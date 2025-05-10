@@ -9,6 +9,7 @@ import { ArrowLeft, Edit } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { children } from "@/data/mockData";
 import { toast } from "sonner";
+import FileUpload from "@/components/FileUpload";
 
 const ChildDetailPage = () => {
   const { id } = useParams<{ id: string }>();
@@ -16,6 +17,7 @@ const ChildDetailPage = () => {
   const { currentUser } = useAuth();
   const [child, setChild] = useState<Child | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
+  const [isEditing, setIsEditing] = useState<boolean>(false);
 
   useEffect(() => {
     // In a real app, we'd fetch this from an API
@@ -45,6 +47,19 @@ const ChildDetailPage = () => {
       default:
         return "bg-yellow-100 text-yellow-800";
     }
+  };
+  
+  const handleImageUpload = (url: string) => {
+    if (child) {
+      setChild({...child, profileImage: url});
+      toast.success("Profile image updated successfully");
+    }
+  };
+
+  const handleEditProfile = () => {
+    setIsEditing(true);
+    toast.info("Edit functionality will be implemented soon.");
+    // In a real app, this would open a form to edit the child's details
   };
 
   if (loading) {
@@ -88,18 +103,11 @@ const ChildDetailPage = () => {
         
         <div className="grid gap-6 md:grid-cols-3">
           <Card className="md:col-span-1">
-            <div className="h-48 bg-gray-100">
-              {child.profileImage ? (
-                <img 
-                  src={child.profileImage} 
-                  alt={child.name} 
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <div className="flex items-center justify-center h-full">
-                  <span className="text-gray-400">No profile image</span>
-                </div>
-              )}
+            <div className="p-6 flex justify-center">
+              <FileUpload 
+                currentImage={child.profileImage}
+                onUpload={handleImageUpload}
+              />
             </div>
             <CardContent className="p-6">
               <div className="space-y-3">
@@ -118,7 +126,7 @@ const ChildDetailPage = () => {
                 <Button 
                   variant="outline"
                   className="w-full"
-                  onClick={() => toast.info("Edit functionality will be implemented soon.")}
+                  onClick={handleEditProfile}
                 >
                   <Edit className="mr-2 h-4 w-4" />
                   Edit Profile

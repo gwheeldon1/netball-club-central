@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useAuth } from "@/context/AuthContext";
 import { toast } from "sonner";
+import FileUpload from "@/components/FileUpload";
 
 const NewChildPage = () => {
   const navigate = useNavigate();
@@ -19,12 +20,17 @@ const NewChildPage = () => {
     dateOfBirth: "",
     medicalInfo: "",
     notes: "",
+    profileImage: "",
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
+  };
+  
+  const handleImageUpload = (url: string) => {
+    setFormData(prev => ({ ...prev, profileImage: url }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -73,30 +79,40 @@ const NewChildPage = () => {
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="flex flex-col md:flex-row gap-6">
+                <FileUpload 
+                  onUpload={handleImageUpload}
+                  currentImage={formData.profileImage}
+                  className="mb-4"
+                />
+                
+                <div className="space-y-4 flex-1">
+                  <div>
+                    <Label htmlFor="name">Full Name <span className="text-red-500">*</span></Label>
+                    <Input 
+                      id="name" 
+                      name="name" 
+                      value={formData.name} 
+                      onChange={handleChange} 
+                      required
+                    />
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="dateOfBirth">Date of Birth <span className="text-red-500">*</span></Label>
+                    <Input 
+                      id="dateOfBirth" 
+                      name="dateOfBirth" 
+                      type="date" 
+                      value={formData.dateOfBirth} 
+                      onChange={handleChange} 
+                      required
+                    />
+                  </div>
+                </div>
+              </div>
+              
               <div className="space-y-4">
-                <div>
-                  <Label htmlFor="name">Full Name <span className="text-red-500">*</span></Label>
-                  <Input 
-                    id="name" 
-                    name="name" 
-                    value={formData.name} 
-                    onChange={handleChange} 
-                    required
-                  />
-                </div>
-                
-                <div>
-                  <Label htmlFor="dateOfBirth">Date of Birth <span className="text-red-500">*</span></Label>
-                  <Input 
-                    id="dateOfBirth" 
-                    name="dateOfBirth" 
-                    type="date" 
-                    value={formData.dateOfBirth} 
-                    onChange={handleChange} 
-                    required
-                  />
-                </div>
-                
                 <div>
                   <Label htmlFor="medicalInfo">Medical Information</Label>
                   <Textarea 
