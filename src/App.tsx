@@ -14,6 +14,9 @@ import ApprovalsPage from "@/pages/ApprovalsPage";
 import LoginPage from "@/pages/LoginPage";
 import UnauthorizedPage from "@/pages/UnauthorizedPage";
 import NotFound from "@/pages/NotFound";
+import ChildrenPage from "@/pages/ChildrenPage";
+import ChildDetailPage from "@/pages/ChildDetailPage";
+import NewChildPage from "@/pages/NewChildPage";
 import { UserRole } from "./types";
 
 const queryClient = new QueryClient();
@@ -64,6 +67,34 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <EventsPage />
+                </ProtectedRoute>
+              }
+            />
+            
+            {/* Children Routes - Only for parents */}
+            <Route 
+              path="/children"
+              element={
+                <ProtectedRoute allowedRoles={['parent'] as UserRole[]}>
+                  <ChildrenPage />
+                </ProtectedRoute>
+              }
+            />
+            
+            <Route 
+              path="/children/:id"
+              element={
+                <ProtectedRoute allowedRoles={['parent'] as UserRole[]}>
+                  <ChildDetailPage />
+                </ProtectedRoute>
+              }
+            />
+            
+            <Route 
+              path="/children/new"
+              element={
+                <ProtectedRoute allowedRoles={['parent'] as UserRole[]}>
+                  <NewChildPage />
                 </ProtectedRoute>
               }
             />
