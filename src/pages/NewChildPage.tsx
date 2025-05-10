@@ -84,6 +84,7 @@ const NewChildPage = () => {
                   onUpload={handleImageUpload}
                   currentImage={formData.profileImage}
                   className="mb-4"
+                  aspectRatio={1}
                 />
                 
                 <div className="space-y-4 flex-1">

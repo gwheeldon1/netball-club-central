@@ -107,6 +107,7 @@ const ChildDetailPage = () => {
               <FileUpload 
                 currentImage={child.profileImage}
                 onUpload={handleImageUpload}
+                aspectRatio={1}
               />
             </div>
             <CardContent className="p-6">
