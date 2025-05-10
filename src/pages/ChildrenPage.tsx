@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
 import Layout from "@/components/Layout";
 import { Button } from "@/components/ui/button";
@@ -8,16 +8,20 @@ import { Plus, Edit } from "lucide-react";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
 import { Child } from "@/types";
-
-// Import mock data for children
-import { children } from "@/data/mockData";
+import { childrenApi } from "@/services/api";
 
 const ChildrenPage = () => {
   const { currentUser } = useAuth();
-  const [myChildren, setMyChildren] = useState<Child[]>(() => {
-    // Filter children that belong to the current user
-    return children.filter(child => child.parentId === currentUser?.id);
-  });
+  const [myChildren, setMyChildren] = useState<Child[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+
+  useEffect(() => {
+    if (currentUser) {
+      const children = childrenApi.getByParentId(currentUser.id);
+      setMyChildren(children);
+      setLoading(false);
+    }
+  }, [currentUser]);
 
   const getStatusBadgeColor = (status: 'pending' | 'approved' | 'rejected') => {
     switch (status) {
@@ -38,6 +42,16 @@ const ChildrenPage = () => {
     // This would open an edit form in a real implementation
     toast.info(`Edit functionality for child ${childId} will be implemented soon.`);
   };
+
+  if (loading) {
+    return (
+      <Layout>
+        <div className="flex items-center justify-center h-64">
+          <p>Loading...</p>
+        </div>
+      </Layout>
+    );
+  }
 
   return (
     <Layout>

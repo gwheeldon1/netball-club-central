@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
 import Layout from "@/components/Layout";
-import { children, teams, users } from "@/data/mockData";
+import { childrenApi, teamApi, userApi } from "@/services/api";
 import { Child, Team } from "@/types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -29,16 +29,28 @@ const ApprovalsPage = () => {
   const [pendingChildren, setPendingChildren] = useState<Child[]>([]);
   const [selectedChild, setSelectedChild] = useState<Child | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [selectedTeamId, setSelectedTeamId] = useState<string>("");
+  const [availableTeams, setAvailableTeams] = useState<Team[]>([]);
+  const [loading, setLoading] = useState(true);
   
   useEffect(() => {
     // Get pending children
-    const pending = children.filter(child => child.status === 'pending');
-    setPendingChildren(pending);
+    const loadData = () => {
+      const pending = childrenApi.getPending();
+      setPendingChildren(pending);
+      
+      const teams = teamApi.getAll();
+      setAvailableTeams(teams);
+      
+      setLoading(false);
+    };
+    
+    loadData();
   }, []);
   
   // Find parent of a child
   const getParent = (parentId: string) => {
-    return users.find(user => user.id === parentId);
+    return userApi.getById(parentId);
   };
   
   // Get child's age from DOB
@@ -57,30 +69,75 @@ const ApprovalsPage = () => {
   };
   
   // Handle approve child
-  const handleApprove = (child: Child, teamId?: string) => {
-    // In a real app, this would be an API call
-    toast.success(`${child.name} has been approved`);
-    
-    // Filter out the approved child
-    setPendingChildren(pendingChildren.filter(c => c.id !== child.id));
-    setIsDialogOpen(false);
+  const handleApprove = (child: Child) => {
+    try {
+      // Update child status
+      const updatedChild = childrenApi.updateStatus(
+        child.id, 
+        'approved', 
+        selectedTeamId || undefined
+      );
+      
+      if (updatedChild) {
+        toast.success(`${child.name} has been approved`);
+        
+        // Remove the approved child from the list
+        setPendingChildren(pendingChildren.filter(c => c.id !== child.id));
+        setIsDialogOpen(false);
+      } else {
+        toast.error("Failed to update child status");
+      }
+    } catch (error) {
+      console.error("Error approving child:", error);
+      toast.error("An error occurred while approving");
+    }
   };
   
   // Handle reject child
   const handleReject = (child: Child) => {
-    // In a real app, this would be an API call
-    toast.error(`${child.name}'s registration has been rejected`);
-    
-    // Filter out the rejected child
-    setPendingChildren(pendingChildren.filter(c => c.id !== child.id));
-    setIsDialogOpen(false);
+    try {
+      // Update child status
+      const updatedChild = childrenApi.updateStatus(child.id, 'rejected');
+      
+      if (updatedChild) {
+        toast.error(`${child.name}'s registration has been rejected`);
+        
+        // Remove the rejected child from the list
+        setPendingChildren(pendingChildren.filter(c => c.id !== child.id));
+        setIsDialogOpen(false);
+      } else {
+        toast.error("Failed to update child status");
+      }
+    } catch (error) {
+      console.error("Error rejecting child:", error);
+      toast.error("An error occurred while rejecting");
+    }
   };
   
   // Open child details dialog
   const openChildDetails = (child: Child) => {
     setSelectedChild(child);
+    
+    // Pre-select a team that matches the child's age group
+    const matchingTeam = availableTeams.find(team => team.ageGroup === child.ageGroup);
+    if (matchingTeam) {
+      setSelectedTeamId(matchingTeam.id);
+    } else {
+      setSelectedTeamId("");
+    }
+    
     setIsDialogOpen(true);
   };
+
+  if (loading) {
+    return (
+      <Layout>
+        <div className="flex items-center justify-center h-64">
+          <p>Loading approvals data...</p>
+        </div>
+      </Layout>
+    );
+  }
 
   if (!hasRole("admin") && !hasRole("coach") && !hasRole("manager")) {
     return (
@@ -213,12 +270,15 @@ const ApprovalsPage = () => {
                 
                 <div className="space-y-2">
                   <h3 className="font-medium">Assign Team</h3>
-                  <Select defaultValue={selectedChild.teamId || ""}>
+                  <Select 
+                    value={selectedTeamId} 
+                    onValueChange={setSelectedTeamId}
+                  >
                     <SelectTrigger>
                       <SelectValue placeholder="Select a team" />
                     </SelectTrigger>
                     <SelectContent>
-                      {teams
+                      {availableTeams
                         .filter(team => team.ageGroup === selectedChild.ageGroup)
                         .map(team => (
                           <SelectItem key={team.id} value={team.id}>

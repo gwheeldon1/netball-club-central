@@ -11,6 +11,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { useAuth } from "@/context/AuthContext";
 import { toast } from "sonner";
 import FileUpload from "@/components/FileUpload";
+import { childrenApi } from "@/services/api";
+import { Child } from "@/types";
 
 const NewChildPage = () => {
   const navigate = useNavigate();
@@ -41,12 +43,49 @@ const NewChildPage = () => {
       return;
     }
     
+    if (!currentUser) {
+      toast.error("You must be logged in to register a child");
+      return;
+    }
+    
     setIsSubmitting(true);
     
     try {
-      // In a real app, we would submit to an API
-      // For now, just simulate a submission delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Calculate age group based on date of birth
+      const dob = new Date(formData.dateOfBirth);
+      const today = new Date();
+      let age = today.getFullYear() - dob.getFullYear();
+      
+      // Adjust age if birthday hasn't occurred yet this year
+      if (
+        today.getMonth() < dob.getMonth() || 
+        (today.getMonth() === dob.getMonth() && today.getDate() < dob.getDate())
+      ) {
+        age--;
+      }
+      
+      // Determine age group
+      let ageGroup: string;
+      if (age <= 8) ageGroup = 'U8';
+      else if (age <= 10) ageGroup = 'U10';
+      else if (age <= 12) ageGroup = 'U12';
+      else if (age <= 14) ageGroup = 'U14';
+      else if (age <= 16) ageGroup = 'U16';
+      else ageGroup = 'U18';
+      
+      // Create the new child record
+      const newChild: Omit<Child, 'id'> = {
+        name: formData.name,
+        dateOfBirth: formData.dateOfBirth,
+        medicalInfo: formData.medicalInfo,
+        notes: formData.notes,
+        profileImage: formData.profileImage,
+        parentId: currentUser.id,
+        status: 'pending',
+        ageGroup,
+      };
+      
+      const createdChild = childrenApi.create(newChild);
       
       toast.success("Child registration submitted successfully!");
       navigate("/children");

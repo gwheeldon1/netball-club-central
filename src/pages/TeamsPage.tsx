@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
 import Layout from "@/components/Layout";
-import { teams } from "@/data/mockData";
+import { teamApi, childrenApi } from "@/services/api";
 import { Team } from "@/types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -11,10 +11,34 @@ import { Link } from "react-router-dom";
 
 const TeamsPage = () => {
   const { hasRole } = useAuth();
-  const [filteredTeams, setFilteredTeams] = useState<Team[]>(teams);
+  const [teams, setTeams] = useState<Team[]>([]);
+  const [filteredTeams, setFilteredTeams] = useState<Team[]>([]);
   const [activeCategory, setActiveCategory] = useState<string>("All");
+  const [loading, setLoading] = useState(true);
   
   const filterCategories = ["All", "Junior", "Senior", "Mixed"];
+  
+  // Load teams data
+  useEffect(() => {
+    const loadTeams = async () => {
+      const teamsData = teamApi.getAll();
+      
+      // Enhance teams with player count
+      const enhancedTeams = teamsData.map(team => {
+        const players = childrenApi.getByTeamId(team.id);
+        return {
+          ...team,
+          players: players
+        };
+      });
+      
+      setTeams(enhancedTeams);
+      setFilteredTeams(enhancedTeams);
+      setLoading(false);
+    };
+    
+    loadTeams();
+  }, []);
   
   // Filter teams by category
   const filterTeamsByCategory = (category: string) => {
@@ -27,6 +51,16 @@ const TeamsPage = () => {
       setFilteredTeams(filtered);
     }
   };
+
+  if (loading) {
+    return (
+      <Layout>
+        <div className="flex items-center justify-center h-64">
+          <p>Loading teams...</p>
+        </div>
+      </Layout>
+    );
+  }
 
   return (
     <Layout>

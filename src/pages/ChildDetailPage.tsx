@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowLeft, Edit } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
-import { children } from "@/data/mockData";
+import { childrenApi } from "@/services/api";
 import { toast } from "sonner";
 import FileUpload from "@/components/FileUpload";
 
@@ -20,22 +20,23 @@ const ChildDetailPage = () => {
   const [isEditing, setIsEditing] = useState<boolean>(false);
 
   useEffect(() => {
-    // In a real app, we'd fetch this from an API
-    const childData = children.find(c => c.id === id);
-    
-    if (childData) {
-      // Check if this child belongs to the current user
-      if (childData.parentId !== currentUser?.id) {
-        navigate("/unauthorized");
-        return;
+    if (id && currentUser) {
+      const childData = childrenApi.getById(id);
+      
+      if (childData) {
+        // Check if this child belongs to the current user
+        if (childData.parentId !== currentUser.id) {
+          navigate("/unauthorized");
+          return;
+        }
+        setChild(childData);
+      } else {
+        toast.error("Child not found");
+        navigate("/children");
       }
-      setChild(childData);
-    } else {
-      toast.error("Child not found");
-      navigate("/children");
+      
+      setLoading(false);
     }
-    
-    setLoading(false);
   }, [id, currentUser, navigate]);
 
   const getStatusBadgeColor = (status: 'pending' | 'approved' | 'rejected') => {
@@ -50,9 +51,14 @@ const ChildDetailPage = () => {
   };
   
   const handleImageUpload = (url: string) => {
-    if (child) {
-      setChild({...child, profileImage: url});
-      toast.success("Profile image updated successfully");
+    if (child && id) {
+      const updatedChild = childrenApi.update(id, { profileImage: url });
+      if (updatedChild) {
+        setChild(updatedChild);
+        toast.success("Profile image updated successfully");
+      } else {
+        toast.error("Failed to update profile image");
+      }
     }
   };
 

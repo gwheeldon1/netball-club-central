@@ -1,47 +1,74 @@
 
 import { useState, useEffect } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import Layout from "@/components/Layout";
-import { teams, children, users } from "@/data/mockData";
+import { teamApi, childrenApi, userApi } from "@/services/api";
 import { Team, Child, User } from "@/types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Calendar, User as UserIcon, Award } from "lucide-react";
+import { toast } from "sonner";
 
 const TeamDetailPage = () => {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
   const { currentUser, hasRole } = useAuth();
   const [team, setTeam] = useState<Team | null>(null);
   const [players, setPlayers] = useState<Child[]>([]);
   const [coaches, setCoaches] = useState<User[]>([]);
   const [managers, setManagers] = useState<User[]>([]);
+  const [loading, setLoading] = useState(true);
   
   useEffect(() => {
-    // Find the team with the matching ID
-    const foundTeam = teams.find(t => t.id === id);
-    setTeam(foundTeam || null);
-    
-    if (foundTeam) {
-      // Find children in this team
-      const teamPlayers = children.filter(child => child.teamId === id && child.status === 'approved');
+    const loadTeamData = () => {
+      if (!id) return;
+      
+      // Get team details
+      const teamData = teamApi.getById(id);
+      if (!teamData) {
+        toast.error("Team not found");
+        navigate("/teams");
+        return;
+      }
+      
+      setTeam(teamData);
+      
+      // Get players in this team
+      const teamPlayers = childrenApi.getByTeamId(id);
       setPlayers(teamPlayers);
       
-      // Find coaches for this team
-      const teamCoaches = users.filter(
-        user => user.roles.includes('coach') && user.teams?.some(t => t.id === id)
-      );
-      setCoaches(teamCoaches);
+      // In a real app, we'd have proper team membership records
+      // For now, we'll simulate coaches and managers
+      const allUsers = userApi.getAll();
       
-      // Find managers for this team
-      const teamManagers = users.filter(
-        user => user.roles.includes('manager') && user.teams?.some(t => t.id === id)
+      const teamCoaches = allUsers.filter(user => 
+        user.roles.includes('coach')
       );
-      setManagers(teamManagers);
-    }
-  }, [id]);
+      setCoaches(teamCoaches.slice(0, 2)); // Just take a couple for demo
+      
+      const teamManagers = allUsers.filter(user => 
+        user.roles.includes('manager')
+      );
+      setManagers(teamManagers.slice(0, 1)); // Just take one for demo
+      
+      setLoading(false);
+    };
+    
+    loadTeamData();
+  }, [id, navigate]);
+
+  if (loading) {
+    return (
+      <Layout>
+        <div className="flex items-center justify-center h-64">
+          <p>Loading team details...</p>
+        </div>
+      </Layout>
+    );
+  }
 
   if (!team) {
     return (
