@@ -21,20 +21,25 @@ const TeamsPage = () => {
   // Load teams data
   useEffect(() => {
     const loadTeams = async () => {
-      const teamsData = teamApi.getAll();
-      
-      // Enhance teams with player count
-      const enhancedTeams = teamsData.map(team => {
-        const players = childrenApi.getByTeamId(team.id);
-        return {
-          ...team,
-          players: players
-        };
-      });
-      
-      setTeams(enhancedTeams);
-      setFilteredTeams(enhancedTeams);
-      setLoading(false);
+      try {
+        const teamsData = teamApi.getAll();
+        
+        // Enhance teams with player count
+        const enhancedTeams = teamsData.map(team => {
+          const players = childrenApi.getByTeamId(team.id);
+          return {
+            ...team,
+            players: players
+          };
+        });
+        
+        setTeams(enhancedTeams);
+        setFilteredTeams(enhancedTeams);
+      } catch (error) {
+        console.error("Error loading teams:", error);
+      } finally {
+        setLoading(false);
+      }
     };
     
     loadTeams();
