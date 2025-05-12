@@ -1,29 +1,83 @@
 
-import { createContext, useContext, useState, ReactNode } from 'react';
+import { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import { User, UserRole } from '../types';
 import { userApi } from '../services/api';
+import { toast } from "sonner";
 
 interface AuthContextType {
   currentUser: User | null;
   login: (email: string, password: string) => Promise<boolean>;
   logout: () => void;
   hasRole: (role: UserRole) => boolean;
+  isAuthenticated: boolean;
+  isOffline: boolean;
 }
+
+const AUTH_STORAGE_KEY = 'netball_auth_user';
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+  const [isOffline, setIsOffline] = useState<boolean>(!navigator.onLine);
+
+  // Load previously authenticated user from localStorage on init
+  useEffect(() => {
+    const storedUser = localStorage.getItem(AUTH_STORAGE_KEY);
+    if (storedUser) {
+      try {
+        const user = JSON.parse(storedUser);
+        setCurrentUser(user);
+        setIsAuthenticated(true);
+      } catch (error) {
+        console.error('Error parsing stored user data', error);
+        localStorage.removeItem(AUTH_STORAGE_KEY);
+      }
+    }
+  }, []);
+
+  // Set up online/offline detection
+  useEffect(() => {
+    const handleOnline = () => {
+      setIsOffline(false);
+      toast.success("You are back online");
+    };
+
+    const handleOffline = () => {
+      setIsOffline(true);
+      toast.warning("You are offline. Some features may be limited.");
+    };
+
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
 
   const login = async (email: string, password: string): Promise<boolean> => {
     // In a real app, this would be an API call to authenticate
-    // For demo purposes, we're using localStorage API service
-    const user = userApi.getByEmail(email.toLowerCase());
-    
-    if (user) {
-      // In a real app, we'd check the password hash
-      setCurrentUser(user);
-      return true;
+    // For our offline-first approach, we use localStorage API service
+    try {
+      const user = userApi.getByEmail(email.toLowerCase());
+      
+      if (user) {
+        // In a real app, we'd check the password hash
+        setCurrentUser(user);
+        setIsAuthenticated(true);
+        
+        // Store the authenticated user in localStorage
+        localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(user));
+        return true;
+      }
+    } catch (error) {
+      console.error('Error during login:', error);
+      if (isOffline) {
+        toast.error("Cannot verify credentials in offline mode");
+      }
     }
     
     return false;
@@ -31,6 +85,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logout = () => {
     setCurrentUser(null);
+    setIsAuthenticated(false);
+    localStorage.removeItem(AUTH_STORAGE_KEY);
   };
 
   const hasRole = (role: UserRole): boolean => {
@@ -39,7 +95,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ currentUser, login, logout, hasRole }}>
+    <AuthContext.Provider value={{ 
+      currentUser, 
+      login, 
+      logout, 
+      hasRole, 
+      isAuthenticated,
+      isOffline 
+    }}>
       {children}
     </AuthContext.Provider>
   );
