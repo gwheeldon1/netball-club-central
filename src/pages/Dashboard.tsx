@@ -5,28 +5,65 @@ import Layout from "@/components/Layout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Calendar, Award, Users, User } from "lucide-react";
-import { events, teams, children } from "@/data/mockData";
 import { Link } from "react-router-dom";
+import { teamApi, childrenApi, eventApi } from "@/services/api";
+import { Team, Event, Child } from "@/types";
 
 const Dashboard = () => {
   const { currentUser, hasRole } = useAuth();
-  const [upcomingEvents, setUpcomingEvents] = useState(events);
+  const [upcomingEvents, setUpcomingEvents] = useState<Event[]>([]);
   const [playerCount, setPlayerCount] = useState(0);
   const [pendingApprovals, setPendingApprovals] = useState(0);
-  const [teamCount, setTeamCount] = useState(teams.length);
-
+  const [teamCount, setTeamCount] = useState(0);
+  const [teams, setTeams] = useState<Team[]>([]);
+  const [loading, setLoading] = useState(true);
+  
+  // Load dashboard data
   useEffect(() => {
-    // Filter upcoming events (in a real app, would filter by date)
-    setUpcomingEvents(events.slice(0, 3));
+    const loadDashboardData = async () => {
+      try {
+        // Get teams
+        const teamsData = teamApi.getAll();
+        setTeams(teamsData);
+        setTeamCount(teamsData.length);
+        
+        // Get events (in a real app, we would filter by date)
+        const eventsData = eventApi.getAll();
+        // Sort events by date and time to get upcoming events
+        const sortedEvents = eventsData.sort((a, b) => {
+          const dateA = new Date(`${a.date}T${a.time}`);
+          const dateB = new Date(`${b.date}T${b.time}`);
+          return dateA.getTime() - dateB.getTime();
+        });
+        setUpcomingEvents(sortedEvents.slice(0, 3));
+        
+        // Count children with pending status
+        const allChildren = childrenApi.getAll();
+        const pending = allChildren.filter(child => child.status === 'pending').length;
+        setPendingApprovals(pending);
+        
+        // Count approved children
+        const approved = allChildren.filter(child => child.status === 'approved').length;
+        setPlayerCount(approved);
+      } catch (error) {
+        console.error("Error loading dashboard data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
     
-    // Count children with pending status
-    const pending = children.filter(child => child.status === 'pending').length;
-    setPendingApprovals(pending);
-    
-    // Count approved children
-    const approved = children.filter(child => child.status === 'approved').length;
-    setPlayerCount(approved);
+    loadDashboardData();
   }, []);
+
+  if (loading) {
+    return (
+      <Layout>
+        <div className="flex items-center justify-center h-64">
+          <p>Loading dashboard...</p>
+        </div>
+      </Layout>
+    );
+  }
 
   return (
     <Layout>

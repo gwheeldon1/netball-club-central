@@ -1,7 +1,6 @@
 
 import { useState, useEffect } from "react";
 import Layout from "@/components/Layout";
-import { events, teams } from "@/data/mockData";
 import { Event, Team } from "@/types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -21,16 +20,40 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
+import { eventApi, teamApi } from "@/services/api";
 
 const EventsPage = () => {
   const { hasRole } = useAuth();
-  const [filteredEvents, setFilteredEvents] = useState<Event[]>(events);
+  const [events, setEvents] = useState<Event[]>([]);
+  const [teams, setTeams] = useState<Team[]>([]);
+  const [filteredEvents, setFilteredEvents] = useState<Event[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [showFilters, setShowFilters] = useState(false);
+  const [loading, setLoading] = useState(true);
   
   // Filters
   const [teamFilter, setTeamFilter] = useState<string>("all");
   const [typeFilter, setTypeFilter] = useState<string>("all");
+  
+  // Load events and teams data
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        const eventsData = eventApi.getAll();
+        const teamsData = teamApi.getAll();
+        
+        setEvents(eventsData);
+        setFilteredEvents(eventsData);
+        setTeams(teamsData);
+      } catch (error) {
+        console.error("Error loading events data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    loadData();
+  }, []);
   
   useEffect(() => {
     // Apply filters
@@ -56,7 +79,7 @@ const EventsPage = () => {
     }
     
     setFilteredEvents(filtered);
-  }, [searchTerm, teamFilter, typeFilter]);
+  }, [searchTerm, teamFilter, typeFilter, events]);
   
   // Get event team name
   const getTeamName = (teamId: string) => {
@@ -83,6 +106,16 @@ const EventsPage = () => {
         return 'bg-purple-100 text-purple-600';
     }
   };
+
+  if (loading) {
+    return (
+      <Layout>
+        <div className="flex items-center justify-center h-64">
+          <p>Loading events...</p>
+        </div>
+      </Layout>
+    );
+  }
 
   return (
     <Layout>

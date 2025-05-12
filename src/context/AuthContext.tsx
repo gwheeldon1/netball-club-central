@@ -1,7 +1,7 @@
 
 import { createContext, useContext, useState, ReactNode } from 'react';
 import { User, UserRole } from '../types';
-import { users } from '../data/mockData';
+import { userApi } from '../services/api';
 
 interface AuthContextType {
   currentUser: User | null;
@@ -17,8 +17,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const login = async (email: string, password: string): Promise<boolean> => {
     // In a real app, this would be an API call to authenticate
-    // For demo purposes, we'll simulate login with mock data
-    const user = users.find(u => u.email.toLowerCase() === email.toLowerCase());
+    // For demo purposes, we're using localStorage API service
+    const user = userApi.getByEmail(email.toLowerCase());
     
     if (user) {
       // In a real app, we'd check the password hash
