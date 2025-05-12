@@ -12,6 +12,7 @@ interface AuthContextType {
   hasRole: (role: UserRole) => boolean;
   isAuthenticated: boolean;
   isOffline: boolean;
+  lastOnlineTime: Date | null;
 }
 
 const AUTH_STORAGE_KEY = 'netball_auth_user';
@@ -21,7 +22,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
-  const isOffline = useOffline({ showToasts: true });
+  const { isOffline, lastOnlineTime } = useOffline({ showToasts: true });
 
   // Load previously authenticated user from localStorage on init
   useEffect(() => {
@@ -81,7 +82,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       logout, 
       hasRole, 
       isAuthenticated,
-      isOffline 
+      isOffline,
+      lastOnlineTime
     }}>
       {children}
     </AuthContext.Provider>
