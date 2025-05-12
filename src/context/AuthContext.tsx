@@ -3,6 +3,7 @@ import { createContext, useContext, useState, ReactNode, useEffect } from 'react
 import { User, UserRole } from '../types';
 import { userApi } from '../services/api';
 import { toast } from "sonner";
+import { useOffline } from '@/hooks/use-offline';
 
 interface AuthContextType {
   currentUser: User | null;
@@ -20,7 +21,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
-  const [isOffline, setIsOffline] = useState<boolean>(!navigator.onLine);
+  const isOffline = useOffline({ showToasts: true });
 
   // Load previously authenticated user from localStorage on init
   useEffect(() => {
@@ -35,27 +36,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         localStorage.removeItem(AUTH_STORAGE_KEY);
       }
     }
-  }, []);
-
-  // Set up online/offline detection
-  useEffect(() => {
-    const handleOnline = () => {
-      setIsOffline(false);
-      toast.success("You are back online");
-    };
-
-    const handleOffline = () => {
-      setIsOffline(true);
-      toast.warning("You are offline. Some features may be limited.");
-    };
-
-    window.addEventListener('online', handleOnline);
-    window.addEventListener('offline', handleOffline);
-
-    return () => {
-      window.removeEventListener('online', handleOnline);
-      window.removeEventListener('offline', handleOffline);
-    };
   }, []);
 
   const login = async (email: string, password: string): Promise<boolean> => {

@@ -6,35 +6,20 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
-import { Award, AlertCircle } from "lucide-react";
+import { Award, AlertCircle, WifiOff } from "lucide-react";
 import { toast } from "sonner";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useOffline } from "@/hooks/use-offline";
 
 const LoginPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [offlineMode, setOfflineMode] = useState(false);
   const { login } = useAuth();
   const navigate = useNavigate();
   const isMobile = useIsMobile();
-
-  // Check network status when component mounts
-  useState(() => {
-    const updateOnlineStatus = () => {
-      setOfflineMode(!navigator.onLine);
-    };
-    
-    window.addEventListener('online', updateOnlineStatus);
-    window.addEventListener('offline', updateOnlineStatus);
-    updateOnlineStatus(); // Initial check
-    
-    return () => {
-      window.removeEventListener('online', updateOnlineStatus);
-      window.removeEventListener('offline', updateOnlineStatus);
-    };
-  });
+  const isOffline = useOffline();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -69,9 +54,9 @@ const LoginPage = () => {
           <p className="text-gray-600 mt-1">Management System</p>
         </div>
 
-        {offlineMode && (
+        {isOffline && (
           <Alert className="mb-4 bg-amber-50 border-amber-200">
-            <AlertCircle className="h-4 w-4 text-amber-500" />
+            <WifiOff className="h-4 w-4 text-amber-500" />
             <AlertTitle className="text-amber-700">Offline Mode</AlertTitle>
             <AlertDescription className="text-amber-600">
               You are currently offline. Login will use cached credentials.
