@@ -61,7 +61,7 @@ const Layout = ({ children }: LayoutProps) => {
   };
 
   return (
-    <div className="flex min-h-screen bg-gray-50">
+    <div className="flex min-h-screen bg-background">
       {/* Mobile sidebar toggle */}
       <div className="lg:hidden fixed top-4 left-4 z-50">
         <Button
@@ -79,7 +79,7 @@ const Layout = ({ children }: LayoutProps) => {
       <div
         id="mobile-sidebar"
         className={cn(
-          "fixed inset-y-0 left-0 z-40 w-64 transform bg-white shadow-lg transition-transform duration-200 ease-in-out lg:translate-x-0",
+          "fixed inset-y-0 left-0 z-40 w-[280px] transform transition-transform duration-200 ease-in-out lg:translate-x-0 bg-white dark:bg-gray-900 shadow-lg",
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
         )}
       >
@@ -97,18 +97,18 @@ const Layout = ({ children }: LayoutProps) => {
           </div>
 
           {/* Logo and app name */}
-          <div className="flex items-center gap-2 px-5 py-4 border-b">
-            <div className="flex items-center justify-center w-9 h-9 md:w-10 md:h-10 bg-netball-400 rounded-full">
-              <Award className="h-5 w-5 md:h-6 md:w-6 text-white" />
+          <div className="flex items-center gap-2 px-5 py-5 border-b">
+            <div className="flex items-center justify-center w-10 h-10 md:w-12 md:h-12 bg-netball-400 rounded-full">
+              <Award className="h-6 w-6 md:h-7 md:w-7 text-white" />
             </div>
-            <span className="text-lg md:text-xl font-bold">Netball Club</span>
+            <span className="text-xl md:text-2xl font-bold">Netball Club</span>
           </div>
 
           {/* User info */}
           {currentUser && (
-            <div className="border-b p-4">
-              <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
+            <div className="border-b p-5">
+              <div className="flex items-center gap-4">
+                <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
                   {currentUser.profileImage ? (
                     <img
                       src={currentUser.profileImage}
@@ -116,12 +116,12 @@ const Layout = ({ children }: LayoutProps) => {
                       className="w-full h-full object-cover"
                     />
                   ) : (
-                    <User className="h-5 w-5 text-gray-500" />
+                    <User className="h-6 w-6 text-gray-500" />
                   )}
                 </div>
                 <div className="flex flex-col">
-                  <span className="font-medium truncate text-sm">{currentUser.name}</span>
-                  <span className="text-xs text-gray-500">
+                  <span className="font-medium text-base md:text-lg truncate">{currentUser.name}</span>
+                  <span className="text-sm md:text-base text-gray-500">
                     {currentUser.roles.map((role) => 
                       role.charAt(0).toUpperCase() + role.slice(1)
                     ).join(", ")}
@@ -131,24 +131,24 @@ const Layout = ({ children }: LayoutProps) => {
               
               {/* Offline indicator */}
               {isOffline && (
-                <div className="flex items-center mt-2 p-1.5 bg-amber-50 rounded text-amber-700 gap-1.5">
-                  <WifiOff className="h-3.5 w-3.5" />
-                  <span className="text-xs">Offline Mode</span>
+                <div className="flex items-center mt-3 p-2 bg-amber-50 rounded text-amber-700 gap-2">
+                  <WifiOff className="h-4 w-4" />
+                  <span className="text-sm">Offline Mode</span>
                 </div>
               )}
             </div>
           )}
 
           {/* Navigation links */}
-          <nav className="flex-1 overflow-y-auto p-3">
-            <ul className="space-y-1.5">
+          <nav className="flex-1 overflow-y-auto p-4">
+            <ul className="space-y-2">
               <li>
                 <Link
                   to="/"
-                  className="flex items-center gap-3 rounded-md px-3 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                  className="flex items-center gap-3 rounded-md px-4 py-3 text-base text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800"
                   onClick={closeSidebar}
                 >
-                  <Home className="h-4 w-4" />
+                  <Home className="h-5 w-5" />
                   <span>Dashboard</span>
                 </Link>
               </li>
@@ -157,10 +157,10 @@ const Layout = ({ children }: LayoutProps) => {
                 <li>
                   <Link
                     to="/children"
-                    className="flex items-center gap-3 rounded-md px-3 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    className="flex items-center gap-3 rounded-md px-4 py-3 text-base text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800"
                     onClick={closeSidebar}
                   >
-                    <Users className="h-4 w-4" />
+                    <Users className="h-5 w-5" />
                     <span>My Children</span>
                   </Link>
                 </li>
@@ -169,10 +169,10 @@ const Layout = ({ children }: LayoutProps) => {
               <li>
                 <Link
                   to="/teams"
-                  className="flex items-center gap-3 rounded-md px-3 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                  className="flex items-center gap-3 rounded-md px-4 py-3 text-base text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800"
                   onClick={closeSidebar}
                 >
-                  <Award className="h-4 w-4" />
+                  <Award className="h-5 w-5" />
                   <span>Teams</span>
                 </Link>
               </li>
@@ -180,10 +180,10 @@ const Layout = ({ children }: LayoutProps) => {
               <li>
                 <Link
                   to="/events"
-                  className="flex items-center gap-3 rounded-md px-3 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                  className="flex items-center gap-3 rounded-md px-4 py-3 text-base text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800"
                   onClick={closeSidebar}
                 >
-                  <Calendar className="h-4 w-4" />
+                  <Calendar className="h-5 w-5" />
                   <span>Events</span>
                 </Link>
               </li>
@@ -192,10 +192,10 @@ const Layout = ({ children }: LayoutProps) => {
                 <li>
                   <Link
                     to="/approvals"
-                    className="flex items-center gap-3 rounded-md px-3 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    className="flex items-center gap-3 rounded-md px-4 py-3 text-base text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800"
                     onClick={closeSidebar}
                   >
-                    <User className="h-4 w-4" />
+                    <User className="h-5 w-5" />
                     <span>Approvals</span>
                   </Link>
                 </li>
@@ -205,10 +205,10 @@ const Layout = ({ children }: LayoutProps) => {
                 <li>
                   <Link
                     to="/settings"
-                    className="flex items-center gap-3 rounded-md px-3 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    className="flex items-center gap-3 rounded-md px-4 py-3 text-base text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800"
                     onClick={closeSidebar}
                   >
-                    <Settings className="h-4 w-4" />
+                    <Settings className="h-5 w-5" />
                     <span>Settings</span>
                   </Link>
                 </li>
@@ -218,16 +218,16 @@ const Layout = ({ children }: LayoutProps) => {
 
           {/* Logout button */}
           {currentUser && (
-            <div className="border-t p-3">
+            <div className="border-t p-4">
               <Button
                 variant="ghost"
-                className="w-full justify-start gap-3 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 h-9"
+                className="w-full justify-start gap-3 text-base text-gray-700 hover:bg-gray-100 hover:text-gray-900 py-3 h-auto dark:hover:bg-gray-800"
                 onClick={() => {
                   handleLogout();
                   closeSidebar();
                 }}
               >
-                <LogOut className="h-4 w-4" />
+                <LogOut className="h-5 w-5" />
                 <span>Log out</span>
               </Button>
             </div>
@@ -236,8 +236,8 @@ const Layout = ({ children }: LayoutProps) => {
       </div>
 
       {/* Main content */}
-      <div className="flex-1 lg:pl-64">
-        <main className="min-h-screen p-4 sm:p-6">
+      <div className="flex-1 lg:pl-[280px] w-full">
+        <main className="min-h-screen p-5 sm:p-6 md:p-8 w-full max-w-[1920px] mx-auto">
           {children}
         </main>
       </div>

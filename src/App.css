@@ -1,8 +1,9 @@
 
 #root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
   text-align: center;
 }
 
@@ -12,9 +13,11 @@
   will-change: filter;
   transition: filter 300ms;
 }
+
 .logo:hover {
   filter: drop-shadow(0 0 2em hsla(171, 75%, 41%, 0.6));
 }
+
 .logo.react:hover {
   filter: drop-shadow(0 0 2em hsla(171, 75%, 41%, 0.6));
 }
@@ -35,7 +38,7 @@
 }
 
 .card {
-  padding: 2em;
+  padding: 1.5em;
 }
 
 .read-the-docs {
