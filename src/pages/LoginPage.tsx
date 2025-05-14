@@ -6,9 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
-import { Award, AlertCircle, WifiOff } from "lucide-react";
+import { Award } from "lucide-react";
 import { toast } from "sonner";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useOffline } from "@/hooks/use-offline";
 
@@ -53,16 +52,6 @@ const LoginPage = () => {
           <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Netball Club</h1>
           <p className="text-gray-600 mt-1">Management System</p>
         </div>
-
-        {isOffline && (
-          <Alert className="mb-4 bg-amber-50 border-amber-200">
-            <WifiOff className="h-4 w-4 text-amber-500" />
-            <AlertTitle className="text-amber-700">Offline Mode</AlertTitle>
-            <AlertDescription className="text-amber-600">
-              You are currently offline. Login will use cached credentials.
-            </AlertDescription>
-          </Alert>
-        )}
 
         <Card className="shadow-lg">
           <CardHeader className="pb-3">
