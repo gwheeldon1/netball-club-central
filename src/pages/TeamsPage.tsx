@@ -79,7 +79,7 @@ const TeamsPage = () => {
           </div>
           
           {hasRole("admin") && (
-            <Button className="bg-netball-500 hover:bg-netball-600" asChild>
+            <Button className="bg-primary hover:bg-primary/90" asChild>
               <Link to="/teams/new">
                 <Users className="mr-2 h-4 w-4" />
                 Create New Team
@@ -95,7 +95,7 @@ const TeamsPage = () => {
               key={category}
               variant={activeCategory === category ? "default" : "outline"}
               onClick={() => filterTeamsByCategory(category)}
-              className={activeCategory === category ? "bg-netball-500 hover:bg-netball-600" : ""}
+              className={activeCategory === category ? "bg-primary hover:bg-primary/90" : ""}
             >
               {category}
             </Button>
@@ -118,12 +118,16 @@ const TeamsPage = () => {
                     </div>
                   )}
                   <CardHeader className="flex flex-row items-center gap-3">
-                    <div className="w-12 h-12 rounded-full overflow-hidden flex-shrink-0 bg-gray-100">
-                      <img 
-                        src={team.icon || team.profileImage || "/placeholder.svg"} 
-                        alt="" 
-                        className="w-full h-full object-cover"
-                      />
+                    <div className="w-12 h-12 rounded-full overflow-hidden flex-shrink-0 bg-accent flex items-center justify-center">
+                      {team.icon || team.profileImage ? (
+                        <img 
+                          src={team.icon || team.profileImage || "/placeholder.svg"} 
+                          alt="" 
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <Users className="h-6 w-6 text-primary" />
+                      )}
                     </div>
                     <div>
                       <CardTitle className="text-xl">{team.name}</CardTitle>

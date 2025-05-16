@@ -83,7 +83,7 @@ const Dashboard = () => {
           <Card>
             <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
               <CardTitle className="text-sm font-medium">Total Teams</CardTitle>
-              <Award className="h-4 w-4 text-netball-500" />
+              <Award className="h-4 w-4 text-primary" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{teamCount}</div>
@@ -96,7 +96,7 @@ const Dashboard = () => {
           <Card>
             <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
               <CardTitle className="text-sm font-medium">Total Players</CardTitle>
-              <Users className="h-4 w-4 text-netball-500" />
+              <Users className="h-4 w-4 text-primary" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{playerCount}</div>
@@ -109,7 +109,7 @@ const Dashboard = () => {
           <Card>
             <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
               <CardTitle className="text-sm font-medium">Upcoming Events</CardTitle>
-              <Calendar className="h-4 w-4 text-netball-500" />
+              <Calendar className="h-4 w-4 text-primary" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{upcomingEvents.length}</div>
@@ -123,7 +123,7 @@ const Dashboard = () => {
             <Card>
               <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
                 <CardTitle className="text-sm font-medium">Pending Approvals</CardTitle>
-                <User className="h-4 w-4 text-netball-500" />
+                <User className="h-4 w-4 text-primary" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">{pendingApprovals}</div>
@@ -152,10 +152,10 @@ const Dashboard = () => {
                     <div key={event.id} className="flex items-start gap-4 p-3 rounded-lg border">
                       <div className={`w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0 ${
                         event.eventType === 'match' 
-                          ? 'bg-orange-100 text-orange-600' 
+                          ? 'bg-accent text-primary' 
                           : event.eventType === 'training' 
-                            ? 'bg-blue-100 text-blue-600'
-                            : 'bg-purple-100 text-purple-600'
+                            ? 'bg-accent text-primary'
+                            : 'bg-accent text-primary'
                       }`}>
                         <Calendar className="h-6 w-6" />
                       </div>
@@ -195,12 +195,16 @@ const Dashboard = () => {
               <div className="space-y-4">
                 {teams.slice(0, 3).map((team) => (
                   <div key={team.id} className="flex items-center gap-4 p-3 rounded-lg border">
-                    <div className="w-12 h-12 rounded-full overflow-hidden flex-shrink-0">
-                      <img 
-                        src={team.icon || team.profileImage} 
-                        alt={team.name} 
-                        className="w-full h-full object-cover"
-                      />
+                    <div className="w-12 h-12 rounded-full overflow-hidden flex-shrink-0 bg-accent flex items-center justify-center">
+                      {team.icon || team.profileImage ? (
+                        <img 
+                          src={team.icon || team.profileImage} 
+                          alt={team.name} 
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <Users className="h-6 w-6 text-primary" />
+                      )}
                     </div>
                     <div className="flex-1 min-w-0">
                       <h4 className="font-medium text-sm truncate">{team.name}</h4>
