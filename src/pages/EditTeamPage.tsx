@@ -104,7 +104,7 @@ const EditTeamPage = () => {
     return (
       <Layout>
         <div className="flex items-center justify-center h-64">
-          <p>Loading team details...</p>
+          <p className="text-muted-foreground">Loading team details...</p>
         </div>
       </Layout>
     );
@@ -114,8 +114,8 @@ const EditTeamPage = () => {
     return (
       <Layout>
         <div className="text-center py-12">
-          <p>Team not found.</p>
-          <Button className="mt-4" variant="outline" onClick={() => navigate("/teams")}>
+          <p className="text-muted-foreground">Team not found.</p>
+          <Button className="mt-6" variant="outline" onClick={() => navigate("/teams")}>
             Back to Teams
           </Button>
         </div>
@@ -125,11 +125,11 @@ const EditTeamPage = () => {
   
   return (
     <Layout>
-      <div className="space-y-6">
+      <div className="space-y-8">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
             <h1 className="text-3xl font-bold tracking-tight">Edit Team</h1>
-            <p className="text-muted-foreground mt-1">
+            <p className="text-muted-foreground mt-2">
               Update the team information and settings
             </p>
           </div>
@@ -147,15 +147,15 @@ const EditTeamPage = () => {
         <TeamForm team={team} mode="edit" />
         
         <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-          <DialogContent>
+          <DialogContent className="sm:max-w-md">
             <DialogHeader>
               <DialogTitle>Are you sure you want to delete this team?</DialogTitle>
-              <DialogDescription>
+              <DialogDescription className="mt-2">
                 This action cannot be undone. This will permanently delete the team 
                 "{team.name}" and remove it from our servers.
               </DialogDescription>
             </DialogHeader>
-            <DialogFooter>
+            <DialogFooter className="mt-4 sm:justify-between">
               <Button 
                 variant="outline" 
                 onClick={() => setDeleteDialogOpen(false)} 

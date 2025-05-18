@@ -8,6 +8,7 @@ import Dashboard from '@/pages/Dashboard';
 import LoginPage from '@/pages/LoginPage';
 import TeamsPage from '@/pages/TeamsPage';
 import TeamDetailPage from '@/pages/TeamDetailPage';
+import EditTeamPage from '@/pages/EditTeamPage';
 import ChildrenPage from '@/pages/ChildrenPage';
 import ChildDetailPage from '@/pages/ChildDetailPage';
 import NewChildPage from '@/pages/NewChildPage';
@@ -44,6 +45,12 @@ function App() {
             <Route path="/teams/:id" element={
               <ProtectedRoute>
                 <TeamDetailPage />
+              </ProtectedRoute>
+            } />
+            
+            <Route path="/teams/:id/edit" element={
+              <ProtectedRoute allowedRoles={['admin']}>
+                <EditTeamPage />
               </ProtectedRoute>
             } />
             

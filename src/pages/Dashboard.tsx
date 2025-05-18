@@ -59,7 +59,7 @@ const Dashboard = () => {
     return (
       <Layout>
         <div className="flex items-center justify-center h-64">
-          <p>Loading dashboard...</p>
+          <p className="text-muted-foreground">Loading dashboard...</p>
         </div>
       </Layout>
     );
@@ -67,67 +67,75 @@ const Dashboard = () => {
 
   return (
     <Layout>
-      <div className="space-y-6">
+      <div className="space-y-8">
         {/* Welcome section */}
         <div>
           <h1 className="text-3xl font-bold tracking-tight">
             Welcome back, {currentUser?.name}
           </h1>
-          <p className="text-muted-foreground mt-1">
+          <p className="text-muted-foreground mt-2">
             Here's what's happening with your netball club today
           </p>
         </div>
 
         {/* Stats section */}
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          <Card>
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+          <Card className="shadow-sm hover:shadow transition-shadow">
             <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
               <CardTitle className="text-sm font-medium">Total Teams</CardTitle>
-              <Award className="h-4 w-4 text-primary" />
+              <div className="h-8 w-8 rounded-full bg-accent flex items-center justify-center">
+                <Award className="h-4 w-4 text-primary" />
+              </div>
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{teamCount}</div>
-              <p className="text-xs text-muted-foreground">
+              <p className="text-xs text-muted-foreground mt-1">
                 Active netball teams
               </p>
             </CardContent>
           </Card>
           
-          <Card>
+          <Card className="shadow-sm hover:shadow transition-shadow">
             <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
               <CardTitle className="text-sm font-medium">Total Players</CardTitle>
-              <Users className="h-4 w-4 text-primary" />
+              <div className="h-8 w-8 rounded-full bg-accent flex items-center justify-center">
+                <Users className="h-4 w-4 text-primary" />
+              </div>
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{playerCount}</div>
-              <p className="text-xs text-muted-foreground">
+              <p className="text-xs text-muted-foreground mt-1">
                 Registered players
               </p>
             </CardContent>
           </Card>
           
-          <Card>
+          <Card className="shadow-sm hover:shadow transition-shadow">
             <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
               <CardTitle className="text-sm font-medium">Upcoming Events</CardTitle>
-              <Calendar className="h-4 w-4 text-primary" />
+              <div className="h-8 w-8 rounded-full bg-accent flex items-center justify-center">
+                <Calendar className="h-4 w-4 text-primary" />
+              </div>
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{upcomingEvents.length}</div>
-              <p className="text-xs text-muted-foreground">
+              <p className="text-xs text-muted-foreground mt-1">
                 In the next 7 days
               </p>
             </CardContent>
           </Card>
           
           {(hasRole("admin") || hasRole("coach") || hasRole("manager")) && (
-            <Card>
+            <Card className="shadow-sm hover:shadow transition-shadow">
               <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
                 <CardTitle className="text-sm font-medium">Pending Approvals</CardTitle>
-                <User className="h-4 w-4 text-primary" />
+                <div className="h-8 w-8 rounded-full bg-accent flex items-center justify-center">
+                  <User className="h-4 w-4 text-primary" />
+                </div>
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">{pendingApprovals}</div>
-                <p className="text-xs text-muted-foreground">
+                <p className="text-xs text-muted-foreground mt-1">
                   Waiting for review
                 </p>
               </CardContent>
@@ -138,45 +146,46 @@ const Dashboard = () => {
         {/* Content rows */}
         <div className="grid gap-6 md:grid-cols-2">
           {/* Upcoming events */}
-          <Card className="md:col-span-1">
+          <Card className="shadow-sm hover:shadow transition-shadow">
             <CardHeader>
-              <CardTitle>Upcoming Events</CardTitle>
-              <CardDescription>
-                Your scheduled events for the next few days
-              </CardDescription>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle className="text-xl font-semibold">Upcoming Events</CardTitle>
+                  <CardDescription className="mt-1">
+                    Your scheduled events for the next few days
+                  </CardDescription>
+                </div>
+                <div className="h-10 w-10 rounded-full bg-accent flex items-center justify-center">
+                  <Calendar className="h-5 w-5 text-primary" />
+                </div>
+              </div>
             </CardHeader>
             <CardContent>
               {upcomingEvents.length > 0 ? (
                 <div className="space-y-4">
                   {upcomingEvents.map((event) => (
-                    <div key={event.id} className="flex items-start gap-4 p-3 rounded-lg border">
-                      <div className={`w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0 ${
-                        event.eventType === 'match' 
-                          ? 'bg-accent text-primary' 
-                          : event.eventType === 'training' 
-                            ? 'bg-accent text-primary'
-                            : 'bg-accent text-primary'
-                      }`}>
+                    <div key={event.id} className="flex items-start gap-4 p-4 rounded-lg border bg-card hover:bg-accent/50 transition-colors">
+                      <div className="w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0 bg-accent text-primary">
                         <Calendar className="h-6 w-6" />
                       </div>
                       <div className="flex-1 min-w-0">
                         <h4 className="font-medium text-sm truncate">{event.name}</h4>
-                        <p className="text-xs text-gray-500 mt-1">
+                        <p className="text-xs text-muted-foreground mt-1">
                           {new Date(`${event.date}T${event.time}`).toLocaleString('en-GB', { 
                             dateStyle: 'medium', 
                             timeStyle: 'short' 
                           })}
                         </p>
-                        <p className="text-xs text-gray-500 truncate">{event.location}</p>
+                        <p className="text-xs text-muted-foreground truncate">{event.location}</p>
                       </div>
                     </div>
                   ))}
-                  <Button variant="outline" className="w-full" asChild>
+                  <Button variant="outline" className="w-full mt-2" asChild>
                     <Link to="/events">View All Events</Link>
                   </Button>
                 </div>
               ) : (
-                <p className="text-center py-4 text-gray-500">
+                <p className="text-center py-8 text-muted-foreground">
                   No upcoming events scheduled
                 </p>
               )}
@@ -184,17 +193,24 @@ const Dashboard = () => {
           </Card>
 
           {/* Teams section */}
-          <Card>
+          <Card className="shadow-sm hover:shadow transition-shadow">
             <CardHeader>
-              <CardTitle>Your Teams</CardTitle>
-              <CardDescription>
-                Teams you're associated with
-              </CardDescription>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle className="text-xl font-semibold">Your Teams</CardTitle>
+                  <CardDescription className="mt-1">
+                    Teams you're associated with
+                  </CardDescription>
+                </div>
+                <div className="h-10 w-10 rounded-full bg-accent flex items-center justify-center">
+                  <Users className="h-5 w-5 text-primary" />
+                </div>
+              </div>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
                 {teams.slice(0, 3).map((team) => (
-                  <div key={team.id} className="flex items-center gap-4 p-3 rounded-lg border">
+                  <div key={team.id} className="flex items-center gap-4 p-4 rounded-lg border bg-card hover:bg-accent/50 transition-colors">
                     <div className="w-12 h-12 rounded-full overflow-hidden flex-shrink-0 bg-accent flex items-center justify-center">
                       {team.icon || team.profileImage ? (
                         <img 
@@ -208,13 +224,13 @@ const Dashboard = () => {
                     </div>
                     <div className="flex-1 min-w-0">
                       <h4 className="font-medium text-sm truncate">{team.name}</h4>
-                      <p className="text-xs text-gray-500 mt-1">
+                      <p className="text-xs text-muted-foreground mt-1">
                         {team.ageGroup} · {team.category}
                       </p>
                     </div>
                   </div>
                 ))}
-                <Button variant="outline" className="w-full" asChild>
+                <Button variant="outline" className="w-full mt-2" asChild>
                   <Link to="/teams">View All Teams</Link>
                 </Button>
               </div>
@@ -224,61 +240,57 @@ const Dashboard = () => {
 
         {/* Additional section for admins, coaches, managers */}
         {(hasRole("admin") || hasRole("coach") || hasRole("manager")) && (
-          <div>
-            <Card>
-              <CardHeader>
-                <CardTitle>Admin Actions</CardTitle>
-                <CardDescription>
-                  Quick actions for club management
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="flex flex-wrap gap-3">
-                <Button className="bg-netball-500 hover:bg-netball-600" asChild>
-                  <Link to="/approvals">
-                    Review Pending Approvals
+          <Card className="shadow-sm hover:shadow transition-shadow">
+            <CardHeader>
+              <CardTitle className="text-xl font-semibold">Admin Actions</CardTitle>
+              <CardDescription>
+                Quick actions for club management
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="flex flex-wrap gap-4">
+              <Button variant="default" className="bg-primary hover:bg-primary/90" asChild>
+                <Link to="/approvals">
+                  Review Pending Approvals
+                </Link>
+              </Button>
+              <Button variant="outline" className="border-primary hover:bg-primary/10 text-primary" asChild>
+                <Link to="/events/new">
+                  Create New Event
+                </Link>
+              </Button>
+              {hasRole("admin") && (
+                <Button variant="outline" className="border-primary hover:bg-primary/10 text-primary" asChild>
+                  <Link to="/teams/new">
+                    Create New Team
                   </Link>
                 </Button>
-                <Button variant="outline" asChild>
-                  <Link to="/events/new">
-                    Create New Event
-                  </Link>
-                </Button>
-                {hasRole("admin") && (
-                  <Button variant="outline" asChild>
-                    <Link to="/teams/new">
-                      Create New Team
-                    </Link>
-                  </Button>
-                )}
-              </CardContent>
-            </Card>
-          </div>
+              )}
+            </CardContent>
+          </Card>
         )}
 
         {/* Parent specific section */}
         {hasRole("parent") && (
-          <div>
-            <Card>
-              <CardHeader>
-                <CardTitle>Parent Actions</CardTitle>
-                <CardDescription>
-                  Quick actions for parents
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="flex flex-wrap gap-3">
-                <Button className="bg-netball-500 hover:bg-netball-600" asChild>
-                  <Link to="/children">
-                    Manage My Children
-                  </Link>
-                </Button>
-                <Button variant="outline" asChild>
-                  <Link to="/children/new">
-                    Register New Child
-                  </Link>
-                </Button>
-              </CardContent>
-            </Card>
-          </div>
+          <Card className="shadow-sm hover:shadow transition-shadow">
+            <CardHeader>
+              <CardTitle className="text-xl font-semibold">Parent Actions</CardTitle>
+              <CardDescription>
+                Quick actions for parents
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="flex flex-wrap gap-4">
+              <Button variant="default" className="bg-primary hover:bg-primary/90" asChild>
+                <Link to="/children">
+                  Manage My Children
+                </Link>
+              </Button>
+              <Button variant="outline" className="border-primary hover:bg-primary/10 text-primary" asChild>
+                <Link to="/children/new">
+                  Register New Child
+                </Link>
+              </Button>
+            </CardContent>
+          </Card>
         )}
       </div>
     </Layout>
