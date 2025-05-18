@@ -9,7 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Calendar, User as UserIcon, Award } from "lucide-react";
+import { Calendar, User as UserIcon, Award, Edit } from "lucide-react";
 import { toast } from "sonner";
 
 const TeamDetailPage = () => {
@@ -98,7 +98,7 @@ const TeamDetailPage = () => {
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
             </div>
           ) : (
-            <div className="h-48 md:h-64 w-full bg-gradient-to-r from-netball-500/20 to-netball-600/20" />
+            <div className="h-48 md:h-64 w-full bg-gradient-to-r from-primary/20 to-primary/30" />
           )}
           
           <div className={`absolute bottom-0 left-0 right-0 p-6 flex items-center gap-4 ${team.bannerImage ? 'text-white' : 'text-gray-900'}`}>
@@ -121,24 +121,25 @@ const TeamDetailPage = () => {
         </div>
         
         {/* Admin/Coach/Manager actions */}
-        {(hasRole("admin") || hasRole("coach") || hasRole("manager")) && (
-          <div className="flex flex-wrap gap-3">
-            <Button className="bg-netball-500 hover:bg-netball-600" asChild>
+        <div className="flex flex-wrap gap-3">
+          {(hasRole("admin") || hasRole("coach") || hasRole("manager")) && (
+            <Button className="bg-primary hover:bg-primary/90" asChild>
               <Link to={`/events/new?teamId=${team.id}`}>
                 <Calendar className="mr-2 h-4 w-4" />
                 Create Event
               </Link>
             </Button>
-            
-            {hasRole("admin") && (
-              <Button variant="outline" asChild>
-                <Link to={`/teams/${team.id}/edit`}>
-                  Edit Team
-                </Link>
-              </Button>
-            )}
-          </div>
-        )}
+          )}
+          
+          {hasRole("admin") && (
+            <Button variant="outline" asChild>
+              <Link to={`/teams/${team.id}/edit`}>
+                <Edit className="mr-2 h-4 w-4 text-primary" />
+                Edit Team
+              </Link>
+            </Button>
+          )}
+        </div>
         
         {/* Team content */}
         <div>
@@ -199,7 +200,7 @@ const TeamDetailPage = () => {
                 <Card>
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
-                      <Award className="h-5 w-5 text-netball-500" />
+                      <Award className="h-5 w-5 text-primary" />
                       Coaches
                     </CardTitle>
                   </CardHeader>
@@ -230,7 +231,7 @@ const TeamDetailPage = () => {
                 <Card>
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
-                      <UserIcon className="h-5 w-5 text-netball-500" />
+                      <UserIcon className="h-5 w-5 text-primary" />
                       Managers
                     </CardTitle>
                   </CardHeader>

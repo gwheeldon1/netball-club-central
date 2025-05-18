@@ -141,7 +141,7 @@ const TeamsPage = () => {
                       </p>
                     )}
                     <div className="mt-3 flex items-center gap-1">
-                      <Users className="h-4 w-4 text-muted-foreground" />
+                      <Users className="h-4 w-4 text-primary" />
                       <span className="text-sm text-muted-foreground">
                         {team.players?.length || 0} players
                       </span>
