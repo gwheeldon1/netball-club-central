@@ -79,7 +79,16 @@ const TeamForm = ({ team, mode }: TeamFormProps) => {
     
     try {
       if (mode === "create") {
-        const newTeam = teamApi.create(data);
+        // Ensure we pass all required properties with their proper types
+        const newTeam = teamApi.create({
+          name: data.name,          // Required field
+          ageGroup: data.ageGroup,  // Required field
+          category: data.category,  // Required field
+          description: data.description,
+          profileImage: data.profileImage,
+          bannerImage: data.bannerImage,
+          icon: data.icon,
+        });
         toast.success("Team created successfully");
         navigate(`/teams/${newTeam.id}`);
       } else if (team) {
