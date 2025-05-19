@@ -87,9 +87,7 @@ const Dashboard = () => {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{playerCount}</div>
-              <p className="text-xs text-muted-foreground mt-1">
-                Registered players
-              </p>
+              
             </CardContent>
           </Card>
           
