@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
 import Layout from "@/components/Layout";
@@ -23,12 +22,12 @@ const Dashboard = () => {
     const loadDashboardData = async () => {
       try {
         // Get teams
-        const teamsData = teamApi.getAll();
+        const teamsData = await teamApi.getAll();
         setTeams(teamsData);
         setTeamCount(teamsData.length);
         
         // Get events (in a real app, we would filter by date)
-        const eventsData = eventApi.getAll();
+        const eventsData = await eventApi.getAll();
         // Sort events by date and time to get upcoming events
         const sortedEvents = eventsData.sort((a, b) => {
           const dateA = new Date(`${a.date}T${a.time}`);
@@ -38,7 +37,7 @@ const Dashboard = () => {
         setUpcomingEvents(sortedEvents.slice(0, 3));
         
         // Count children with pending status
-        const allChildren = childrenApi.getAll();
+        const allChildren = await childrenApi.getAll();
         const pending = allChildren.filter(child => child.status === 'pending').length;
         setPendingApprovals(pending);
         
