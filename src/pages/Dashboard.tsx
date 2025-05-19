@@ -7,16 +7,18 @@ import { Calendar, Award, Users, User } from "lucide-react";
 import { Link } from "react-router-dom";
 import { teamApi, childrenApi, eventApi } from "@/services/api";
 import { Team, Event, Child } from "@/types";
-
 const Dashboard = () => {
-  const { currentUser, hasRole } = useAuth();
+  const {
+    currentUser,
+    hasRole
+  } = useAuth();
   const [upcomingEvents, setUpcomingEvents] = useState<Event[]>([]);
   const [playerCount, setPlayerCount] = useState(0);
   const [pendingApprovals, setPendingApprovals] = useState(0);
   const [teamCount, setTeamCount] = useState(0);
   const [teams, setTeams] = useState<Team[]>([]);
   const [loading, setLoading] = useState(true);
-  
+
   // Load dashboard data
   useEffect(() => {
     const loadDashboardData = async () => {
@@ -25,7 +27,7 @@ const Dashboard = () => {
         const teamsData = await teamApi.getAll();
         setTeams(teamsData);
         setTeamCount(teamsData.length);
-        
+
         // Get events (in a real app, we would filter by date)
         const eventsData = await eventApi.getAll();
         // Sort events by date and time to get upcoming events
@@ -35,12 +37,12 @@ const Dashboard = () => {
           return dateA.getTime() - dateB.getTime();
         });
         setUpcomingEvents(sortedEvents.slice(0, 3));
-        
+
         // Count children with pending status
         const allChildren = await childrenApi.getAll();
         const pending = allChildren.filter(child => child.status === 'pending').length;
         setPendingApprovals(pending);
-        
+
         // Count approved children
         const approved = allChildren.filter(child => child.status === 'approved').length;
         setPlayerCount(approved);
@@ -50,32 +52,19 @@ const Dashboard = () => {
         setLoading(false);
       }
     };
-    
     loadDashboardData();
   }, []);
-
   if (loading) {
-    return (
-      <Layout>
+    return <Layout>
         <div className="flex items-center justify-center h-64">
           <p className="text-muted-foreground">Loading dashboard...</p>
         </div>
-      </Layout>
-    );
+      </Layout>;
   }
-
-  return (
-    <Layout>
+  return <Layout>
       <div className="space-y-8">
         {/* Welcome section */}
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">
-            Welcome back, {currentUser?.name}
-          </h1>
-          <p className="text-muted-foreground mt-2">
-            Here's what's happening with your netball club today
-          </p>
-        </div>
+        
 
         {/* Stats section */}
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
@@ -124,8 +113,7 @@ const Dashboard = () => {
             </CardContent>
           </Card>
           
-          {(hasRole("admin") || hasRole("coach") || hasRole("manager")) && (
-            <Card className="shadow-sm hover:shadow transition-shadow">
+          {(hasRole("admin") || hasRole("coach") || hasRole("manager")) && <Card className="shadow-sm hover:shadow transition-shadow">
               <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
                 <CardTitle className="text-sm font-medium">Pending Approvals</CardTitle>
                 <div className="h-8 w-8 rounded-full bg-accent flex items-center justify-center">
@@ -138,8 +126,7 @@ const Dashboard = () => {
                   Waiting for review
                 </p>
               </CardContent>
-            </Card>
-          )}
+            </Card>}
         </div>
 
         {/* Content rows */}
@@ -160,34 +147,28 @@ const Dashboard = () => {
               </div>
             </CardHeader>
             <CardContent>
-              {upcomingEvents.length > 0 ? (
-                <div className="space-y-4">
-                  {upcomingEvents.map((event) => (
-                    <div key={event.id} className="flex items-start gap-4 p-4 rounded-lg border bg-card hover:bg-accent/50 transition-colors">
+              {upcomingEvents.length > 0 ? <div className="space-y-4">
+                  {upcomingEvents.map(event => <div key={event.id} className="flex items-start gap-4 p-4 rounded-lg border bg-card hover:bg-accent/50 transition-colors">
                       <div className="w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0 bg-accent text-primary">
                         <Calendar className="h-6 w-6" />
                       </div>
                       <div className="flex-1 min-w-0">
                         <h4 className="font-medium text-sm truncate">{event.name}</h4>
                         <p className="text-xs text-muted-foreground mt-1">
-                          {new Date(`${event.date}T${event.time}`).toLocaleString('en-GB', { 
-                            dateStyle: 'medium', 
-                            timeStyle: 'short' 
-                          })}
+                          {new Date(`${event.date}T${event.time}`).toLocaleString('en-GB', {
+                      dateStyle: 'medium',
+                      timeStyle: 'short'
+                    })}
                         </p>
                         <p className="text-xs text-muted-foreground truncate">{event.location}</p>
                       </div>
-                    </div>
-                  ))}
+                    </div>)}
                   <Button variant="outline" className="w-full mt-2" asChild>
                     <Link to="/events">View All Events</Link>
                   </Button>
-                </div>
-              ) : (
-                <p className="text-center py-8 text-muted-foreground">
+                </div> : <p className="text-center py-8 text-muted-foreground">
                   No upcoming events scheduled
-                </p>
-              )}
+                </p>}
             </CardContent>
           </Card>
 
@@ -208,18 +189,9 @@ const Dashboard = () => {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {teams.slice(0, 3).map((team) => (
-                  <div key={team.id} className="flex items-center gap-4 p-4 rounded-lg border bg-card hover:bg-accent/50 transition-colors">
+                {teams.slice(0, 3).map(team => <div key={team.id} className="flex items-center gap-4 p-4 rounded-lg border bg-card hover:bg-accent/50 transition-colors">
                     <div className="w-12 h-12 rounded-full overflow-hidden flex-shrink-0 bg-accent flex items-center justify-center">
-                      {team.icon || team.profileImage ? (
-                        <img 
-                          src={team.icon || team.profileImage} 
-                          alt={team.name} 
-                          className="w-full h-full object-cover"
-                        />
-                      ) : (
-                        <Users className="h-6 w-6 text-primary" />
-                      )}
+                      {team.icon || team.profileImage ? <img src={team.icon || team.profileImage} alt={team.name} className="w-full h-full object-cover" /> : <Users className="h-6 w-6 text-primary" />}
                     </div>
                     <div className="flex-1 min-w-0">
                       <h4 className="font-medium text-sm truncate">{team.name}</h4>
@@ -227,8 +199,7 @@ const Dashboard = () => {
                         {team.ageGroup} · {team.category}
                       </p>
                     </div>
-                  </div>
-                ))}
+                  </div>)}
                 <Button variant="outline" className="w-full mt-2" asChild>
                   <Link to="/teams">View All Teams</Link>
                 </Button>
@@ -238,8 +209,7 @@ const Dashboard = () => {
         </div>
 
         {/* Additional section for admins, coaches, managers */}
-        {(hasRole("admin") || hasRole("coach") || hasRole("manager")) && (
-          <Card className="shadow-sm hover:shadow transition-shadow">
+        {(hasRole("admin") || hasRole("coach") || hasRole("manager")) && <Card className="shadow-sm hover:shadow transition-shadow">
             <CardHeader>
               <CardTitle className="text-xl font-semibold">Admin Actions</CardTitle>
               <CardDescription>
@@ -257,20 +227,16 @@ const Dashboard = () => {
                   Create New Event
                 </Link>
               </Button>
-              {hasRole("admin") && (
-                <Button variant="outline" className="border-primary hover:bg-primary/10 text-primary" asChild>
+              {hasRole("admin") && <Button variant="outline" className="border-primary hover:bg-primary/10 text-primary" asChild>
                   <Link to="/teams/new">
                     Create New Team
                   </Link>
-                </Button>
-              )}
+                </Button>}
             </CardContent>
-          </Card>
-        )}
+          </Card>}
 
         {/* Parent specific section */}
-        {hasRole("parent") && (
-          <Card className="shadow-sm hover:shadow transition-shadow">
+        {hasRole("parent") && <Card className="shadow-sm hover:shadow transition-shadow">
             <CardHeader>
               <CardTitle className="text-xl font-semibold">Parent Actions</CardTitle>
               <CardDescription>
@@ -289,11 +255,8 @@ const Dashboard = () => {
                 </Link>
               </Button>
             </CardContent>
-          </Card>
-        )}
+          </Card>}
       </div>
-    </Layout>
-  );
+    </Layout>;
 };
-
 export default Dashboard;
