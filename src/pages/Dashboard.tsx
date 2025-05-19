@@ -100,9 +100,7 @@ const Dashboard = () => {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{upcomingEvents.length}</div>
-              <p className="text-xs text-muted-foreground mt-1">
-                In the next 7 days
-              </p>
+              
             </CardContent>
           </Card>
           
