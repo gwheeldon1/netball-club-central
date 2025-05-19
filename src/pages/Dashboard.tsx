@@ -113,9 +113,7 @@ const Dashboard = () => {
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">{pendingApprovals}</div>
-                <p className="text-xs text-muted-foreground mt-1">
-                  Waiting for review
-                </p>
+                
               </CardContent>
             </Card>}
         </div>
