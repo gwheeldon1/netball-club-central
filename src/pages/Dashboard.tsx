@@ -186,22 +186,24 @@ const Dashboard = () => {
               </div>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
-                {teams.slice(0, 3).map(team => <div key={team.id} className="flex items-center gap-4 p-4 rounded-lg border bg-card hover:bg-accent/50 transition-colors">
-                    <div className="w-12 h-12 rounded-full overflow-hidden flex-shrink-0 bg-accent flex items-center justify-center">
-                      {team.icon || team.profileImage ? <img src={team.icon || team.profileImage} alt={team.name} className="w-full h-full object-cover" /> : <Users className="h-6 w-6 text-primary" />}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <h4 className="font-medium text-sm truncate">{team.name}</h4>
-                      <p className="text-xs text-muted-foreground mt-1">
-                        {team.ageGroup} · {team.category}
-                      </p>
-                    </div>
-                  </div>)}
-                <Button variant="outline" className="w-full mt-2" asChild>
-                  <Link to="/teams">View All Teams</Link>
-                </Button>
-              </div>
+              {teams.length > 0 ? <div className="space-y-4">
+                  {teams.slice(0, 3).map(team => <div key={team.id} className="flex items-start gap-4 p-4 rounded-lg border bg-card hover:bg-accent/50 transition-colors">
+                      <div className="w-12 h-12 rounded-full overflow-hidden flex-shrink-0 bg-accent flex items-center justify-center">
+                        {team.icon || team.profileImage ? <img src={team.icon || team.profileImage} alt={team.name} className="w-full h-full object-cover" /> : <Users className="h-6 w-6 text-primary" />}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h4 className="font-medium text-sm truncate">{team.name}</h4>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          {team.ageGroup} · {team.category}
+                        </p>
+                      </div>
+                    </div>)}
+                  <Button variant="outline" className="w-full mt-2" asChild>
+                    <Link to="/teams">View All Teams</Link>
+                  </Button>
+                </div> : <p className="text-center py-8 text-muted-foreground">
+                  You're not associated with any teams
+                </p>}
             </CardContent>
           </Card>
         </div>
