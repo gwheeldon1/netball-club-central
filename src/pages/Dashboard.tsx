@@ -7,7 +7,6 @@ import { Calendar, Award, Users, User } from "lucide-react";
 import { Link } from "react-router-dom";
 import { teamApi, childrenApi, eventApi } from "@/services/api";
 import { Team, Event, Child } from "@/types";
-
 const Dashboard = () => {
   const {
     currentUser,
@@ -135,9 +134,7 @@ const Dashboard = () => {
               <div className="flex items-center justify-between">
                 <div>
                   <CardTitle className="text-xl font-semibold">Upcoming Events</CardTitle>
-                  <CardDescription className="mt-1">
-                    Your scheduled events for the next few days
-                  </CardDescription>
+                  
                 </div>
                 <div className="h-10 w-10 rounded-full bg-accent flex items-center justify-center">
                   <Calendar className="h-5 w-5 text-primary" />
