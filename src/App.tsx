@@ -17,7 +17,6 @@ import EventDetailPage from '@/pages/EventDetailPage';
 import ApprovalsPage from '@/pages/ApprovalsPage';
 import NotFound from '@/pages/NotFound';
 import UnauthorizedPage from '@/pages/UnauthorizedPage';
-import { NetworkStatus } from '@/components/NetworkStatus';
 import './App.css';
 
 function App() {
@@ -92,7 +91,6 @@ function App() {
             
             <Route path="*" element={<NotFound />} />
           </Routes>
-          <NetworkStatus />
         </Router>
         <Toaster position="top-right" />
       </AuthProvider>
