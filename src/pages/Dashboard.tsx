@@ -173,9 +173,7 @@ const Dashboard = () => {
               <div className="flex items-center justify-between">
                 <div>
                   <CardTitle className="text-xl font-semibold">Your Teams</CardTitle>
-                  <CardDescription className="mt-1">
-                    Teams you're associated with
-                  </CardDescription>
+                  
                 </div>
                 <div className="h-10 w-10 rounded-full bg-accent flex items-center justify-center">
                   <Users className="h-5 w-5 text-primary" />
