@@ -67,7 +67,7 @@ const Dashboard = () => {
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
           <Card className="shadow-sm hover:shadow transition-shadow">
             <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-              <CardTitle className="text-sm font-medium">Total Teams</CardTitle>
+              <CardTitle className="text-sm font-medium">Teams</CardTitle>
               <div className="h-8 w-8 rounded-full bg-accent flex items-center justify-center">
                 <Award className="h-4 w-4 text-primary" />
               </div>
@@ -80,7 +80,7 @@ const Dashboard = () => {
           
           <Card className="shadow-sm hover:shadow transition-shadow">
             <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-              <CardTitle className="text-sm font-medium">Total Players</CardTitle>
+              <CardTitle className="text-sm font-medium">Players</CardTitle>
               <div className="h-8 w-8 rounded-full bg-accent flex items-center justify-center">
                 <Users className="h-4 w-4 text-primary" />
               </div>
@@ -95,7 +95,7 @@ const Dashboard = () => {
           
           <Card className="shadow-sm hover:shadow transition-shadow">
             <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-              <CardTitle className="text-sm font-medium">Upcoming Events</CardTitle>
+              <CardTitle className="text-sm font-medium">Events</CardTitle>
               <div className="h-8 w-8 rounded-full bg-accent flex items-center justify-center">
                 <Calendar className="h-4 w-4 text-primary" />
               </div>
@@ -110,7 +110,7 @@ const Dashboard = () => {
           
           {(hasRole("admin") || hasRole("coach") || hasRole("manager")) && <Card className="shadow-sm hover:shadow transition-shadow">
               <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-                <CardTitle className="text-sm font-medium">Pending Approvals</CardTitle>
+                <CardTitle className="text-sm font-medium">Approvals</CardTitle>
                 <div className="h-8 w-8 rounded-full bg-accent flex items-center justify-center">
                   <User className="h-4 w-4 text-primary" />
                 </div>
