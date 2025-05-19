@@ -7,6 +7,7 @@ import { Calendar, Award, Users, User } from "lucide-react";
 import { Link } from "react-router-dom";
 import { teamApi, childrenApi, eventApi } from "@/services/api";
 import { Team, Event, Child } from "@/types";
+
 const Dashboard = () => {
   const {
     currentUser,
@@ -63,9 +64,6 @@ const Dashboard = () => {
   }
   return <Layout>
       <div className="space-y-8">
-        {/* Welcome section */}
-        
-
         {/* Stats section */}
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
           <Card className="shadow-sm hover:shadow transition-shadow">
@@ -216,22 +214,24 @@ const Dashboard = () => {
                 Quick actions for club management
               </CardDescription>
             </CardHeader>
-            <CardContent className="flex flex-wrap gap-4">
-              <Button variant="default" className="bg-primary hover:bg-primary/90" asChild>
-                <Link to="/approvals">
-                  Review Pending Approvals
-                </Link>
-              </Button>
-              <Button variant="outline" className="border-primary hover:bg-primary/10 text-primary" asChild>
-                <Link to="/events/new">
-                  Create New Event
-                </Link>
-              </Button>
-              {hasRole("admin") && <Button variant="outline" className="border-primary hover:bg-primary/10 text-primary" asChild>
+            <CardContent>
+              <div className="flex flex-wrap gap-4 justify-center">
+                <Button variant="default" className="bg-primary hover:bg-primary/90" asChild>
+                  <Link to="/approvals">
+                    Review Pending Approvals
+                  </Link>
+                </Button>
+                <Button variant="outline" className="border-primary hover:bg-primary/10 text-primary" asChild>
+                  <Link to="/events/new">
+                    Create New Event
+                  </Link>
+                </Button>
+                {hasRole("admin") && <Button variant="outline" className="border-primary hover:bg-primary/10 text-primary" asChild>
                   <Link to="/teams/new">
                     Create New Team
                   </Link>
                 </Button>}
+              </div>
             </CardContent>
           </Card>}
 
@@ -243,17 +243,19 @@ const Dashboard = () => {
                 Quick actions for parents
               </CardDescription>
             </CardHeader>
-            <CardContent className="flex flex-wrap gap-4">
-              <Button variant="default" className="bg-primary hover:bg-primary/90" asChild>
-                <Link to="/children">
-                  Manage My Children
-                </Link>
-              </Button>
-              <Button variant="outline" className="border-primary hover:bg-primary/10 text-primary" asChild>
-                <Link to="/children/new">
-                  Register New Child
-                </Link>
-              </Button>
+            <CardContent>
+              <div className="flex flex-wrap gap-4 justify-center">
+                <Button variant="default" className="bg-primary hover:bg-primary/90" asChild>
+                  <Link to="/children">
+                    Manage My Children
+                  </Link>
+                </Button>
+                <Button variant="outline" className="border-primary hover:bg-primary/10 text-primary" asChild>
+                  <Link to="/children/new">
+                    Register New Child
+                  </Link>
+                </Button>
+              </div>
             </CardContent>
           </Card>}
       </div>
