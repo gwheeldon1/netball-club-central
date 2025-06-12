@@ -1,4 +1,5 @@
 
+
 import { ReactNode, useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
@@ -74,7 +75,7 @@ const Layout = ({
       <div id="mobile-header" className="fixed top-0 left-0 right-0 z-50 bg-background border-b border-border lg:hidden">
         <div className="flex items-center justify-between px-4 py-3">
           <Button variant="ghost" size="icon" onClick={() => setSidebarOpen(!sidebarOpen)} id="sidebar-toggle" className="h-11 w-11">
-            <Menu className="h-6 w-6" />
+            <Menu className="h-8 w-8" />
           </Button>
           
           <div className="flex items-center gap-2">
@@ -87,7 +88,7 @@ const Layout = ({
           <div className="flex items-center gap-2">
             {(hasRole("admin") || hasRole("coach") || hasRole("manager")) && <Button variant="ghost" size="icon" className="h-9 w-9" asChild>
                 <Link to="/approvals">
-                  <Bell className="h-6 w-6" />
+                  <Bell className="h-7 w-7" />
                 </Link>
               </Button>}
             {isOffline && <WifiOff className="h-4 w-4 text-muted-foreground" />}
@@ -208,3 +209,4 @@ const Layout = ({
     </div>;
 };
 export default Layout;
+
