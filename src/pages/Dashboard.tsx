@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
 import Layout from "@/components/Layout";
@@ -8,7 +7,6 @@ import { Calendar, Award, Users, User, MapPin, Clock, ChevronRight, Plus } from 
 import { Link } from "react-router-dom";
 import { teamApi, childrenApi, eventApi } from "@/services/api";
 import { Team, Event, Child } from "@/types";
-
 const Dashboard = () => {
   const {
     currentUser,
@@ -56,7 +54,6 @@ const Dashboard = () => {
     };
     loadDashboardData();
   }, []);
-
   if (loading) {
     return <Layout>
         <div className="flex items-center justify-center h-64">
@@ -64,7 +61,6 @@ const Dashboard = () => {
         </div>
       </Layout>;
   }
-
   return <Layout>
       <div className="space-y-8">
         <div className="grid gap-8 lg:grid-cols-2">
@@ -74,24 +70,16 @@ const Dashboard = () => {
               <div className="flex items-center justify-between">
                 <div>
                   <CardTitle className="text-xl">Upcoming Events</CardTitle>
-                  <CardDescription>Your next scheduled activities</CardDescription>
+                  
                 </div>
-                <Link 
-                  to="/events" 
-                  className="flex items-center gap-1 text-sm text-primary hover:text-primary/80 font-medium"
-                >
+                <Link to="/events" className="flex items-center gap-1 text-sm text-primary hover:text-primary/80 font-medium">
                   View all <ChevronRight className="h-4 w-4" />
                 </Link>
               </div>
             </CardHeader>
             <CardContent>
-              {upcomingEvents.length > 0 ? (
-                <div className="space-y-3">
-                  {upcomingEvents.map((event) => (
-                    <div 
-                      key={event.id} 
-                      className="group p-4 rounded-lg border hover:border-primary/30 hover:bg-accent/30 transition-all duration-200"
-                    >
+              {upcomingEvents.length > 0 ? <div className="space-y-3">
+                  {upcomingEvents.map(event => <div key={event.id} className="group p-4 rounded-lg border hover:border-primary/30 hover:bg-accent/30 transition-all duration-200">
                       <div className="flex items-start gap-3">
                         <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
                           <Calendar className="h-5 w-5 text-primary" />
@@ -108,12 +96,12 @@ const Dashboard = () => {
                               <Clock className="h-4 w-4" />
                               <span>
                                 {new Date(`${event.date}T${event.time}`).toLocaleString('en-GB', {
-                                  weekday: 'short',
-                                  month: 'short',
-                                  day: 'numeric',
-                                  hour: '2-digit',
-                                  minute: '2-digit'
-                                })}
+                            weekday: 'short',
+                            month: 'short',
+                            day: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit'
+                          })}
                               </span>
                             </div>
                             <div className="flex items-center gap-2 text-sm text-muted-foreground">
@@ -123,16 +111,12 @@ const Dashboard = () => {
                           </div>
                         </div>
                       </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-8">
+                    </div>)}
+                </div> : <div className="text-center py-8">
                   <Calendar className="h-12 w-12 text-muted-foreground/50 mx-auto mb-3" />
                   <p className="text-muted-foreground">No upcoming events</p>
                   <p className="text-sm text-muted-foreground/70">Events will appear here when scheduled</p>
-                </div>
-              )}
+                </div>}
             </CardContent>
           </Card>
 
@@ -144,26 +128,18 @@ const Dashboard = () => {
                   <CardTitle className="text-xl">Your Teams</CardTitle>
                   <CardDescription>Teams you're involved with</CardDescription>
                 </div>
-                <Link 
-                  to="/teams" 
-                  className="flex items-center gap-1 text-sm text-primary hover:text-primary/80 font-medium"
-                >
+                <Link to="/teams" className="flex items-center gap-1 text-sm text-primary hover:text-primary/80 font-medium">
                   View all <ChevronRight className="h-4 w-4" />
                 </Link>
               </div>
             </CardHeader>
             <CardContent>
-              {teams.length > 0 ? (
-                <div className="space-y-3">
-                  {teams.slice(0, 4).map(team => (
-                    <div key={team.id} className="flex items-center gap-4 p-3 rounded-lg border border-border hover:border-primary/20 hover:bg-accent/50 transition-all duration-200">
+              {teams.length > 0 ? <div className="space-y-3">
+                  {teams.slice(0, 4).map(team => <div key={team.id} className="flex items-center gap-4 p-3 rounded-lg border border-border hover:border-primary/20 hover:bg-accent/50 transition-all duration-200">
                       <div className="w-12 h-12 rounded-lg overflow-hidden flex-shrink-0 bg-accent border border-border">
-                        {team.icon || team.profileImage ? 
-                          <img src={team.icon || team.profileImage} alt={team.name} className="w-full h-full object-cover" /> : 
-                          <div className="w-full h-full flex items-center justify-center">
+                        {team.icon || team.profileImage ? <img src={team.icon || team.profileImage} alt={team.name} className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center">
                             <Users className="h-6 w-6 text-primary" />
-                          </div>
-                        }
+                          </div>}
                       </div>
                       <div className="flex-1 min-w-0">
                         <h4 className="font-semibold text-base truncate">{team.name}</h4>
@@ -171,34 +147,25 @@ const Dashboard = () => {
                           {team.ageGroup} • {team.category}
                         </p>
                       </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-8">
+                    </div>)}
+                </div> : <div className="text-center py-8">
                   <Users className="h-12 w-12 text-muted-foreground/50 mx-auto mb-3" />
                   <p className="text-muted-foreground">No teams yet</p>
                   <p className="text-sm text-muted-foreground/70">Join or create teams to get started</p>
-                </div>
-              )}
+                </div>}
             </CardContent>
           </Card>
         </div>
 
         {/* Quick Actions */}
-        {(hasRole("admin") || hasRole("coach") || hasRole("manager")) && (
-          <Card className="border-0 shadow-lg">
+        {(hasRole("admin") || hasRole("coach") || hasRole("manager")) && <Card className="border-0 shadow-lg">
             <CardHeader>
               <CardTitle className="text-xl">Quick Actions</CardTitle>
               <CardDescription>Common tasks and management</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                <Button 
-                  variant="default" 
-                  className="h-auto p-4 flex-col items-start gap-2" 
-                  asChild
-                >
+                <Button variant="default" className="h-auto p-4 flex-col items-start gap-2" asChild>
                   <Link to="/approvals">
                     <div className="flex items-center gap-3 w-full">
                       <User className="h-5 w-5" />
@@ -210,11 +177,7 @@ const Dashboard = () => {
                   </Link>
                 </Button>
                 
-                <Button 
-                  variant="outline" 
-                  className="h-auto p-4 flex-col items-start gap-2" 
-                  asChild
-                >
+                <Button variant="outline" className="h-auto p-4 flex-col items-start gap-2" asChild>
                   <Link to="/events/new">
                     <div className="flex items-center gap-3 w-full">
                       <Plus className="h-5 w-5" />
@@ -226,12 +189,7 @@ const Dashboard = () => {
                   </Link>
                 </Button>
 
-                {hasRole("admin") && (
-                  <Button 
-                    variant="outline" 
-                    className="h-auto p-4 flex-col items-start gap-2" 
-                    asChild
-                  >
+                {hasRole("admin") && <Button variant="outline" className="h-auto p-4 flex-col items-start gap-2" asChild>
                     <Link to="/teams/new">
                       <div className="flex items-center gap-3 w-full">
                         <Award className="h-5 w-5" />
@@ -241,26 +199,19 @@ const Dashboard = () => {
                         </div>
                       </div>
                     </Link>
-                  </Button>
-                )}
+                  </Button>}
               </div>
             </CardContent>
-          </Card>
-        )}
+          </Card>}
 
-        {hasRole("parent") && (
-          <Card className="border-0 shadow-lg">
+        {hasRole("parent") && <Card className="border-0 shadow-lg">
             <CardHeader>
               <CardTitle className="text-xl">Parent Dashboard</CardTitle>
               <CardDescription>Manage your children's registrations</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="grid gap-4 sm:grid-cols-2">
-                <Button 
-                  variant="default" 
-                  className="h-auto p-4 flex-col items-start gap-2" 
-                  asChild
-                >
+                <Button variant="default" className="h-auto p-4 flex-col items-start gap-2" asChild>
                   <Link to="/children">
                     <div className="flex items-center gap-3 w-full">
                       <Users className="h-5 w-5" />
@@ -272,11 +223,7 @@ const Dashboard = () => {
                   </Link>
                 </Button>
                 
-                <Button 
-                  variant="outline" 
-                  className="h-auto p-4 flex-col items-start gap-2" 
-                  asChild
-                >
+                <Button variant="outline" className="h-auto p-4 flex-col items-start gap-2" asChild>
                   <Link to="/children/new">
                     <div className="flex items-center gap-3 w-full">
                       <Plus className="h-5 w-5" />
@@ -289,10 +236,8 @@ const Dashboard = () => {
                 </Button>
               </div>
             </CardContent>
-          </Card>
-        )}
+          </Card>}
       </div>
     </Layout>;
 };
-
 export default Dashboard;
