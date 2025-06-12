@@ -1,3 +1,4 @@
+
 import { ReactNode, useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
@@ -11,7 +12,8 @@ import {
   Menu, 
   X,
   Home,
-  WifiOff
+  WifiOff,
+  Bell
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -84,7 +86,19 @@ const Layout = ({ children }: LayoutProps) => {
             <span className="text-lg font-semibold">Netball Club</span>
           </div>
           
-          <div className="w-9 h-9 flex items-center justify-center">
+          <div className="flex items-center gap-2">
+            {(hasRole("admin") || hasRole("coach") || hasRole("manager")) && (
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-9 w-9"
+                asChild
+              >
+                <Link to="/approvals">
+                  <Bell className="h-4 w-4" />
+                </Link>
+              </Button>
+            )}
             {isOffline && (
               <WifiOff className="h-4 w-4 text-muted-foreground" />
             )}

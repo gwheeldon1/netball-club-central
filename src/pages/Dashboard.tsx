@@ -66,60 +66,7 @@ const Dashboard = () => {
   }
 
   return <Layout>
-      <div className="space-y-8 pt-6 lg:pt-0">
-        {/* Stats Grid */}
-        <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
-          <div className="bg-gradient-to-br from-primary/5 to-primary/10 rounded-xl p-6 border border-primary/20">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground font-medium">Teams</p>
-                <p className="text-3xl font-bold text-primary mt-1">{teamCount}</p>
-              </div>
-              <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
-                <Award className="h-6 w-6 text-primary" />
-              </div>
-            </div>
-          </div>
-          
-          <div className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-950/50 dark:to-blue-900/50 rounded-xl p-6 border border-blue-200 dark:border-blue-800">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground font-medium">Players</p>
-                <p className="text-3xl font-bold text-blue-600 dark:text-blue-400 mt-1">{playerCount}</p>
-              </div>
-              <div className="w-12 h-12 rounded-xl bg-blue-500/10 flex items-center justify-center">
-                <Users className="h-6 w-6 text-blue-600 dark:text-blue-400" />
-              </div>
-            </div>
-          </div>
-          
-          <div className="bg-gradient-to-br from-green-50 to-green-100 dark:from-green-950/50 dark:to-green-900/50 rounded-xl p-6 border border-green-200 dark:border-green-800">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground font-medium">Events</p>
-                <p className="text-3xl font-bold text-green-600 dark:text-green-400 mt-1">{upcomingEvents.length}</p>
-              </div>
-              <div className="w-12 h-12 rounded-xl bg-green-500/10 flex items-center justify-center">
-                <Calendar className="h-6 w-6 text-green-600 dark:text-green-400" />
-              </div>
-            </div>
-          </div>
-          
-          {(hasRole("admin") || hasRole("coach") || hasRole("manager")) && 
-            <div className="bg-gradient-to-br from-orange-50 to-orange-100 dark:from-orange-950/50 dark:to-orange-900/50 rounded-xl p-6 border border-orange-200 dark:border-orange-800">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-muted-foreground font-medium">Pending</p>
-                  <p className="text-3xl font-bold text-orange-600 dark:text-orange-400 mt-1">{pendingApprovals}</p>
-                </div>
-                <div className="w-12 h-12 rounded-xl bg-orange-500/10 flex items-center justify-center">
-                  <User className="h-6 w-6 text-orange-600 dark:text-orange-400" />
-                </div>
-              </div>
-            </div>
-          }
-        </div>
-
+      <div className="space-y-8">
         <div className="grid gap-8 lg:grid-cols-2">
           {/* Upcoming Events */}
           <Card className="border-0 shadow-lg">
@@ -139,14 +86,14 @@ const Dashboard = () => {
             </CardHeader>
             <CardContent>
               {upcomingEvents.length > 0 ? (
-                <div className="space-y-4">
+                <div className="space-y-3">
                   {upcomingEvents.map((event) => (
                     <div 
                       key={event.id} 
-                      className="group p-4 rounded-lg border border-border hover:border-primary/20 hover:bg-accent/50 transition-all duration-200"
+                      className="group p-4 rounded-lg border hover:border-primary/30 hover:bg-accent/30 transition-all duration-200"
                     >
-                      <div className="flex items-start gap-4">
-                        <div className="flex-shrink-0 w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center">
+                      <div className="flex items-start gap-3">
+                        <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
                           <Calendar className="h-5 w-5 text-primary" />
                         </div>
                         <div className="flex-1 min-w-0">
