@@ -99,23 +99,26 @@ const EventsPage = () => {
     });
   };
   
-  // Get event type styling - simplified to use design system colors only
+  // Get event type styling
   const getEventTypeStyle = (eventType: string) => {
     switch (eventType) {
       case 'match':
         return {
-          badge: 'bg-primary text-primary-foreground',
-          dot: 'bg-primary'
+          badge: 'bg-primary/10 text-primary border border-primary/20',
+          dot: 'bg-primary',
+          icon: Calendar
         };
       case 'training':
         return {
-          badge: 'bg-secondary text-secondary-foreground',
-          dot: 'bg-secondary'
+          badge: 'bg-muted text-muted-foreground border border-border',
+          dot: 'bg-muted-foreground',
+          icon: Clock
         };
       default:
         return {
-          badge: 'bg-muted text-muted-foreground',
-          dot: 'bg-muted-foreground'
+          badge: 'bg-muted text-muted-foreground border border-border',
+          dot: 'bg-muted-foreground',
+          icon: Calendar
         };
     }
   };
@@ -136,7 +139,7 @@ const EventsPage = () => {
   return (
     <Layout>
       <div className="space-y-6">
-        {/* Header Section - Mobile optimized */}
+        {/* Header Section */}
         <div className="flex flex-col space-y-4 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
           <div className="space-y-1">
             <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">Events</h1>
@@ -168,9 +171,7 @@ const EventsPage = () => {
           </Alert>
         )}
         
-        {/* Search and Filters Section */}
         <div className="space-y-4">
-          {/* Search Bar */}
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
@@ -181,7 +182,6 @@ const EventsPage = () => {
             />
           </div>
           
-          {/* Filter Controls */}
           <Collapsible open={showFilters} onOpenChange={setShowFilters}>
             <div className="flex items-center justify-between py-3 border-b border-border">
               <div>
@@ -251,55 +251,58 @@ const EventsPage = () => {
           </Collapsible>
         </div>
         
-        {/* Events List */}
+        {/* Events List - improved for mobile/tablet with varied layouts */}
         <div className="space-y-3">
           {filteredEvents.length > 0 ? (
-            filteredEvents.map((event) => {
+            filteredEvents.map((event, index) => {
               const eventStyle = getEventTypeStyle(event.eventType);
+              const IconComponent = eventStyle.icon;
+              
               return (
                 <Link key={event.id} to={`/events/${event.id}`} className="block">
-                  <Card className="transition-all duration-200 hover:shadow-md border-border">
+                  <Card className="transition-all duration-200 hover:shadow-md border-border hover:border-primary/20">
                     <CardContent className="p-4">
-                      <div className="flex items-start space-x-4">
-                        {/* Event Type Indicator */}
-                        <div className="flex-shrink-0 mt-1">
-                          <div className={`w-3 h-3 rounded-full ${eventStyle.dot}`}></div>
+                      {/* Mobile/Tablet optimized layout */}
+                      <div className="flex flex-col space-y-3 md:flex-row md:items-center md:space-y-0 md:space-x-4">
+                        {/* Left side - Event type and icon */}
+                        <div className="flex items-center space-x-3 md:flex-col md:items-center md:space-x-0 md:space-y-2 md:w-20 md:flex-shrink-0">
+                          <div className="w-10 h-10 rounded-full flex items-center justify-center bg-primary/10 text-primary">
+                            <IconComponent className="h-5 w-5" />
+                          </div>
+                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${eventStyle.badge} md:text-center`}>
+                            {event.eventType}
+                          </span>
                         </div>
                         
-                        {/* Event Details */}
-                        <div className="flex-1 min-w-0 space-y-2">
-                          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2">
+                        {/* Main content */}
+                        <div className="flex-1 space-y-2">
+                          <div className="flex flex-col space-y-1 md:flex-row md:items-start md:justify-between md:space-y-0">
                             <div className="space-y-1">
-                              <div className="flex items-center gap-2 flex-wrap">
-                                <span className={`px-2 py-1 rounded text-xs font-medium ${eventStyle.badge}`}>
-                                  {event.eventType}
-                                </span>
-                                {event.eventType === 'match' && event.opponent && (
-                                  <span className="text-sm text-muted-foreground">
-                                    vs {event.opponent}
-                                  </span>
-                                )}
-                              </div>
-                              <h3 className="font-semibold text-foreground truncate">
+                              <h3 className="font-semibold text-foreground text-base leading-tight">
                                 {event.name}
                               </h3>
+                              {event.eventType === 'match' && event.opponent && (
+                                <p className="text-sm text-muted-foreground">
+                                  vs {event.opponent}
+                                </p>
+                              )}
                             </div>
                             
-                            <div className="flex-shrink-0">
-                              <span className="inline-block px-2 py-1 bg-muted text-muted-foreground text-xs rounded">
+                            <div className="flex-shrink-0 self-start">
+                              <span className="inline-block px-2 py-1 bg-muted text-muted-foreground text-xs rounded-md">
                                 {getTeamName(event.teamId)}
                               </span>
                             </div>
                           </div>
                           
-                          <div className="flex flex-col sm:flex-row sm:items-center gap-2 text-sm text-muted-foreground">
-                            <div className="flex items-center gap-1">
-                              <Calendar className="h-4 w-4" />
-                              <span>{formatDateTime(event.date, event.time)}</span>
+                          {/* Event details */}
+                          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 text-sm text-muted-foreground">
+                            <div className="flex items-center gap-2">
+                              <Calendar className="h-4 w-4 flex-shrink-0" />
+                              <span className="truncate">{formatDateTime(event.date, event.time)}</span>
                             </div>
-                            <div className="hidden sm:block text-muted-foreground">•</div>
-                            <div className="flex items-center gap-1">
-                              <MapPin className="h-4 w-4" />
+                            <div className="flex items-center gap-2">
+                              <MapPin className="h-4 w-4 flex-shrink-0" />
                               <span className="truncate">{event.location}</span>
                             </div>
                           </div>

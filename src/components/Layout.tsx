@@ -1,4 +1,3 @@
-
 import { ReactNode, useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
@@ -27,8 +26,11 @@ const Layout = ({ children }: LayoutProps) => {
   const { currentUser, logout, hasRole, isOffline } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const isMobile = useIsMobile();
+  
+  // Show mobile header on mobile and tablet (up to lg breakpoint)
+  const showMobileHeader = true; // We'll control this with CSS classes
 
-  // Close sidebar when clicking outside on mobile
+  // Close sidebar when clicking outside on mobile/tablet
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       const sidebar = document.getElementById('mobile-sidebar');
@@ -42,14 +44,14 @@ const Layout = ({ children }: LayoutProps) => {
       }
     };
 
-    if (sidebarOpen && isMobile) {
+    if (sidebarOpen) {
       document.addEventListener('mousedown', handleClickOutside);
     }
     
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, [sidebarOpen, isMobile]);
+  }, [sidebarOpen]);
 
   const handleLogout = () => {
     logout();
@@ -62,35 +64,33 @@ const Layout = ({ children }: LayoutProps) => {
 
   return (
     <div className="flex min-h-screen bg-background">
-      {/* Mobile Header */}
-      {isMobile && (
-        <div className="fixed top-0 left-0 right-0 z-50 bg-background border-b border-border">
-          <div className="flex items-center justify-between px-4 py-3">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="h-9 w-9"
-              id="sidebar-toggle"
-            >
-              <Menu className="h-5 w-5" />
-            </Button>
-            
-            <div className="flex items-center gap-2">
-              <div className="flex items-center justify-center w-8 h-8 bg-primary rounded-full">
-                <Award className="h-4 w-4 text-primary-foreground" />
-              </div>
-              <span className="text-lg font-semibold">Netball Club</span>
+      {/* Mobile/Tablet Header - hidden on desktop (lg+) */}
+      <div className="fixed top-0 left-0 right-0 z-50 bg-background border-b border-border lg:hidden">
+        <div className="flex items-center justify-between px-4 py-3">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setSidebarOpen(!sidebarOpen)}
+            className="h-9 w-9"
+            id="sidebar-toggle"
+          >
+            <Menu className="h-5 w-5" />
+          </Button>
+          
+          <div className="flex items-center gap-2">
+            <div className="flex items-center justify-center w-8 h-8 bg-primary rounded-full">
+              <Award className="h-4 w-4 text-primary-foreground" />
             </div>
-            
-            <div className="w-9 h-9 flex items-center justify-center">
-              {isOffline && (
-                <WifiOff className="h-4 w-4 text-muted-foreground" />
-              )}
-            </div>
+            <span className="text-lg font-semibold">Netball Club</span>
+          </div>
+          
+          <div className="w-9 h-9 flex items-center justify-center">
+            {isOffline && (
+              <WifiOff className="h-4 w-4 text-muted-foreground" />
+            )}
           </div>
         </div>
-      )}
+      </div>
 
       {/* Sidebar */}
       <div
@@ -101,7 +101,7 @@ const Layout = ({ children }: LayoutProps) => {
         )}
       >
         <div className="flex h-full flex-col">
-          {/* Close button (mobile only) */}
+          {/* Close button (mobile/tablet only) */}
           <div className="lg:hidden absolute top-4 right-4 z-10">
             <Button
               variant="ghost"
@@ -147,8 +147,8 @@ const Layout = ({ children }: LayoutProps) => {
               </div>
               
               {/* Offline indicator */}
-              {isOffline && !isMobile && (
-                <div className="flex items-center mt-3 px-3 py-2 bg-muted rounded-md text-muted-foreground gap-2">
+              {isOffline && (
+                <div className="flex items-center mt-3 px-3 py-2 bg-muted rounded-md text-muted-foreground gap-2 lg:flex hidden">
                   <WifiOff className="h-4 w-4" />
                   <span className="text-xs">Offline Mode</span>
                 </div>
@@ -256,13 +256,13 @@ const Layout = ({ children }: LayoutProps) => {
       <div className="flex-1 lg:pl-[280px] w-full">
         <main className={cn(
           "min-h-screen w-full max-w-[1920px] mx-auto",
-          isMobile ? "pt-[73px] p-4" : "p-6 lg:p-8"
+          "pt-[73px] p-4 lg:pt-6 lg:p-8" // Always add top padding for mobile/tablet header
         )}>
           {children}
         </main>
       </div>
 
-      {/* Overlay for mobile sidebar */}
+      {/* Overlay for mobile/tablet sidebar */}
       {sidebarOpen && (
         <div 
           className="fixed inset-0 z-30 bg-black/50 lg:hidden"

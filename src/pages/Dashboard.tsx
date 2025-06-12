@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
 import Layout from "@/components/Layout";
@@ -7,6 +8,7 @@ import { Calendar, Award, Users, User } from "lucide-react";
 import { Link } from "react-router-dom";
 import { teamApi, childrenApi, eventApi } from "@/services/api";
 import { Team, Event, Child } from "@/types";
+
 const Dashboard = () => {
   const {
     currentUser,
@@ -54,6 +56,7 @@ const Dashboard = () => {
     };
     loadDashboardData();
   }, []);
+
   if (loading) {
     return <Layout>
         <div className="flex items-center justify-center h-64">
@@ -61,6 +64,7 @@ const Dashboard = () => {
         </div>
       </Layout>;
   }
+
   return <Layout>
       <div className="space-y-8">
         {/* Stats section */}
@@ -74,7 +78,6 @@ const Dashboard = () => {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{teamCount}</div>
-              
             </CardContent>
           </Card>
           
@@ -87,7 +90,6 @@ const Dashboard = () => {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{playerCount}</div>
-              
             </CardContent>
           </Card>
           
@@ -100,7 +102,6 @@ const Dashboard = () => {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{upcomingEvents.length}</div>
-              
             </CardContent>
           </Card>
           
@@ -113,49 +114,60 @@ const Dashboard = () => {
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">{pendingApprovals}</div>
-                
               </CardContent>
             </Card>}
         </div>
 
         {/* Content rows */}
         <div className="grid gap-6 md:grid-cols-2">
-          {/* Upcoming events */}
+          {/* Upcoming events - improved spacing and design */}
           <Card className="shadow-sm hover:shadow transition-shadow">
-            <CardHeader>
+            <CardHeader className="pb-4">
               <div className="flex items-center justify-between">
                 <div>
                   <CardTitle className="text-xl font-semibold">Upcoming Events</CardTitle>
-                  
                 </div>
                 <div className="h-10 w-10 rounded-full bg-accent flex items-center justify-center">
                   <Calendar className="h-5 w-5 text-primary" />
                 </div>
               </div>
             </CardHeader>
-            <CardContent>
-              {upcomingEvents.length > 0 ? <div className="space-y-4">
-                  {upcomingEvents.map(event => <div key={event.id} className="flex items-start gap-4 p-4 rounded-lg border bg-card hover:bg-accent/50 transition-colors">
-                      <div className="w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0 bg-accent text-primary">
-                        <Calendar className="h-6 w-6" />
+            <CardContent className="pt-0">
+              {upcomingEvents.length > 0 ? (
+                <div className="space-y-3">
+                  {upcomingEvents.map((event, index) => (
+                    <div 
+                      key={event.id} 
+                      className="flex items-center gap-3 p-3 rounded-lg border bg-card hover:bg-accent/30 transition-colors"
+                    >
+                      <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 bg-primary/10 text-primary">
+                        <Calendar className="h-4 w-4" />
                       </div>
-                      <div className="flex-1 min-w-0">
-                        <h4 className="font-medium text-sm truncate">{event.name}</h4>
-                        <p className="text-xs text-muted-foreground mt-1">
-                          {new Date(`${event.date}T${event.time}`).toLocaleString('en-GB', {
-                      dateStyle: 'medium',
-                      timeStyle: 'short'
-                    })}
-                        </p>
-                        <p className="text-xs text-muted-foreground truncate">{event.location}</p>
+                      <div className="flex-1 min-w-0 space-y-1">
+                        <h4 className="font-medium text-sm truncate leading-tight">{event.name}</h4>
+                        <div className="space-y-0.5">
+                          <p className="text-xs text-muted-foreground">
+                            {new Date(`${event.date}T${event.time}`).toLocaleString('en-GB', {
+                              dateStyle: 'medium',
+                              timeStyle: 'short'
+                            })}
+                          </p>
+                          <p className="text-xs text-muted-foreground truncate">{event.location}</p>
+                        </div>
                       </div>
-                    </div>)}
-                  <Button variant="outline" className="w-full mt-2" asChild>
-                    <Link to="/events">View All Events</Link>
-                  </Button>
-                </div> : <p className="text-center py-8 text-muted-foreground">
-                  No upcoming events scheduled
-                </p>}
+                    </div>
+                  ))}
+                  <div className="pt-2">
+                    <Button variant="outline" className="w-full" asChild>
+                      <Link to="/events">View All Events</Link>
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                <div className="text-center py-8">
+                  <p className="text-muted-foreground text-sm">No upcoming events scheduled</p>
+                </div>
+              )}
             </CardContent>
           </Card>
 
@@ -165,7 +177,6 @@ const Dashboard = () => {
               <div className="flex items-center justify-between">
                 <div>
                   <CardTitle className="text-xl font-semibold">Your Teams</CardTitle>
-                  
                 </div>
                 <div className="h-10 w-10 rounded-full bg-accent flex items-center justify-center">
                   <Users className="h-5 w-5 text-primary" />
@@ -224,7 +235,6 @@ const Dashboard = () => {
             </CardContent>
           </Card>}
 
-        {/* Parent specific section */}
         {hasRole("parent") && <Card className="shadow-sm hover:shadow transition-shadow">
             <CardHeader>
               <CardTitle className="text-xl font-semibold">Parent Actions</CardTitle>
@@ -250,4 +260,5 @@ const Dashboard = () => {
       </div>
     </Layout>;
 };
+
 export default Dashboard;
