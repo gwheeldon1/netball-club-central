@@ -270,7 +270,7 @@ const Layout = ({ children }: LayoutProps) => {
       <div className="flex-1 lg:pl-[280px] w-full">
         <main className={cn(
           "min-h-screen w-full max-w-[1920px] mx-auto",
-          "pt-[73px] p-4 lg:pt-6 lg:p-8" // Always add top padding for mobile/tablet header
+          "pt-20 p-4 lg:pt-6 lg:p-8" // Increased mobile top padding from pt-[73px] to pt-20 (80px)
         )}>
           {children}
         </main>
