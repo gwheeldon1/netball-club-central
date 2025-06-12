@@ -66,10 +66,10 @@ const Dashboard = () => {
   }
 
   return <Layout>
-      <div className="space-y-8">
+      <div className="space-y-8 pt-4 lg:pt-0">
         {/* Stats section */}
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-          <Card className="shadow-sm hover:shadow transition-shadow">
+          <Card className="hover:shadow-md transition-shadow border-border">
             <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
               <CardTitle className="text-sm font-medium">Teams</CardTitle>
               <div className="h-8 w-8 rounded-full bg-accent flex items-center justify-center">
@@ -81,7 +81,7 @@ const Dashboard = () => {
             </CardContent>
           </Card>
           
-          <Card className="shadow-sm hover:shadow transition-shadow">
+          <Card className="hover:shadow-md transition-shadow border-border">
             <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
               <CardTitle className="text-sm font-medium">Players</CardTitle>
               <div className="h-8 w-8 rounded-full bg-accent flex items-center justify-center">
@@ -93,7 +93,7 @@ const Dashboard = () => {
             </CardContent>
           </Card>
           
-          <Card className="shadow-sm hover:shadow transition-shadow">
+          <Card className="hover:shadow-md transition-shadow border-border">
             <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
               <CardTitle className="text-sm font-medium">Events</CardTitle>
               <div className="h-8 w-8 rounded-full bg-accent flex items-center justify-center">
@@ -105,7 +105,7 @@ const Dashboard = () => {
             </CardContent>
           </Card>
           
-          {(hasRole("admin") || hasRole("coach") || hasRole("manager")) && <Card className="shadow-sm hover:shadow transition-shadow">
+          {(hasRole("admin") || hasRole("coach") || hasRole("manager")) && <Card className="hover:shadow-md transition-shadow border-border">
               <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
                 <CardTitle className="text-sm font-medium">Approvals</CardTitle>
                 <div className="h-8 w-8 rounded-full bg-accent flex items-center justify-center">
@@ -121,7 +121,7 @@ const Dashboard = () => {
         {/* Content rows */}
         <div className="grid gap-6 md:grid-cols-2">
           {/* Upcoming events - improved spacing and design */}
-          <Card className="shadow-sm hover:shadow transition-shadow">
+          <Card className="hover:shadow-md transition-shadow border-border">
             <CardHeader className="pb-4">
               <div className="flex items-center justify-between">
                 <div>
@@ -138,7 +138,7 @@ const Dashboard = () => {
                   {upcomingEvents.map((event, index) => (
                     <div 
                       key={event.id} 
-                      className="flex items-center gap-3 p-3 rounded-lg border bg-card hover:bg-accent/30 transition-colors"
+                      className="flex items-center gap-3 p-3 rounded-lg border border-border bg-card hover:bg-accent/30 transition-colors"
                     >
                       <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 bg-primary/10 text-primary">
                         <Calendar className="h-4 w-4" />
@@ -158,7 +158,7 @@ const Dashboard = () => {
                     </div>
                   ))}
                   <div className="pt-2">
-                    <Button variant="outline" className="w-full" asChild>
+                    <Button variant="outline" className="w-full border-border" asChild>
                       <Link to="/events">View All Events</Link>
                     </Button>
                   </div>
@@ -172,7 +172,7 @@ const Dashboard = () => {
           </Card>
 
           {/* Teams section */}
-          <Card className="shadow-sm hover:shadow transition-shadow">
+          <Card className="hover:shadow-md transition-shadow border-border">
             <CardHeader>
               <div className="flex items-center justify-between">
                 <div>
@@ -185,7 +185,7 @@ const Dashboard = () => {
             </CardHeader>
             <CardContent>
               {teams.length > 0 ? <div className="space-y-4">
-                  {teams.slice(0, 3).map(team => <div key={team.id} className="flex items-start gap-4 p-4 rounded-lg border bg-card hover:bg-accent/50 transition-colors">
+                  {teams.slice(0, 3).map(team => <div key={team.id} className="flex items-start gap-4 p-4 rounded-lg border border-border bg-card hover:bg-accent/50 transition-colors">
                       <div className="w-12 h-12 rounded-full overflow-hidden flex-shrink-0 bg-accent flex items-center justify-center">
                         {team.icon || team.profileImage ? <img src={team.icon || team.profileImage} alt={team.name} className="w-full h-full object-cover" /> : <Users className="h-6 w-6 text-primary" />}
                       </div>
@@ -196,7 +196,7 @@ const Dashboard = () => {
                         </p>
                       </div>
                     </div>)}
-                  <Button variant="outline" className="w-full mt-2" asChild>
+                  <Button variant="outline" className="w-full mt-2 border-border" asChild>
                     <Link to="/teams">View All Teams</Link>
                   </Button>
                 </div> : <p className="text-center py-8 text-muted-foreground">
@@ -207,7 +207,7 @@ const Dashboard = () => {
         </div>
 
         {/* Additional section for admins, coaches, managers */}
-        {(hasRole("admin") || hasRole("coach") || hasRole("manager")) && <Card className="shadow-sm hover:shadow transition-shadow">
+        {(hasRole("admin") || hasRole("coach") || hasRole("manager")) && <Card className="hover:shadow-md transition-shadow border-border">
             <CardHeader>
               <CardTitle className="text-xl font-semibold">Admin Actions</CardTitle>
               <CardDescription>
@@ -235,7 +235,7 @@ const Dashboard = () => {
             </CardContent>
           </Card>}
 
-        {hasRole("parent") && <Card className="shadow-sm hover:shadow transition-shadow">
+        {hasRole("parent") && <Card className="hover:shadow-md transition-shadow border-border">
             <CardHeader>
               <CardTitle className="text-xl font-semibold">Parent Actions</CardTitle>
               <CardDescription>
