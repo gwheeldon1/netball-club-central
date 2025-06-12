@@ -1,4 +1,3 @@
-
 import { ReactNode, useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
@@ -27,7 +26,29 @@ interface LayoutProps {
 const Layout = ({ children }: LayoutProps) => {
   const { currentUser, logout, hasRole, isOffline } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [headerHeight, setHeaderHeight] = useState(73); // Default fallback
   const isMobile = useIsMobile();
+
+  // Measure header height dynamically
+  useEffect(() => {
+    const measureHeaderHeight = () => {
+      const header = document.getElementById('mobile-header');
+      if (header) {
+        const height = header.offsetHeight;
+        setHeaderHeight(height);
+      }
+    };
+
+    // Measure on mount
+    measureHeaderHeight();
+
+    // Measure on resize
+    window.addEventListener('resize', measureHeaderHeight);
+    
+    return () => {
+      window.removeEventListener('resize', measureHeaderHeight);
+    };
+  }, []);
   
   // Show mobile header on mobile and tablet (up to lg breakpoint)
   const showMobileHeader = true; // We'll control this with CSS classes
@@ -67,7 +88,10 @@ const Layout = ({ children }: LayoutProps) => {
   return (
     <div className="flex min-h-screen bg-background">
       {/* Mobile/Tablet Header - hidden on desktop (lg+) */}
-      <div className="fixed top-0 left-0 right-0 z-50 bg-background border-b border-border lg:hidden">
+      <div 
+        id="mobile-header"
+        className="fixed top-0 left-0 right-0 z-50 bg-background border-b border-border lg:hidden"
+      >
         <div className="flex items-center justify-between px-4 py-3">
           <Button
             variant="ghost"
@@ -268,10 +292,15 @@ const Layout = ({ children }: LayoutProps) => {
 
       {/* Main content */}
       <div className="flex-1 lg:pl-[280px] w-full">
-        <main className={cn(
-          "min-h-screen w-full max-w-[1920px] mx-auto",
-          "pt-20 p-4 lg:pt-6 lg:p-8" // Increased mobile top padding from pt-[73px] to pt-20 (80px)
-        )}>
+        <main 
+          className={cn(
+            "min-h-screen w-full max-w-[1920px] mx-auto",
+            "p-4 lg:pt-6 lg:p-8"
+          )}
+          style={{
+            paddingTop: `${headerHeight + 16}px`, // Dynamic padding + 16px buffer
+          }}
+        >
           {children}
         </main>
       </div>
