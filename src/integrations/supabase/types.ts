@@ -103,33 +103,67 @@ export type Database = {
       }
       guardians: {
         Row: {
+          approval_status: string | null
+          approved_at: string | null
+          approved_by: string | null
+          code_of_conduct_accepted: boolean | null
           email: string | null
           first_name: string
           id: string
           last_name: string
           phone: string | null
+          photo_consent: boolean | null
           player_id: string | null
+          profile_image: string | null
+          registration_date: string | null
+          rejection_reason: string | null
           relationship: string | null
+          terms_accepted: boolean | null
         }
         Insert: {
+          approval_status?: string | null
+          approved_at?: string | null
+          approved_by?: string | null
+          code_of_conduct_accepted?: boolean | null
           email?: string | null
           first_name: string
           id?: string
           last_name: string
           phone?: string | null
+          photo_consent?: boolean | null
           player_id?: string | null
+          profile_image?: string | null
+          registration_date?: string | null
+          rejection_reason?: string | null
           relationship?: string | null
+          terms_accepted?: boolean | null
         }
         Update: {
+          approval_status?: string | null
+          approved_at?: string | null
+          approved_by?: string | null
+          code_of_conduct_accepted?: boolean | null
           email?: string | null
           first_name?: string
           id?: string
           last_name?: string
           phone?: string | null
+          photo_consent?: boolean | null
           player_id?: string | null
+          profile_image?: string | null
+          registration_date?: string | null
+          rejection_reason?: string | null
           relationship?: string | null
+          terms_accepted?: boolean | null
         }
         Relationships: [
+          {
+            foreignKeyName: "guardians_approved_by_fkey"
+            columns: ["approved_by"]
+            isOneToOne: false
+            referencedRelation: "guardians"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "guardians_player_id_fkey"
             columns: ["player_id"]
@@ -178,6 +212,9 @@ export type Database = {
       players: {
         Row: {
           address: string | null
+          approval_status: string | null
+          approved_at: string | null
+          approved_by: string | null
           city: string | null
           date_of_birth: string | null
           email: string | null
@@ -187,10 +224,16 @@ export type Database = {
           last_name: string
           phone: string | null
           postal_code: string | null
+          profile_image: string | null
+          rejection_reason: string | null
           sign_up_date: string | null
+          team_preference: string | null
         }
         Insert: {
           address?: string | null
+          approval_status?: string | null
+          approved_at?: string | null
+          approved_by?: string | null
           city?: string | null
           date_of_birth?: string | null
           email?: string | null
@@ -200,10 +243,16 @@ export type Database = {
           last_name: string
           phone?: string | null
           postal_code?: string | null
+          profile_image?: string | null
+          rejection_reason?: string | null
           sign_up_date?: string | null
+          team_preference?: string | null
         }
         Update: {
           address?: string | null
+          approval_status?: string | null
+          approved_at?: string | null
+          approved_by?: string | null
           city?: string | null
           date_of_birth?: string | null
           email?: string | null
@@ -213,9 +262,27 @@ export type Database = {
           last_name?: string
           phone?: string | null
           postal_code?: string | null
+          profile_image?: string | null
+          rejection_reason?: string | null
           sign_up_date?: string | null
+          team_preference?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "players_approved_by_fkey"
+            columns: ["approved_by"]
+            isOneToOne: false
+            referencedRelation: "guardians"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "players_team_preference_fkey"
+            columns: ["team_preference"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       teams: {
         Row: {
@@ -295,6 +362,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      calculate_uk_age_group: {
+        Args: { date_of_birth: string }
+        Returns: string
+      }
       get_user_roles: {
         Args: { user_id: string }
         Returns: Database["public"]["Enums"]["user_role"][]
