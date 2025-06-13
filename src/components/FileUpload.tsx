@@ -6,18 +6,23 @@ import { toast } from "sonner";
 import Cropper from 'react-easy-crop';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Slider } from "@/components/ui/slider";
+import { supabase } from "@/integrations/supabase/client";
 
 interface FileUploadProps {
   onUpload: (url: string) => void;
   currentImage?: string;
   className?: string;
   aspectRatio?: number;
+  bucket?: string;
 }
 
-const FileUpload = ({ onUpload, currentImage, className, aspectRatio = 1 }: FileUploadProps) => {
+const FileUpload = ({ onUpload, currentImage, className, aspectRatio = 1, bucket = 'default' }: FileUploadProps) => {
   const [isUploading, setIsUploading] = useState(false);
   const [showCropDialog, setShowCropDialog] = useState(false);
   const [imageToCrop, setImageToCrop] = useState<string | null>(null);
+  
+  // Generate unique ID for this component instance
+  const [inputId] = useState(() => `file-upload-${Math.random().toString(36).substring(2)}`);
   
   // Cropper state
   const [crop, setCrop] = useState({ x: 0, y: 0 });
@@ -55,8 +60,6 @@ const FileUpload = ({ onUpload, currentImage, className, aspectRatio = 1 }: File
     if (!imageToCrop || !croppedAreaPixels) return null;
     
     try {
-      setIsUploading(true);
-      
       const image = new Image();
       image.src = imageToCrop;
       
@@ -90,15 +93,14 @@ const FileUpload = ({ onUpload, currentImage, className, aspectRatio = 1 }: File
       );
       
       // Convert canvas to blob
-      return new Promise<string>((resolve, reject) => {
+      return new Promise<Blob>((resolve, reject) => {
         canvas.toBlob((blob) => {
           if (!blob) {
             reject(new Error("Canvas to Blob conversion failed"));
             return;
           }
           
-          const croppedImageUrl = URL.createObjectURL(blob);
-          resolve(croppedImageUrl);
+          resolve(blob);
         }, 'image/jpeg', 0.95); // JPEG at 95% quality
       });
     } catch (error) {
@@ -109,18 +111,39 @@ const FileUpload = ({ onUpload, currentImage, className, aspectRatio = 1 }: File
   
   const handleCropConfirm = async () => {
     try {
-      const croppedImageUrl = await createCroppedImage();
+      setIsUploading(true);
+      const croppedImageBlob = await createCroppedImage();
       
-      if (croppedImageUrl) {
+      if (croppedImageBlob) {
+        // Generate a unique filename
+        const fileExtension = 'jpg';
+        const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExtension}`;
+        
+        // Upload to Supabase Storage
+        const { data, error } = await supabase.storage
+          .from(bucket)
+          .upload(fileName, croppedImageBlob, {
+            contentType: 'image/jpeg',
+            upsert: false
+          });
+
+        if (error) {
+          console.error('Upload error:', error);
+          toast.error('Failed to upload image');
+          return;
+        }
+
+        // Get the public URL
+        const { data: { publicUrl } } = supabase.storage
+          .from(bucket)
+          .getPublicUrl(data.path);
+
         // Clean up the temporary URL
         if (imageToCrop) {
           URL.revokeObjectURL(imageToCrop);
         }
         
-        // Simulate a delay for the upload
-        await new Promise(resolve => setTimeout(resolve, 500));
-        
-        onUpload(croppedImageUrl);
+        onUpload(publicUrl);
         setShowCropDialog(false);
         toast.success("Image uploaded successfully");
       }
@@ -158,13 +181,13 @@ const FileUpload = ({ onUpload, currentImage, className, aspectRatio = 1 }: File
         <div className="flex flex-col gap-2 items-center">
           <input
             type="file"
-            id="profileImage"
+            id={inputId}
             accept="image/*"
             onChange={handleFileChange}
             className="hidden"
             disabled={isUploading}
           />
-          <label htmlFor="profileImage">
+          <label htmlFor={inputId}>
             <Button
               type="button"
               variant="outline"
@@ -231,7 +254,6 @@ const FileUpload = ({ onUpload, currentImage, className, aspectRatio = 1 }: File
               Cancel
             </Button>
             <Button 
-              className="bg-netball-500 hover:bg-netball-600"
               disabled={isUploading} 
               onClick={handleCropConfirm}
             >
