@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
 import Layout from "@/components/Layout";
-import { teamApi, childrenApi } from "@/services/api";
+import { supabaseTeamApi, supabaseChildrenApi } from "@/services/supabaseApi";
 import { Team } from "@/types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -22,16 +22,18 @@ const TeamsPage = () => {
   useEffect(() => {
     const loadTeams = async () => {
       try {
-        const teamsData = teamApi.getAll();
+        const teamsData = await supabaseTeamApi.getAll();
         
         // Enhance teams with player count
-        const enhancedTeams = teamsData.map(team => {
-          const players = childrenApi.getByTeamId(team.id);
-          return {
-            ...team,
-            players: players
-          };
-        });
+        const enhancedTeams = await Promise.all(
+          teamsData.map(async team => {
+            const players = await supabaseChildrenApi.getByTeamId(team.id);
+            return {
+              ...team,
+              players: players
+            };
+          })
+        );
         
         setTeams(enhancedTeams);
         setFilteredTeams(enhancedTeams);

@@ -9,7 +9,235 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      event_responses: {
+        Row: {
+          attendance_marked_at: string | null
+          attended: boolean | null
+          event_id: string | null
+          id: string
+          notes: string | null
+          player_id: string | null
+          response_date: string | null
+          rsvp_status: string
+        }
+        Insert: {
+          attendance_marked_at?: string | null
+          attended?: boolean | null
+          event_id?: string | null
+          id?: string
+          notes?: string | null
+          player_id?: string | null
+          response_date?: string | null
+          rsvp_status: string
+        }
+        Update: {
+          attendance_marked_at?: string | null
+          attended?: boolean | null
+          event_id?: string | null
+          id?: string
+          notes?: string | null
+          player_id?: string | null
+          response_date?: string | null
+          rsvp_status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_responses_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "event_responses_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      events: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          event_date: string
+          event_type: string
+          id: string
+          is_home: boolean | null
+          location: string | null
+          team_id: string | null
+          title: string
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          event_date: string
+          event_type: string
+          id?: string
+          is_home?: boolean | null
+          location?: string | null
+          team_id?: string | null
+          title: string
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          event_date?: string
+          event_type?: string
+          id?: string
+          is_home?: boolean | null
+          location?: string | null
+          team_id?: string | null
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "events_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      guardians: {
+        Row: {
+          email: string | null
+          first_name: string
+          id: string
+          last_name: string
+          phone: string | null
+          player_id: string | null
+          relationship: string | null
+        }
+        Insert: {
+          email?: string | null
+          first_name: string
+          id?: string
+          last_name: string
+          phone?: string | null
+          player_id?: string | null
+          relationship?: string | null
+        }
+        Update: {
+          email?: string | null
+          first_name?: string
+          id?: string
+          last_name?: string
+          phone?: string | null
+          player_id?: string | null
+          relationship?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "guardians_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      player_teams: {
+        Row: {
+          id: string
+          join_date: string | null
+          player_id: string | null
+          team_id: string | null
+        }
+        Insert: {
+          id?: string
+          join_date?: string | null
+          player_id?: string | null
+          team_id?: string | null
+        }
+        Update: {
+          id?: string
+          join_date?: string | null
+          player_id?: string | null
+          team_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "player_teams_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "player_teams_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      players: {
+        Row: {
+          address: string | null
+          city: string | null
+          date_of_birth: string | null
+          email: string | null
+          first_name: string
+          gender: string | null
+          id: string
+          last_name: string
+          phone: string | null
+          postal_code: string | null
+          sign_up_date: string | null
+        }
+        Insert: {
+          address?: string | null
+          city?: string | null
+          date_of_birth?: string | null
+          email?: string | null
+          first_name: string
+          gender?: string | null
+          id?: string
+          last_name: string
+          phone?: string | null
+          postal_code?: string | null
+          sign_up_date?: string | null
+        }
+        Update: {
+          address?: string | null
+          city?: string | null
+          date_of_birth?: string | null
+          email?: string | null
+          first_name?: string
+          gender?: string | null
+          id?: string
+          last_name?: string
+          phone?: string | null
+          postal_code?: string | null
+          sign_up_date?: string | null
+        }
+        Relationships: []
+      }
+      teams: {
+        Row: {
+          age_group: string
+          id: string
+          name: string
+          season_year: number | null
+        }
+        Insert: {
+          age_group: string
+          id?: string
+          name: string
+          season_year?: number | null
+        }
+        Update: {
+          age_group?: string
+          id?: string
+          name?: string
+          season_year?: number | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
