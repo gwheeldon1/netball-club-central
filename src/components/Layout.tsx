@@ -116,7 +116,7 @@ const Layout = ({
 
           {/* User info */}
           {currentUser && <div className="border-b border-border p-6">
-              <div className="flex items-center gap-3">
+              <Link to="/profile" className="flex items-center gap-3 hover:bg-muted/50 rounded-lg p-2 transition-colors" onClick={closeSidebar}>
                 <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center overflow-hidden">
                   {currentUser.profileImage ? <img src={currentUser.profileImage} alt={currentUser.name} className="w-full h-full object-cover" /> : <User className="h-5 w-5 text-muted-foreground" />}
                 </div>
@@ -126,7 +126,7 @@ const Layout = ({
                     {currentUser.roles.map(role => role.charAt(0).toUpperCase() + role.slice(1)).join(", ")}
                   </span>
                 </div>
-              </div>
+              </Link>
               
               {/* Offline indicator */}
               {isOffline && <div className="flex items-center mt-3 px-3 py-2 bg-muted rounded-md text-muted-foreground gap-2 lg:flex hidden">

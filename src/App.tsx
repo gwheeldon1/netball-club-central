@@ -16,6 +16,7 @@ import NewChildPage from '@/pages/NewChildPage';
 import EventsPage from '@/pages/EventsPage';
 import EventDetailPage from '@/pages/EventDetailPage';
 import ApprovalsPage from '@/pages/ApprovalsPage';
+import UserProfilePage from '@/pages/UserProfilePage';
 import NotFound from '@/pages/NotFound';
 import UnauthorizedPage from '@/pages/UnauthorizedPage';
 import './App.css';
@@ -88,6 +89,12 @@ function App() {
             <Route path="/approvals" element={
               <ProtectedRoute allowedRoles={['admin', 'coach', 'manager']}>
                 <ApprovalsPage />
+              </ProtectedRoute>
+            } />
+            
+            <Route path="/profile" element={
+              <ProtectedRoute>
+                <UserProfilePage />
               </ProtectedRoute>
             } />
             
