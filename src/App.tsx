@@ -13,6 +13,7 @@ import EditTeamPage from '@/pages/EditTeamPage';
 import ChildrenPage from '@/pages/ChildrenPage';
 import ChildDetailPage from '@/pages/ChildDetailPage';
 import NewChildPage from '@/pages/NewChildPage';
+import NewTeamPage from '@/pages/NewTeamPage';
 import EventsPage from '@/pages/EventsPage';
 import EventDetailPage from '@/pages/EventDetailPage';
 import ApprovalsPage from '@/pages/ApprovalsPage';
@@ -48,6 +49,12 @@ function App() {
             <Route path="/teams/:id" element={
               <ProtectedRoute>
                 <TeamDetailPage />
+              </ProtectedRoute>
+            } />
+            
+            <Route path="/teams/new" element={
+              <ProtectedRoute allowedRoles={['admin']}>
+                <NewTeamPage />
               </ProtectedRoute>
             } />
             

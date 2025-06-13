@@ -46,11 +46,11 @@ const mapTeamToTeam = (team: any): Team => ({
   id: team.id,
   name: team.name,
   ageGroup: team.age_group,
-  category: 'Junior' as const, // Default category
-  profileImage: '', // Not in Supabase schema
-  bannerImage: '', // Not in Supabase schema
-  icon: '', // Not in Supabase schema
-  description: '', // Not in Supabase schema
+  category: team.category || 'Junior',
+  profileImage: team.profile_image,
+  bannerImage: team.banner_image,
+  icon: team.icon_image,
+  description: team.description,
 });
 
 // Helper function to map Supabase guardians to User type
@@ -307,6 +307,11 @@ export const supabaseTeamApi = {
       .insert({
         name: team.name,
         age_group: team.ageGroup,
+        category: team.category,
+        description: team.description,
+        profile_image: team.profileImage,
+        banner_image: team.bannerImage,
+        icon_image: team.icon,
         season_year: new Date().getFullYear(),
       })
       .select()
