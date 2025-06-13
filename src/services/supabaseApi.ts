@@ -1,5 +1,5 @@
 import { supabase } from '@/integrations/supabase/client';
-import { User, Child, Team, Event, Attendance } from '@/types';
+import { User, Child, Team, Event, Attendance, UserRole } from '@/types';
 
 /**
  * Supabase API service that replaces the mock localStorage API
@@ -38,7 +38,7 @@ const mapGuardianToUser = (guardian: any): User => ({
   email: guardian.email || '',
   phone: guardian.phone?.toString() || '',
   profileImage: '',
-  roles: ['parent'],
+  roles: guardian.user_roles?.filter((ur: any) => ur.is_active).map((ur: any) => ur.role) || ['parent'],
 });
 
 /**
@@ -255,7 +255,14 @@ export const supabaseUserApi = {
   getAll: async (): Promise<User[]> => {
     const { data: guardians, error } = await supabase
       .from('guardians')
-      .select('*');
+      .select(`
+        *,
+        user_roles (
+          role,
+          team_id,
+          is_active
+        )
+      `);
     
     if (error) throw error;
     
@@ -265,7 +272,14 @@ export const supabaseUserApi = {
   getById: async (id: string): Promise<User | undefined> => {
     const { data: guardian, error } = await supabase
       .from('guardians')
-      .select('*')
+      .select(`
+        *,
+        user_roles (
+          role,
+          team_id,
+          is_active
+        )
+      `)
       .eq('id', id)
       .single();
     
@@ -277,12 +291,94 @@ export const supabaseUserApi = {
   getByEmail: async (email: string): Promise<User | undefined> => {
     const { data: guardian, error } = await supabase
       .from('guardians')
-      .select('*')
+      .select(`
+        *,
+        user_roles (
+          role,
+          team_id,
+          is_active
+        )
+      `)
       .eq('email', email)
       .single();
     
     if (error || !guardian) return undefined;
     
     return mapGuardianToUser(guardian);
+  },
+
+  getCurrentUser: async (): Promise<User | undefined> => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return undefined;
+    
+    return supabaseUserApi.getById(user.id);
+  },
+};
+
+/**
+ * Role management API functions
+ */
+export const supabaseRoleApi = {
+  getUserRoles: async (userId: string): Promise<{ role: string; teamId?: string; isActive: boolean }[]> => {
+    const { data, error } = await supabase
+      .from('user_roles')
+      .select('role, team_id, is_active')
+      .eq('guardian_id', userId);
+    
+    if (error) throw error;
+    
+    return data?.map(role => ({
+      role: role.role,
+      teamId: role.team_id,
+      isActive: role.is_active
+    })) || [];
+  },
+
+  assignRole: async (userId: string, role: UserRole, teamId?: string): Promise<void> => {
+    const { error } = await supabase
+      .from('user_roles')
+      .insert({
+        guardian_id: userId,
+        role: role as any,
+        team_id: teamId,
+        assigned_by: (await supabase.auth.getUser()).data.user?.id
+      });
+    
+    if (error) throw error;
+  },
+
+  removeRole: async (userId: string, role: UserRole, teamId?: string): Promise<void> => {
+    let query = supabase
+      .from('user_roles')
+      .update({ is_active: false })
+      .eq('guardian_id', userId)
+      .eq('role', role as any);
+    
+    if (teamId) {
+      query = query.eq('team_id', teamId);
+    }
+    
+    const { error } = await query;
+    if (error) throw error;
+  },
+
+  hasRole: async (userId: string, role: UserRole): Promise<boolean> => {
+    const { data, error } = await supabase
+      .rpc('has_role', { user_id: userId, check_role: role as any });
+    
+    if (error) throw error;
+    return data || false;
+  },
+
+  hasTeamRole: async (userId: string, role: UserRole, teamId: string): Promise<boolean> => {
+    const { data, error } = await supabase
+      .rpc('has_team_role', { 
+        user_id: userId, 
+        check_role: role as any, 
+        check_team_id: teamId 
+      });
+    
+    if (error) throw error;
+    return data || false;
   },
 };
