@@ -258,22 +258,23 @@ const RegistrationPage = () => {
     <div className="min-h-screen bg-background">
       {/* Hero Section */}
       <div className="bg-gradient-to-br from-primary/10 via-background to-primary/5 border-b">
-        <div className="container mx-auto px-4 py-12 max-w-4xl">
-          <div className="text-center space-y-6">
-            <div className="inline-flex items-center justify-center w-16 h-16 bg-primary rounded-full shadow-lg">
-              <Star className="h-8 w-8 text-primary-foreground" />
+        <div className="container mx-auto px-6 py-16">
+          <div className="max-w-4xl mx-auto text-center space-y-8">
+            <div className="inline-flex items-center justify-center w-20 h-20 bg-primary rounded-full shadow-lg">
+              <Star className="h-10 w-10 text-primary-foreground" />
             </div>
-            <div>
-              <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
+            
+            <div className="space-y-4">
+              <h1 className="text-4xl md:text-5xl font-bold text-foreground">
                 Join Our Netball Club
               </h1>
-              <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+              <p className="text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
                 Get your children involved in the sport they'll love. Professional coaching, friendly environment, and a community that cares.
               </p>
             </div>
             
             {/* Trust indicators */}
-            <div className="flex items-center justify-center gap-8 text-sm text-muted-foreground">
+            <div className="flex flex-wrap items-center justify-center gap-6 md:gap-8 text-sm text-muted-foreground pt-4">
               <div className="flex items-center gap-2">
                 <Users className="h-4 w-4 text-primary" />
                 <span>200+ Active Players</span>
@@ -292,101 +293,102 @@ const RegistrationPage = () => {
       </div>
 
       {/* Registration Form */}
-      <div className="container mx-auto px-4 py-12 max-w-2xl">
-        <Card className="shadow-2xl border-0 bg-card">
-          <CardHeader className="text-center pb-8">
-            <CardTitle className="text-2xl font-semibold">
-              Create Your Account
-            </CardTitle>
-            <p className="text-muted-foreground">
-              Quick registration - takes less than 2 minutes
-            </p>
-          </CardHeader>
-          
-          <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-8">
-              {/* Parent Details */}
+      <div className="container mx-auto px-6 py-16">
+        <div className="max-w-2xl mx-auto">
+          <Card className="shadow-2xl border-0 bg-card">
+            <CardHeader className="text-center py-8">
+              <CardTitle className="text-3xl font-bold text-foreground">
+                Create Your Account
+              </CardTitle>
+              <p className="text-muted-foreground text-lg mt-2">
+                Quick registration - takes less than 2 minutes
+              </p>
+            </CardHeader>
+            
+            <CardContent className="px-8 pb-8">
+            <form onSubmit={handleSubmit} className="space-y-10">
+              {/* Parent Details Section */}
               <div className="space-y-6">
-                <div>
-                  <h3 className="text-lg font-medium mb-4 flex items-center gap-2">
-                    <User className="h-5 w-5 text-primary" />
-                    Your Details
-                  </h3>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <h3 className="text-lg font-semibold text-foreground flex items-center gap-3 pb-2 border-b border-muted">
+                  <User className="h-5 w-5 text-primary" />
+                  Your Information
+                </h3>
+                
+                <div className="space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-2">
-                      <Label htmlFor="firstName">First Name *</Label>
+                      <Label htmlFor="firstName" className="text-sm font-medium text-foreground">First Name *</Label>
                       <Input
                         id="firstName"
                         value={formData.firstName}
                         onChange={(e) => handleInputChange('firstName', e.target.value)}
                         required
-                        className="h-12"
+                        className="h-12 bg-background border-input"
                         placeholder="Enter your first name"
                       />
                     </div>
                     
                     <div className="space-y-2">
-                      <Label htmlFor="lastName">Last Name *</Label>
+                      <Label htmlFor="lastName" className="text-sm font-medium text-foreground">Last Name *</Label>
                       <Input
                         id="lastName"
                         value={formData.lastName}
                         onChange={(e) => handleInputChange('lastName', e.target.value)}
                         required
-                        className="h-12"
+                        className="h-12 bg-background border-input"
                         placeholder="Enter your last name"
                       />
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-2">
-                      <Label htmlFor="email">Email Address *</Label>
+                      <Label htmlFor="email" className="text-sm font-medium text-foreground">Email Address *</Label>
                       <Input
                         id="email"
                         type="email"
                         value={formData.email}
                         onChange={(e) => handleInputChange('email', e.target.value)}
                         required
-                        className="h-12"
+                        className="h-12 bg-background border-input"
                         placeholder="your.email@example.com"
                       />
                     </div>
                     
                     <div className="space-y-2">
-                      <Label htmlFor="phone">Phone Number</Label>
+                      <Label htmlFor="phone" className="text-sm font-medium text-foreground">Phone Number</Label>
                       <Input
                         id="phone"
                         type="tel"
                         value={formData.phone}
                         onChange={(e) => handleInputChange('phone', e.target.value)}
-                        className="h-12"
+                        className="h-12 bg-background border-input"
                         placeholder="Your phone number"
                       />
                     </div>
                   </div>
 
-                  <div className="space-y-2 mt-4">
-                    <Label htmlFor="password">Create Password *</Label>
+                  <div className="space-y-2">
+                    <Label htmlFor="password" className="text-sm font-medium text-foreground">Create Password *</Label>
                     <Input
                       id="password"
                       type="password"
                       value={formData.password}
                       onChange={(e) => handleInputChange('password', e.target.value)}
                       required
-                      className="h-12"
+                      className="h-12 bg-background border-input"
                       placeholder="At least 6 characters"
                     />
                   </div>
                 </div>
               </div>
 
-              {/* Children Details */}
+              {/* Children Details Section */}
               <div className="space-y-6">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-lg font-medium flex items-center gap-2">
+                <div className="flex items-center justify-between pb-2 border-b border-muted">
+                  <h3 className="text-lg font-semibold text-foreground flex items-center gap-3">
                     <Users className="h-5 w-5 text-primary" />
-                    Your Children
+                    Children Information
                   </h3>
                   {formData.children.length < 3 && (
                     <Button
@@ -402,62 +404,66 @@ const RegistrationPage = () => {
                   )}
                 </div>
 
-                {formData.children.map((child, index) => (
-                  <Card key={child.id} className="border border-muted bg-muted/20">
-                    <CardContent className="p-6">
-                      <div className="flex items-center justify-between mb-4">
-                        <span className="font-medium">Child {index + 1}</span>
-                        {formData.children.length > 1 && (
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => removeChild(child.id)}
-                            className="text-muted-foreground hover:text-destructive"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        )}
-                      </div>
-                      
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div className="space-y-2 md:col-span-2">
-                          <Label>Full Name *</Label>
-                          <Input
-                            value={child.name}
-                            onChange={(e) => handleChildChange(child.id, 'name', e.target.value)}
-                            required
-                            className="h-12"
-                            placeholder="Child's full name"
-                          />
+                <div className="space-y-4">
+                  {formData.children.map((child, index) => (
+                    <Card key={child.id} className="border border-muted bg-muted/30">
+                      <CardContent className="p-6">
+                        <div className="flex items-center justify-between mb-6">
+                          <span className="font-semibold text-foreground">Child {index + 1}</span>
+                          {formData.children.length > 1 && (
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => removeChild(child.id)}
+                              className="text-muted-foreground hover:text-destructive"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          )}
                         </div>
                         
-                        <div className="space-y-2">
-                          <Label>Date of Birth *</Label>
-                          <Input
-                            type="date"
-                            value={child.dateOfBirth}
-                            onChange={(e) => handleChildChange(child.id, 'dateOfBirth', e.target.value)}
-                            required
-                            className="h-12"
-                          />
-                        </div>
-                      </div>
-
-                      {child.ageGroup && (
-                        <div className="mt-4">
-                          <div className="inline-flex items-center px-3 py-1 rounded-full bg-primary/10 text-primary font-medium text-sm">
-                            Age Group: {child.ageGroup}
+                        <div className="space-y-4">
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div className="space-y-2">
+                              <Label className="text-sm font-medium text-foreground">Full Name *</Label>
+                              <Input
+                                value={child.name}
+                                onChange={(e) => handleChildChange(child.id, 'name', e.target.value)}
+                                required
+                                className="h-12 bg-background border-input"
+                                placeholder="Child's full name"
+                              />
+                            </div>
+                            
+                            <div className="space-y-2">
+                              <Label className="text-sm font-medium text-foreground">Date of Birth *</Label>
+                              <Input
+                                type="date"
+                                value={child.dateOfBirth}
+                                onChange={(e) => handleChildChange(child.id, 'dateOfBirth', e.target.value)}
+                                required
+                                className="h-12 bg-background border-input"
+                              />
+                            </div>
                           </div>
+
+                          {child.ageGroup && (
+                            <div>
+                              <div className="inline-flex items-center px-4 py-2 rounded-lg bg-primary/10 text-primary font-semibold text-sm border border-primary/20">
+                                Age Group: {child.ageGroup}
+                              </div>
+                            </div>
+                          )}
                         </div>
-                      )}
-                    </CardContent>
-                  </Card>
-                ))}
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
               </div>
 
-              {/* Terms Agreement */}
-              <div className="space-y-4">
+              {/* Terms Agreement Section */}
+              <div className="space-y-6">
                 <div className="flex items-start space-x-3">
                   <Checkbox
                     id="terms"
@@ -496,7 +502,8 @@ const RegistrationPage = () => {
               </div>
             </form>
           </CardContent>
-        </Card>
+          </Card>
+        </div>
       </div>
     </div>
   );
