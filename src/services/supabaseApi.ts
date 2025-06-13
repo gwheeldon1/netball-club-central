@@ -2,8 +2,30 @@ import { supabase } from '@/integrations/supabase/client';
 import { User, Child, Team, Event, Attendance, UserRole } from '@/types';
 
 /**
- * Supabase API service that replaces the mock localStorage API
+ * Supabase API service with role-based permissions enforcement
  */
+
+// Helper function to get current user's role permissions
+const getCurrentUserPermissions = async () => {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { isAdmin: false, userTeams: [], userId: null };
+
+  try {
+    const { data: roles } = await supabase
+      .from('user_roles')
+      .select('role, team_id, is_active')
+      .eq('guardian_id', user.id)
+      .eq('is_active', true);
+
+    const isAdmin = roles?.some(r => r.role === 'admin') || false;
+    const userTeams = roles?.filter(r => r.team_id).map(r => r.team_id) || [];
+    
+    return { isAdmin, userTeams, userId: user.id, roles: roles || [] };
+  } catch (error) {
+    console.error('Error getting user permissions:', error);
+    return { isAdmin: false, userTeams: [], userId: user.id, roles: [] };
+  }
+};
 
 // Helper function to map Supabase players to Child type
 const mapPlayerToChild = (player: any, teamId?: string): Child => ({
@@ -42,11 +64,13 @@ const mapGuardianToUser = (guardian: any): User => ({
 });
 
 /**
- * Children API functions using Supabase
+ * Children API functions using Supabase with role-based permissions
  */
 export const supabaseChildrenApi = {
   getAll: async (): Promise<Child[]> => {
-    const { data: players, error } = await supabase
+    const permissions = await getCurrentUserPermissions();
+    
+    let query = supabase
       .from('players')
       .select(`
         *,
@@ -59,7 +83,19 @@ export const supabaseChildrenApi = {
           )
         )
       `);
-    
+
+    // Apply role-based filtering
+    if (!permissions.isAdmin) {
+      // Non-admins can only see approved players
+      query = query.eq('approval_status', 'approved');
+      
+      // Coaches/managers only see players from their teams
+      if (permissions.userTeams.length > 0) {
+        query = query.in('player_teams.team_id', permissions.userTeams);
+      }
+    }
+
+    const { data: players, error } = await query;
     if (error) throw error;
     
     return players?.map(player => {
@@ -98,6 +134,13 @@ export const supabaseChildrenApi = {
   },
 
   getByParentId: async (parentId: string): Promise<Child[]> => {
+    const permissions = await getCurrentUserPermissions();
+    
+    // Parents can only see their own children, others need proper permissions
+    if (!permissions.isAdmin && permissions.userId !== parentId) {
+      throw new Error('Unauthorized: Cannot access other users\' children');
+    }
+
     const { data: guardians, error } = await supabase
       .from('guardians')
       .select(`
@@ -130,6 +173,13 @@ export const supabaseChildrenApi = {
   },
 
   getByTeamId: async (teamId: string): Promise<Child[]> => {
+    const permissions = await getCurrentUserPermissions();
+    
+    // Check if user has permission to view this team
+    if (!permissions.isAdmin && !permissions.userTeams.includes(teamId)) {
+      throw new Error('Unauthorized: Cannot access this team\'s data');
+    }
+
     const { data: playerTeams, error } = await supabase
       .from('player_teams')
       .select(`
@@ -206,20 +256,33 @@ export const supabaseChildrenApi = {
 };
 
 /**
- * Team API functions using Supabase
+ * Team API functions using Supabase with role-based permissions
  */
 export const supabaseTeamApi = {
   getAll: async (): Promise<Team[]> => {
-    const { data: teams, error } = await supabase
-      .from('teams')
-      .select('*');
+    const permissions = await getCurrentUserPermissions();
     
+    let query = supabase.from('teams').select('*');
+    
+    // Non-admins only see teams they're associated with
+    if (!permissions.isAdmin && permissions.userTeams.length > 0) {
+      query = query.in('id', permissions.userTeams);
+    }
+
+    const { data: teams, error } = await query;
     if (error) throw error;
     
     return teams?.map(mapTeamToTeam) || [];
   },
 
   getById: async (id: string): Promise<Team | undefined> => {
+    const permissions = await getCurrentUserPermissions();
+    
+    // Check if user has permission to view this team
+    if (!permissions.isAdmin && !permissions.userTeams.includes(id)) {
+      throw new Error('Unauthorized: Cannot access this team');
+    }
+
     const { data: team, error } = await supabase
       .from('teams')
       .select('*')
@@ -232,6 +295,13 @@ export const supabaseTeamApi = {
   },
 
   create: async (team: Omit<Team, 'id'>): Promise<Team> => {
+    const permissions = await getCurrentUserPermissions();
+    
+    // Only admins can create teams
+    if (!permissions.isAdmin) {
+      throw new Error('Unauthorized: Only admins can create teams');
+    }
+
     const { data: newTeam, error } = await supabase
       .from('teams')
       .insert({
@@ -249,10 +319,17 @@ export const supabaseTeamApi = {
 };
 
 /**
- * User API functions using Supabase (Guardians)
+ * User API functions using Supabase (Guardians) with role-based permissions
  */
 export const supabaseUserApi = {
   getAll: async (): Promise<User[]> => {
+    const permissions = await getCurrentUserPermissions();
+    
+    // Only admins can view all users
+    if (!permissions.isAdmin) {
+      throw new Error('Unauthorized: Only admins can view all users');
+    }
+
     const { data: guardians, error } = await supabase
       .from('guardians')
       .select(`

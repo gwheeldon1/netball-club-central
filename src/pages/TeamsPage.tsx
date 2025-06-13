@@ -1,63 +1,37 @@
 
 import { useState, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
+import { usePermissions } from "@/hooks/usePermissions";
 import Layout from "@/components/Layout";
-import { offlineTeamApi, offlineChildrenApi } from "@/services/offlineApi";
-import { Team } from "@/types";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Users } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Plus, Users } from "lucide-react";
 import { Link } from "react-router-dom";
+import { toast } from "sonner";
+import { Team } from "@/types";
+import { supabaseTeamApi } from "@/services/supabaseApi";
 
 const TeamsPage = () => {
-  const { hasRole } = useAuth();
+  const { currentUser } = useAuth();
+  const permissions = usePermissions();
   const [teams, setTeams] = useState<Team[]>([]);
-  const [filteredTeams, setFilteredTeams] = useState<Team[]>([]);
-  const [activeCategory, setActiveCategory] = useState<string>("All");
-  const [loading, setLoading] = useState(true);
-  
-  const filterCategories = ["All", "Junior", "Senior", "Mixed"];
-  
-  // Load teams data
+  const [loading, setLoading] = useState<boolean>(true);
+
   useEffect(() => {
     const loadTeams = async () => {
       try {
-        const teamsData = await offlineTeamApi.getAll();
-        
-        // Enhance teams with player count
-        const enhancedTeams = await Promise.all(
-          teamsData.map(async team => {
-            const players = await offlineChildrenApi.getByTeamId(team.id);
-            return {
-              ...team,
-              players: players
-            };
-          })
-        );
-        
-        setTeams(enhancedTeams);
-        setFilteredTeams(enhancedTeams);
+        const teamsData = await supabaseTeamApi.getAll();
+        setTeams(teamsData);
       } catch (error) {
-        console.error("Error loading teams:", error);
+        console.error('Error loading teams:', error);
+        toast.error('Failed to load teams');
       } finally {
         setLoading(false);
       }
     };
-    
+
     loadTeams();
   }, []);
-  
-  // Filter teams by category
-  const filterTeamsByCategory = (category: string) => {
-    setActiveCategory(category);
-    
-    if (category === "All") {
-      setFilteredTeams(teams);
-    } else {
-      const filtered = teams.filter((team) => team.category === category);
-      setFilteredTeams(filtered);
-    }
-  };
 
   if (loading) {
     return (
@@ -76,77 +50,43 @@ const TeamsPage = () => {
           <div>
             <h1 className="text-3xl font-bold tracking-tight">Teams</h1>
             <p className="text-muted-foreground mt-1">
-              View and manage all teams in your netball club
+              {permissions.isAdmin 
+                ? "Manage all teams and their members"
+                : permissions.userTeams.length > 0
+                ? "Teams you coach or manage"
+                : "Browse available teams"}
             </p>
           </div>
           
-          {hasRole("admin") && (
+          {permissions.isAdmin && (
             <Button className="bg-primary hover:bg-primary/90" asChild>
               <Link to="/teams/new">
-                <Users className="mr-2 h-4 w-4" />
-                Create New Team
+                <Plus className="mr-2 h-4 w-4" />
+                Create Team
               </Link>
             </Button>
           )}
         </div>
         
-        {/* Category filter */}
-        <div className="flex flex-wrap gap-2">
-          {filterCategories.map((category) => (
-            <Button
-              key={category}
-              variant={activeCategory === category ? "default" : "outline"}
-              onClick={() => filterTeamsByCategory(category)}
-              className={activeCategory === category ? "bg-primary hover:bg-primary/90" : ""}
-            >
-              {category}
-            </Button>
-          ))}
-        </div>
-        
         {/* Teams grid */}
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {filteredTeams.length > 0 ? (
-            filteredTeams.map((team) => (
+          {teams.length > 0 ? (
+            teams.map((team) => (
               <Link key={team.id} to={`/teams/${team.id}`} className="hover:no-underline">
                 <Card className="h-full transition-all hover:shadow-md overflow-hidden">
-                  {team.bannerImage && (
-                    <div className="h-40 w-full overflow-hidden">
-                      <img 
-                        src={team.bannerImage} 
-                        alt={team.name} 
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                  )}
                   <CardHeader className="flex flex-row items-center gap-3">
                     <div className="w-12 h-12 rounded-full overflow-hidden flex-shrink-0 bg-accent flex items-center justify-center">
-                      {team.icon || team.profileImage ? (
-                        <img 
-                          src={team.icon || team.profileImage || "/placeholder.svg"} 
-                          alt="" 
-                          className="w-full h-full object-cover"
-                        />
-                      ) : (
-                        <Users className="h-6 w-6 text-primary" />
-                      )}
+                      <Users className="h-6 w-6 text-primary" />
                     </div>
                     <div>
                       <CardTitle className="text-xl">{team.name}</CardTitle>
-                      <p className="text-sm text-muted-foreground">{team.ageGroup} • {team.category}</p>
+                      <p className="text-sm text-muted-foreground">{team.ageGroup}</p>
                     </div>
                   </CardHeader>
                   <CardContent>
-                    {team.description && (
-                      <p className="text-sm line-clamp-2 text-gray-600">
-                        {team.description}
-                      </p>
-                    )}
                     <div className="mt-3 flex items-center gap-1">
                       <Users className="h-4 w-4 text-primary" />
-                      <span className="text-sm text-muted-foreground">
-                        {team.players?.length || 0} players
-                      </span>
+                      <span className="text-sm text-muted-foreground">Team Details</span>
                     </div>
                   </CardContent>
                 </Card>
@@ -154,7 +94,7 @@ const TeamsPage = () => {
             ))
           ) : (
             <div className="col-span-full text-center py-12">
-              <p className="text-muted-foreground">No teams found for this category.</p>
+              <p className="text-muted-foreground">No teams found.</p>
             </div>
           )}
         </div>

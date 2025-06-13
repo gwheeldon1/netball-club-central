@@ -17,6 +17,7 @@ import EventsPage from '@/pages/EventsPage';
 import EventDetailPage from '@/pages/EventDetailPage';
 import ApprovalsPage from '@/pages/ApprovalsPage';
 import UserProfilePage from '@/pages/UserProfilePage';
+import SettingsPage from '@/pages/SettingsPage';
 import NotFound from '@/pages/NotFound';
 import UnauthorizedPage from '@/pages/UnauthorizedPage';
 import './App.css';
@@ -95,6 +96,12 @@ function App() {
             <Route path="/profile" element={
               <ProtectedRoute>
                 <UserProfilePage />
+              </ProtectedRoute>
+            } />
+            
+            <Route path="/settings" element={
+              <ProtectedRoute allowedRoles={['admin']}>
+                <SettingsPage />
               </ProtectedRoute>
             } />
             
