@@ -1,0 +1,58 @@
+{
+  "name": "Netball Club Central",
+  "short_name": "Netball Club",
+  "description": "A comprehensive netball club management application",
+  "theme_color": "#1EBEA5",
+  "background_color": "#FFFFFF",
+  "display": "standalone",
+  "orientation": "portrait",
+  "scope": "/",
+  "start_url": "/",
+  "icons": [
+    {
+      "src": "favicon.ico",
+      "sizes": "48x48",
+      "type": "image/x-icon",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["sports", "lifestyle", "productivity"],
+  "shortcuts": [
+    {
+      "name": "Teams",
+      "short_name": "Teams",
+      "description": "View and manage teams",
+      "url": "/teams",
+      "icons": [
+        {
+          "src": "favicon.ico",
+          "sizes": "48x48"
+        }
+      ]
+    },
+    {
+      "name": "Events",
+      "short_name": "Events",
+      "description": "View upcoming events",
+      "url": "/events",
+      "icons": [
+        {
+          "src": "favicon.ico",
+          "sizes": "48x48"
+        }
+      ]
+    }
+  ]
+}
