@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
@@ -9,19 +8,18 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter }
 import { Award, LockIcon, MailIcon } from "lucide-react";
 import { toast } from "sonner";
 import { useIsMobile } from "@/hooks/use-mobile";
-
 const LoginPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const { login } = useAuth();
+  const {
+    login
+  } = useAuth();
   const navigate = useNavigate();
   const isMobile = useIsMobile();
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-
     try {
       const success = await login(email, password);
       if (success) {
@@ -37,9 +35,7 @@ const LoginPage = () => {
       setIsLoading(false);
     }
   };
-
-  return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-background to-background/95 px-4 py-12">
+  return <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-background to-background/95 px-4 py-12">
       <div className="w-full max-w-md space-y-8">
         <div className="text-center">
           <div className="flex justify-center mb-6">
@@ -52,7 +48,7 @@ const LoginPage = () => {
               </div>
             </div>
           </div>
-          <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-gray-900 dark:text-gray-100">Netball Club</h1>
+          <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-gray-900 dark:text-gray-100">Club Management</h1>
           <p className="text-gray-600 dark:text-gray-400 mt-1 text-lg">Management System</p>
         </div>
 
@@ -71,24 +67,13 @@ const LoginPage = () => {
                   <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
                     <MailIcon className="h-5 w-5 text-gray-400" />
                   </div>
-                  <Input
-                    id="email"
-                    type="email"
-                    placeholder="name@example.com"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                    className="pl-10 h-11 text-base"
-                  />
+                  <Input id="email" type="email" placeholder="name@example.com" value={email} onChange={e => setEmail(e.target.value)} required className="pl-10 h-11 text-base" />
                 </div>
               </div>
               <div className="space-y-2">
                 <div className="flex justify-between items-center">
                   <Label htmlFor="password" className="text-sm font-medium">Password</Label>
-                  <a
-                    href="#"
-                    className="text-xs font-medium text-netball-500 hover:text-netball-700 transition-colors"
-                  >
+                  <a href="#" className="text-xs font-medium text-netball-500 hover:text-netball-700 transition-colors">
                     Forgot Password?
                   </a>
                 </div>
@@ -96,33 +81,19 @@ const LoginPage = () => {
                   <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
                     <LockIcon className="h-5 w-5 text-gray-400" />
                   </div>
-                  <Input
-                    id="password"
-                    type="password"
-                    placeholder="••••••••"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                    className="pl-10 h-11 text-base"
-                  />
+                  <Input id="password" type="password" placeholder="••••••••" value={password} onChange={e => setPassword(e.target.value)} required className="pl-10 h-11 text-base" />
                 </div>
               </div>
             </CardContent>
             <CardFooter className="flex-col space-y-4 pt-2">
-              <Button 
-                type="submit" 
-                className="w-full h-11 text-base bg-netball-500 hover:bg-netball-600 transition-colors shadow"
-                disabled={isLoading}
-              >
-                {isLoading ? (
-                  <>
+              <Button type="submit" className="w-full h-11 text-base bg-netball-500 hover:bg-netball-600 transition-colors shadow" disabled={isLoading}>
+                {isLoading ? <>
                     <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                     </svg>
                     Signing in...
-                  </>
-                ) : "Sign In"}
+                  </> : "Sign In"}
               </Button>
               <p className="text-center text-sm text-gray-600 dark:text-gray-400">
                 Don't have an account?{" "}
@@ -179,8 +150,6 @@ const LoginPage = () => {
           </p>
         </div>
       </div>
-    </div>
-  );
+    </div>;
 };
-
 export default LoginPage;
