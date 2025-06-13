@@ -7,6 +7,7 @@ import { Calendar, Award, Users, User, MapPin, Clock, ChevronRight, Plus } from 
 import { Link } from "react-router-dom";
 import { teamApi, childrenApi, eventApi } from "@/services/api";
 import { Team, Event, Child } from "@/types";
+
 const Dashboard = () => {
   const {
     currentUser,
@@ -135,14 +136,14 @@ const Dashboard = () => {
             </CardHeader>
             <CardContent>
               {teams.length > 0 ? <div className="space-y-3">
-                  {teams.slice(0, 4).map(team => <div key={team.id} className="flex items-center gap-4 p-3 rounded-lg border border-border hover:border-primary/20 hover:bg-accent/50 transition-all duration-200">
-                      <div className="w-12 h-12 rounded-lg overflow-hidden flex-shrink-0 bg-accent border border-border">
+                  {teams.slice(0, 4).map(team => <div key={team.id} className="flex items-start gap-3 p-4 rounded-lg border hover:border-primary/30 hover:bg-accent/30 transition-all duration-200">
+                      <div className="w-10 h-10 rounded-lg overflow-hidden flex-shrink-0 bg-primary/10 border border-border">
                         {team.icon || team.profileImage ? <img src={team.icon || team.profileImage} alt={team.name} className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center">
-                            <Users className="h-6 w-6 text-primary" />
+                            <Users className="h-5 w-5 text-primary" />
                           </div>}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <h4 className="font-semibold text-base truncate">{team.name}</h4>
+                        <h4 className="font-semibold text-base leading-tight truncate mb-1">{team.name}</h4>
                         <p className="text-sm text-muted-foreground">
                           {team.ageGroup} • {team.category}
                         </p>
@@ -240,4 +241,5 @@ const Dashboard = () => {
       </div>
     </Layout>;
 };
+
 export default Dashboard;
