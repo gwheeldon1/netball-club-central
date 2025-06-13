@@ -58,7 +58,7 @@ export function SyncStatusIndicator() {
         disabled={isOffline}
         className="h-8 px-2"
       >
-        <Sync size={14} />
+        <RotateCw size={14} />
       </Button>
     </div>
   );
