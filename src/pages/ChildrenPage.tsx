@@ -19,7 +19,8 @@ const ChildrenPage = () => {
     const fetchChildren = async () => {
       if (currentUser) {
         try {
-          const children = await supabaseChildrenApi.getByParentId(currentUser.id);
+          const allChildren = await api.getChildren();
+          const children = allChildren.filter(child => child.parentId === currentUser.id);
           setMyChildren(children);
         } catch (error) {
           console.error('Error fetching children:', error);

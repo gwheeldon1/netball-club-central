@@ -33,7 +33,8 @@ const ChildDetailPage = () => {
   useEffect(() => {
     const fetchChild = async () => {
       if (id && currentUser) {
-        const childData = await supabaseChildrenApi.getById(id);
+        const children = await api.getChildren();
+        const childData = children.find(c => c.id === id);
       
       if (childData) {
         // Check if this child belongs to the current user
@@ -125,13 +126,8 @@ const ChildDetailPage = () => {
   const handleImageUpload = async (url: string) => {
     if (child && id) {
       try {
-        const updatedChild = await supabaseChildrenApi.update(id, { profileImage: url });
-        if (updatedChild) {
-          setChild(updatedChild);
-          toast.success("Profile image updated successfully");
-        } else {
-          toast.error("Failed to update profile image");
-        }
+        // Profile image update functionality needs to be implemented in unified API
+        toast.info('Profile image update coming soon');
       } catch (error) {
         console.error("Error updating profile image:", error);
         toast.error("Failed to update profile image");

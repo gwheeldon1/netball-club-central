@@ -1,5 +1,5 @@
 import { offlineApi, SyncStatus } from './database';
-import { supabaseChildrenApi, supabaseTeamApi, supabaseUserApi } from './supabaseApi';
+// Sync service functionality needs to be refactored to use unified API
 import { DBUser, DBChild, DBTeam, DBEvent, DBAttendance } from '@/types/database';
 import { User, Child, Team, Event, Attendance, UserRole } from '@/types';
 import { logger } from '@/utils/logger';
