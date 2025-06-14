@@ -1,7 +1,7 @@
 
 import { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import { User, UserRole } from '../types';
-import { supabaseUserApi } from '@/services/supabaseApi';
+import { api } from '@/services/offlineApi';
 import { toast } from "sonner";
 
 interface AuthContextType {
@@ -40,7 +40,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // In a real app, this would be an API call to authenticate
     // For our offline-first approach, we use localStorage API service
     try {
-      const user = await supabaseUserApi.getByEmail(email.toLowerCase());
+      const user = await api.getUserByEmail(email.toLowerCase());
       
       if (user) {
         // In a real app, we'd check the password hash
