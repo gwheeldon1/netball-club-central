@@ -117,12 +117,13 @@ const Layout = ({
           {currentUser && <div className="border-b border-border p-6">
               <Link to="/profile" className="flex items-center gap-3 hover:bg-muted/50 rounded-lg p-2 transition-colors" onClick={closeSidebar}>
                 <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center overflow-hidden">
-                  {currentUser.profileImage ? <img src={currentUser.profileImage} alt={currentUser.name} className="w-full h-full object-cover" /> : <User className="h-5 w-5 text-muted-foreground" />}
+                  <User className="h-5 w-5 text-muted-foreground" />
                 </div>
                 <div className="flex flex-col min-w-0">
-                  <span className="font-medium text-sm truncate">{currentUser.name}</span>
+                  <span className="font-medium text-sm truncate">{currentUser.email}</span>
                   <span className="text-xs text-muted-foreground">
-                    {currentUser.roles.map(role => role.charAt(0).toUpperCase() + role.slice(1)).join(", ")}
+                    {/* TODO: Implement role display from user_roles table */}
+                    User
                   </span>
                 </div>
               </Link>

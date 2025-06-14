@@ -30,10 +30,10 @@ const UserProfilePage = () => {
   useEffect(() => {
     if (currentUser) {
       setFormData({
-        name: currentUser.name,
-        email: currentUser.email,
-        phone: currentUser.phone || "",
-        profileImage: currentUser.profileImage || "",
+        name: currentUser.user_metadata?.first_name || "",
+        email: currentUser.email || "",
+        phone: currentUser.user_metadata?.phone || "",
+        profileImage: "",
       });
       
       // Load user roles and teams
@@ -106,10 +106,10 @@ const UserProfilePage = () => {
   const handleCancel = () => {
     if (currentUser) {
       setFormData({
-        name: currentUser.name,
-        email: currentUser.email,
-        phone: currentUser.phone || "",
-        profileImage: currentUser.profileImage || "",
+        name: currentUser.user_metadata?.first_name || "",
+        email: currentUser.email || "",
+        phone: currentUser.user_metadata?.phone || "",
+        profileImage: "",
       });
     }
     setIsEditing(false);
@@ -186,9 +186,9 @@ const UserProfilePage = () => {
                   />
                 ) : (
                   <Avatar className="w-32 h-32">
-                    <AvatarImage src={formData.profileImage} alt={currentUser.name} />
+                    <AvatarImage src={formData.profileImage} alt="Profile" />
                     <AvatarFallback className="text-2xl">
-                      {currentUser.name.split(' ').map(n => n[0]).join('')}
+                      {(currentUser.user_metadata?.first_name?.[0] || '') + (currentUser.user_metadata?.last_name?.[0] || '') || currentUser.email?.[0]?.toUpperCase() || 'U'}
                     </AvatarFallback>
                   </Avatar>
                 )}
@@ -196,12 +196,12 @@ const UserProfilePage = () => {
 
               {!isEditing && (
                 <div className="text-center space-y-2">
-                  <h3 className="text-lg font-semibold">{currentUser.name}</h3>
+                  <h3 className="text-lg font-semibold">{formData.name || 'User'}</h3>
                   <p className="text-sm text-muted-foreground">{currentUser.email}</p>
                   <div className="flex flex-wrap gap-1 justify-center">
-                    {currentUser.roles.map(role => (
-                      <Badge key={role} className={getRoleBadgeColor(role)}>
-                        {role.charAt(0).toUpperCase() + role.slice(1)}
+                    {userRoles.map((roleAssignment, index) => (
+                      <Badge key={index} className={getRoleBadgeColor(roleAssignment.role)}>
+                        {roleAssignment.role.charAt(0).toUpperCase() + roleAssignment.role.slice(1)}
                       </Badge>
                     ))}
                   </div>

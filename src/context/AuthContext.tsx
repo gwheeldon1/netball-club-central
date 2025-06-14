@@ -1,83 +1,119 @@
 
 import { createContext, useContext, useState, ReactNode, useEffect } from 'react';
-import { User, UserRole } from '../types';
-import { api } from '@/services/offlineApi';
+import { User as SupabaseUser, Session } from '@supabase/supabase-js';
+import { supabase } from '@/integrations/supabase/client';
 import { toast } from "sonner";
 import { logger } from '@/utils/logger';
 
+// For backward compatibility with existing code
+export type UserRole = 'admin' | 'coach' | 'manager' | 'parent';
+
 interface AuthContextType {
-  currentUser: User | null;
+  user: SupabaseUser | null;
+  session: Session | null;
+  currentUser: SupabaseUser | null; // For backward compatibility
   login: (email: string, password: string) => Promise<boolean>;
-  logout: () => void;
+  logout: () => Promise<void>;
   hasRole: (role: UserRole) => boolean;
   isAuthenticated: boolean;
+  loading: boolean;
 }
-
-const AUTH_STORAGE_KEY = 'netball_auth_user';
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [currentUser, setCurrentUser] = useState<User | null>(null);
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
-  // Offline functionality removed for simplicity
+  const [user, setUser] = useState<SupabaseUser | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  // Load previously authenticated user from localStorage on init
   useEffect(() => {
-    const storedUser = localStorage.getItem(AUTH_STORAGE_KEY);
-    if (storedUser) {
-      try {
-        const user = JSON.parse(storedUser);
-        setCurrentUser(user);
-        setIsAuthenticated(true);
-      } catch (error) {
-        logger.error('Error parsing stored user data', error);
-        localStorage.removeItem(AUTH_STORAGE_KEY);
+    // Set up auth state listener
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        setSession(session);
+        setUser(session?.user ?? null);
+        setLoading(false);
+        
+        if (event === 'SIGNED_IN') {
+          logger.info('User signed in', { userId: session?.user?.id });
+        } else if (event === 'SIGNED_OUT') {
+          logger.info('User signed out');
+        }
       }
-    }
+    );
+
+    // Check for existing session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setUser(session?.user ?? null);
+      setLoading(false);
+    });
+
+    return () => subscription.unsubscribe();
   }, []);
 
   const login = async (email: string, password: string): Promise<boolean> => {
-    // In a real app, this would be an API call to authenticate
-    // For our offline-first approach, we use localStorage API service
     try {
-      const user = await api.getUserByEmail(email.toLowerCase());
-      
-      if (user) {
-        // In a real app, we'd check the password hash
-        setCurrentUser(user);
-        setIsAuthenticated(true);
-        
-        // Store the authenticated user in localStorage
-        localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(user));
+      setLoading(true);
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: email.toLowerCase().trim(),
+        password,
+      });
+
+      if (error) {
+        logger.error('Login error:', error);
+        toast.error(error.message || 'Login failed');
+        return false;
+      }
+
+      if (data.user) {
+        toast.success('Logged in successfully');
         return true;
       }
+
+      return false;
     } catch (error) {
-      logger.error('Error during login:', error);
-      toast.error("Login failed");
+      logger.error('Unexpected login error:', error);
+      toast.error('An unexpected error occurred');
+      return false;
+    } finally {
+      setLoading(false);
     }
-    
-    return false;
   };
 
-  const logout = () => {
-    setCurrentUser(null);
-    setIsAuthenticated(false);
-    localStorage.removeItem(AUTH_STORAGE_KEY);
+  const logout = async (): Promise<void> => {
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        logger.error('Logout error:', error);
+        toast.error('Failed to logout');
+      } else {
+        toast.success('Logged out successfully');
+      }
+    } catch (error) {
+      logger.error('Unexpected logout error:', error);
+      toast.error('An unexpected error occurred');
+    }
   };
 
   const hasRole = (role: UserRole): boolean => {
-    if (!currentUser) return false;
-    return currentUser.roles.includes(role);
+    // TODO: Implement proper role checking with Supabase user_roles table
+    // For now, return false until we implement the role system
+    return false;
   };
+
+  const isAuthenticated = !!user;
 
   return (
     <AuthContext.Provider value={{ 
-      currentUser, 
+      user,
+      session,
+      currentUser: user, // For backward compatibility
       login, 
       logout, 
       hasRole, 
-      isAuthenticated
+      isAuthenticated,
+      loading
     }}>
       {children}
     </AuthContext.Provider>

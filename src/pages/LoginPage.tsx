@@ -13,29 +13,15 @@ import { ForgotPasswordDialog } from "@/components/ForgotPasswordDialog";
 const LoginPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const {
-    login
-  } = useAuth();
+  const { login, loading } = useAuth();
   const navigate = useNavigate();
   const isMobile = useIsMobile();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
-    try {
-      const success = await login(email, password);
-      if (success) {
-        toast.success("Logged in successfully");
-        navigate("/");
-      } else {
-        toast.error("Invalid email or password");
-      }
-    } catch (error) {
-      toast.error("An error occurred during login");
-      console.error(error);
-    } finally {
-      setIsLoading(false);
+    const success = await login(email, password);
+    if (success) {
+      navigate("/");
     }
   };
 
@@ -109,8 +95,8 @@ const LoginPage = () => {
               </div>
             </CardContent>
             <CardFooter className="flex-col space-y-4 pt-2 px-4 sm:px-6 pb-4 sm:pb-6">
-              <Button type="submit" className="w-full h-10 sm:h-11 text-base" disabled={isLoading}>
-                {isLoading ? (
+              <Button type="submit" className="w-full h-10 sm:h-11 text-base" disabled={loading}>
+                {loading ? (
                   <>
                     <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-primary-foreground" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
