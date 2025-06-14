@@ -8,6 +8,7 @@ import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/componen
 import { Award, LockIcon, MailIcon } from "lucide-react";
 import { toast } from "sonner";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { ForgotPasswordDialog } from "@/components/ForgotPasswordDialog";
 
 const LoginPage = () => {
   const [email, setEmail] = useState("");
@@ -83,9 +84,11 @@ const LoginPage = () => {
               <div className="space-y-2">
                 <div className="flex justify-between items-center">
                   <Label htmlFor="password" className="text-sm font-medium">Password</Label>
-                  <a href="#" className="text-xs font-medium text-primary hover:text-primary/80 transition-colors">
-                    Forgot Password?
-                  </a>
+                  <ForgotPasswordDialog>
+                    <button type="button" className="text-xs font-medium text-primary hover:text-primary/80 transition-colors">
+                      Forgot Password?
+                    </button>
+                  </ForgotPasswordDialog>
                 </div>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">

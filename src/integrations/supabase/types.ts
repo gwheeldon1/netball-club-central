@@ -827,6 +827,10 @@ export type Database = {
         Args: { user_id: string }
         Returns: Database["public"]["Enums"]["user_role"][]
       }
+      handle_guardian_forgot_password: {
+        Args: { guardian_email: string }
+        Returns: Json
+      }
       has_role: {
         Args: {
           user_id: string
