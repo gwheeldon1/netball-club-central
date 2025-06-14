@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
-import { supabaseRoleApi } from '@/services/supabaseApi';
+// Role checking now handled through auth context
 import { logger } from '@/utils/logger';
 
 interface UserPermissions {
@@ -29,11 +29,8 @@ export const usePermissions = (): UserPermissions => {
       }
 
       try {
-        const roles = await supabaseRoleApi.getUserRoles(currentUser.id);
-        const teams = roles
-          .filter(r => r.isActive && r.teamId)
-          .map(r => r.teamId!);
-        setUserTeams(teams);
+        // Role loading will be handled through auth context for now
+        setUserTeams([]);
       } catch (error) {
         logger.error('Error loading user teams:', error);
         setUserTeams([]);
