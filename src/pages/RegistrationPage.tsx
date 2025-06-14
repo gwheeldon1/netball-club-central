@@ -255,30 +255,30 @@ const RegistrationPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background py-16">
-      <div className="container mx-auto px-6">
+    <div className="min-h-screen bg-background py-4 sm:py-8 lg:py-16">
+      <div className="container mx-auto px-4 sm:px-6">
         <div className="max-w-2xl mx-auto">
-          <Card className="shadow-2xl border-0 bg-card">
-            <CardHeader className="text-center py-8">
-              <CardTitle className="text-3xl font-bold text-foreground">
+          <Card className="shadow-lg sm:shadow-2xl border bg-card">
+            <CardHeader className="text-center py-4 sm:py-6 lg:py-8 px-4 sm:px-6">
+              <CardTitle className="text-2xl sm:text-3xl font-bold text-foreground">
                 Create Your Account
               </CardTitle>
-              <p className="text-muted-foreground text-lg mt-2">
+              <p className="text-muted-foreground text-base sm:text-lg mt-2">
                 Quick registration - takes less than 2 minutes
               </p>
             </CardHeader>
             
-            <CardContent className="px-8 pb-8">
-            <form onSubmit={handleSubmit} className="space-y-10">
+            <CardContent className="px-4 sm:px-6 lg:px-8 pb-4 sm:pb-6 lg:pb-8">
+            <form onSubmit={handleSubmit} className="space-y-6 sm:space-y-8 lg:space-y-10">
               {/* Parent Details Section */}
-              <div className="space-y-6">
-                <h3 className="text-lg font-semibold text-foreground flex items-center gap-3 pb-2 border-b border-border">
-                  <User className="h-5 w-5 text-primary" />
-                  Your Information
+              <div className="space-y-4 sm:space-y-6">
+                <h3 className="text-lg font-semibold text-foreground flex items-center gap-2 sm:gap-3 pb-2 border-b border-border">
+                  <User className="h-4 w-4 sm:h-5 sm:w-5 text-primary flex-shrink-0" />
+                  <span className="text-base sm:text-lg">Your Information</span>
                 </h3>
                 
-                <div className="space-y-6">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-4 sm:space-y-6">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                     <div className="space-y-2">
                       <Label htmlFor="firstName" className="text-sm font-medium text-foreground">First Name *</Label>
                       <Input
@@ -286,7 +286,7 @@ const RegistrationPage = () => {
                         value={formData.firstName}
                         onChange={(e) => handleInputChange('firstName', e.target.value)}
                         required
-                        className="h-12 bg-background border-input"
+                        className="h-11 sm:h-12 bg-background border-input text-base"
                         placeholder="Enter your first name"
                       />
                     </div>
@@ -298,13 +298,13 @@ const RegistrationPage = () => {
                         value={formData.lastName}
                         onChange={(e) => handleInputChange('lastName', e.target.value)}
                         required
-                        className="h-12 bg-background border-input"
+                        className="h-11 sm:h-12 bg-background border-input text-base"
                         placeholder="Enter your last name"
                       />
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                     <div className="space-y-2">
                       <Label htmlFor="email" className="text-sm font-medium text-foreground">Email Address *</Label>
                       <Input
@@ -313,7 +313,7 @@ const RegistrationPage = () => {
                         value={formData.email}
                         onChange={(e) => handleInputChange('email', e.target.value)}
                         required
-                        className="h-12 bg-background border-input"
+                        className="h-11 sm:h-12 bg-background border-input text-base"
                         placeholder="your.email@example.com"
                       />
                     </div>
@@ -325,7 +325,7 @@ const RegistrationPage = () => {
                         type="tel"
                         value={formData.phone}
                         onChange={(e) => handleInputChange('phone', e.target.value)}
-                        className="h-12 bg-background border-input"
+                        className="h-11 sm:h-12 bg-background border-input text-base"
                         placeholder="Your phone number"
                       />
                     </div>
@@ -339,7 +339,7 @@ const RegistrationPage = () => {
                       value={formData.password}
                       onChange={(e) => handleInputChange('password', e.target.value)}
                       required
-                      className="h-12 bg-background border-input"
+                      className="h-11 sm:h-12 bg-background border-input text-base"
                       placeholder="At least 6 characters"
                     />
                   </div>
@@ -347,11 +347,11 @@ const RegistrationPage = () => {
               </div>
 
               {/* Children Details Section */}
-              <div className="space-y-6">
-                <div className="flex items-center justify-between pb-2 border-b border-border">
-                  <h3 className="text-lg font-semibold text-foreground flex items-center gap-3">
-                    <Users className="h-5 w-5 text-primary" />
-                    Children Information
+              <div className="space-y-4 sm:space-y-6">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pb-2 border-b border-border">
+                  <h3 className="text-lg font-semibold text-foreground flex items-center gap-2 sm:gap-3">
+                    <Users className="h-4 w-4 sm:h-5 sm:w-5 text-primary flex-shrink-0" />
+                    <span className="text-base sm:text-lg">Children Information</span>
                   </h3>
                   {formData.children.length < 3 && (
                     <Button
@@ -359,7 +359,7 @@ const RegistrationPage = () => {
                       variant="outline"
                       size="sm"
                       onClick={addChild}
-                      className="text-primary border-primary hover:bg-primary/10"
+                      className="text-primary border-primary hover:bg-primary/10 w-full sm:w-auto"
                     >
                       <Plus className="h-4 w-4 mr-2" />
                       Add Child
@@ -370,16 +370,16 @@ const RegistrationPage = () => {
                 <div className="space-y-4">
                   {formData.children.map((child, index) => (
                     <Card key={child.id} className="border border-muted bg-muted/30">
-                      <CardContent className="p-6">
-                        <div className="flex items-center justify-between mb-6">
-                          <span className="font-semibold text-foreground">Child {index + 1}</span>
+                      <CardContent className="p-4 sm:p-6">
+                        <div className="flex items-center justify-between mb-4 sm:mb-6">
+                          <span className="font-semibold text-foreground text-sm sm:text-base">Child {index + 1}</span>
                           {formData.children.length > 1 && (
                             <Button
                               type="button"
                               variant="ghost"
                               size="sm"
                               onClick={() => removeChild(child.id)}
-                              className="text-muted-foreground hover:text-destructive"
+                              className="text-muted-foreground hover:text-destructive h-8 w-8 p-0"
                             >
                               <Trash2 className="h-4 w-4" />
                             </Button>
@@ -387,14 +387,14 @@ const RegistrationPage = () => {
                         </div>
                         
                         <div className="space-y-4">
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                             <div className="space-y-2">
                               <Label className="text-sm font-medium text-foreground">Full Name *</Label>
                               <Input
                                 value={child.name}
                                 onChange={(e) => handleChildChange(child.id, 'name', e.target.value)}
                                 required
-                                className="h-12 bg-background border-input"
+                                className="h-11 sm:h-12 bg-background border-input text-base"
                                 placeholder="Child's full name"
                               />
                             </div>
@@ -406,14 +406,14 @@ const RegistrationPage = () => {
                                 value={child.dateOfBirth}
                                 onChange={(e) => handleChildChange(child.id, 'dateOfBirth', e.target.value)}
                                 required
-                                className="h-12 bg-background border-input"
+                                className="h-11 sm:h-12 bg-background border-input text-base"
                               />
                             </div>
                           </div>
 
                           {child.ageGroup && (
                             <div>
-                              <div className="inline-flex items-center px-4 py-2 rounded-lg bg-primary/10 text-primary font-semibold text-sm border border-primary/20">
+                              <div className="inline-flex items-center px-3 py-2 sm:px-4 rounded-lg bg-primary/10 text-primary font-semibold text-xs sm:text-sm border border-primary/20">
                                 Age Group: {child.ageGroup}
                               </div>
                             </div>
@@ -426,7 +426,7 @@ const RegistrationPage = () => {
               </div>
 
               {/* Terms Agreement Section */}
-              <div className="space-y-6">
+              <div className="space-y-4 sm:space-y-6">
                 <div className="flex items-start space-x-3">
                   <Checkbox
                     id="terms"
@@ -434,7 +434,7 @@ const RegistrationPage = () => {
                     onCheckedChange={(checked) => 
                       setFormData(prev => ({ ...prev, agreeToTerms: checked as boolean }))
                     }
-                    className="mt-1"
+                    className="mt-1 flex-shrink-0"
                   />
                   <Label htmlFor="terms" className="text-sm leading-relaxed cursor-pointer">
                     I agree to the <span className="text-primary font-medium underline">Terms & Conditions</span> and 
@@ -448,7 +448,7 @@ const RegistrationPage = () => {
               <Button
                 type="submit"
                 disabled={isLoading}
-                className="w-full h-14 text-lg font-semibold"
+                className="w-full h-12 sm:h-14 text-base sm:text-lg font-semibold"
               >
                 {isLoading ? "Creating Account..." : "Join the Club"}
               </Button>
