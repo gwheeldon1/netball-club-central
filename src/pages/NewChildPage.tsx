@@ -128,7 +128,7 @@ const NewChildPage = () => {
                 
                 <div className="space-y-4 flex-1">
                   <div>
-                    <Label htmlFor="name">Full Name <span className="text-red-500">*</span></Label>
+                    <Label htmlFor="name">Full Name <span className="text-destructive">*</span></Label>
                     <Input 
                       id="name" 
                       name="name" 
@@ -139,7 +139,7 @@ const NewChildPage = () => {
                   </div>
                   
                   <div>
-                    <Label htmlFor="dateOfBirth">Date of Birth <span className="text-red-500">*</span></Label>
+                    <Label htmlFor="dateOfBirth">Date of Birth <span className="text-destructive">*</span></Label>
                     <Input 
                       id="dateOfBirth" 
                       name="dateOfBirth" 
@@ -186,7 +186,6 @@ const NewChildPage = () => {
                 </Button>
                 <Button 
                   type="submit" 
-                  className="bg-netball-500 hover:bg-netball-600"
                   disabled={isSubmitting}
                 >
                   {isSubmitting ? "Submitting..." : "Submit Registration"}

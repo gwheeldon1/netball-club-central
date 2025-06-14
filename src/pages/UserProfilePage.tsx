@@ -118,15 +118,15 @@ const UserProfilePage = () => {
   const getRoleBadgeColor = (role: string) => {
     switch (role) {
       case 'admin':
-        return "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300";
+        return "bg-destructive/10 text-destructive";
       case 'coach':
-        return "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300";
+        return "bg-primary/10 text-primary";
       case 'manager':
-        return "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300";
+        return "bg-secondary text-secondary-foreground";
       case 'parent':
-        return "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300";
+        return "bg-accent text-accent-foreground";
       default:
-        return "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300";
+        return "bg-muted text-muted-foreground";
     }
   };
 
@@ -278,7 +278,7 @@ const UserProfilePage = () => {
                   {userRoles.map((roleAssignment, index) => (
                     <div
                       key={index}
-                      className="flex items-center justify-between p-3 border rounded-lg"
+                      className="flex items-center justify-between p-3 border border-border rounded-lg"
                     >
                       <div className="flex items-center gap-3">
                         <Badge className={getRoleBadgeColor(roleAssignment.role)}>

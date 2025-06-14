@@ -96,9 +96,9 @@ const EventDetailPage = () => {
       <Layout>
         <div className="flex items-center justify-center h-64">
           <div className="animate-pulse flex flex-col items-center">
-            <div className="h-12 w-12 bg-gray-200 rounded-full mb-4"></div>
-            <div className="h-4 w-32 bg-gray-200 rounded mb-2"></div>
-            <div className="h-3 w-24 bg-gray-100 rounded"></div>
+            <div className="h-12 w-12 bg-muted rounded-full mb-4"></div>
+            <div className="h-4 w-32 bg-muted rounded mb-2"></div>
+            <div className="h-3 w-24 bg-muted/50 rounded"></div>
           </div>
         </div>
       </Layout>
@@ -121,7 +121,7 @@ const EventDetailPage = () => {
           
           <Card>
             <CardContent className="flex flex-col items-center justify-center py-12">
-              <AlertTriangle className="h-12 w-12 text-amber-500 mb-4" />
+              <AlertTriangle className="h-12 w-12 text-destructive mb-4" />
               <h2 className="text-xl font-semibold mb-2">Event Not Found</h2>
               <p className="text-muted-foreground mb-6">{error || "The requested event could not be found"}</p>
               <Button onClick={handleBack}>Return to Events List</Button>
@@ -147,11 +147,11 @@ const EventDetailPage = () => {
   const getEventTypeDisplay = () => {
     switch (event.eventType) {
       case 'match':
-        return { name: 'Match', color: 'bg-orange-100 text-orange-600' };
+        return { name: 'Match', color: 'bg-primary/10 text-primary' };
       case 'training':
-        return { name: 'Training', color: 'bg-blue-100 text-blue-600' };
+        return { name: 'Training', color: 'bg-secondary text-secondary-foreground' };
       default:
-        return { name: 'Other', color: 'bg-purple-100 text-purple-600' };
+        return { name: 'Other', color: 'bg-muted text-muted-foreground' };
     }
   };
   
@@ -186,9 +186,9 @@ const EventDetailPage = () => {
         </div>
         
         {isOffline && (
-          <Alert className="bg-amber-50 border-amber-200">
-            <AlertTriangle className="h-4 w-4 text-amber-600" />
-            <AlertDescription className="text-amber-700 text-sm">
+          <Alert className="bg-background border-border">
+            <AlertTriangle className="h-4 w-4 text-destructive" />
+            <AlertDescription className="text-muted-foreground text-sm">
               You are offline. Some features may be limited.
             </AlertDescription>
           </Alert>
@@ -211,8 +211,8 @@ const EventDetailPage = () => {
               
               <div className="mt-2 sm:mt-0">
                 {event.eventType === 'match' && event.opponent && (
-                  <div className="bg-gray-100 px-4 py-2 rounded-md text-center">
-                    <div className="text-xs text-gray-500">Opponent</div>
+                  <div className="bg-muted px-4 py-2 rounded-md text-center">
+                    <div className="text-xs text-muted-foreground">Opponent</div>
                     <div className="font-medium">{event.opponent}</div>
                   </div>
                 )}
@@ -224,33 +224,33 @@ const EventDetailPage = () => {
             {/* Event Details */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="flex items-start gap-3">
-                <Calendar className="h-5 w-5 text-gray-400 mt-0.5" />
+                <Calendar className="h-5 w-5 text-muted-foreground mt-0.5" />
                 <div>
                   <div className="font-medium">Date</div>
-                  <div className="text-sm text-gray-600">{formatDate(event.date)}</div>
+                  <div className="text-sm text-muted-foreground">{formatDate(event.date)}</div>
                 </div>
               </div>
               
               <div className="flex items-start gap-3">
-                <Clock className="h-5 w-5 text-gray-400 mt-0.5" />
+                <Clock className="h-5 w-5 text-muted-foreground mt-0.5" />
                 <div>
                   <div className="font-medium">Time</div>
-                  <div className="text-sm text-gray-600">{formatTime(event.time)}</div>
+                  <div className="text-sm text-muted-foreground">{formatTime(event.time)}</div>
                 </div>
               </div>
               
               <div className="flex items-start gap-3 sm:col-span-2">
-                <MapPin className="h-5 w-5 text-gray-400 mt-0.5" />
+                <MapPin className="h-5 w-5 text-muted-foreground mt-0.5" />
                 <div>
                   <div className="font-medium">Location</div>
-                  <div className="text-sm text-gray-600">{event.location}</div>
+                  <div className="text-sm text-muted-foreground">{event.location}</div>
                 </div>
               </div>
               
               {event.notes && (
-                <div className="sm:col-span-2 bg-gray-50 p-3 rounded-md">
+                <div className="sm:col-span-2 bg-muted p-3 rounded-md">
                   <div className="font-medium mb-1">Notes</div>
-                  <div className="text-sm text-gray-600">{event.notes}</div>
+                  <div className="text-sm text-muted-foreground">{event.notes}</div>
                 </div>
               )}
             </div>
@@ -279,19 +279,19 @@ const EventDetailPage = () => {
               </div>
               
               <div className="grid grid-cols-3 gap-2 sm:gap-4">
-                <div className="bg-green-50 rounded p-3 text-center">
-                  <div className="text-2xl font-bold text-green-600">{attendanceCounts.going}</div>
-                  <div className="text-xs sm:text-sm text-green-700">Going</div>
+                <div className="bg-primary/10 text-primary rounded p-3 text-center">
+                  <div className="text-2xl font-bold">{attendanceCounts.going}</div>
+                  <div className="text-xs sm:text-sm">Going</div>
                 </div>
                 
-                <div className="bg-red-50 rounded p-3 text-center">
-                  <div className="text-2xl font-bold text-red-600">{attendanceCounts.notGoing}</div>
-                  <div className="text-xs sm:text-sm text-red-700">Not Going</div>
+                <div className="bg-destructive/10 text-destructive rounded p-3 text-center">
+                  <div className="text-2xl font-bold">{attendanceCounts.notGoing}</div>
+                  <div className="text-xs sm:text-sm">Not Going</div>
                 </div>
                 
-                <div className="bg-gray-50 rounded p-3 text-center">
-                  <div className="text-2xl font-bold text-gray-600">{attendanceCounts.notResponded}</div>
-                  <div className="text-xs sm:text-sm text-gray-700">No Response</div>
+                <div className="bg-muted rounded p-3 text-center">
+                  <div className="text-2xl font-bold text-muted-foreground">{attendanceCounts.notResponded}</div>
+                  <div className="text-xs sm:text-sm text-muted-foreground">No Response</div>
                 </div>
               </div>
             </div>
