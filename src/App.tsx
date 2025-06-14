@@ -21,6 +21,7 @@ import UserProfilePage from '@/pages/UserProfilePage';
 import SettingsPage from '@/pages/SettingsPage';
 import NotFound from '@/pages/NotFound';
 import UnauthorizedPage from '@/pages/UnauthorizedPage';
+import DesignSystemPage from '@/pages/DesignSystemPage';
 import './App.css';
 
 function App() {
@@ -111,6 +112,8 @@ function App() {
                 <SettingsPage />
               </ProtectedRoute>
             } />
+            
+            <Route path="/design" element={<DesignSystemPage />} />
             
             <Route path="*" element={<NotFound />} />
           </Routes>
