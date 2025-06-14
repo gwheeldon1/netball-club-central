@@ -206,6 +206,69 @@ export type Database = {
           },
         ]
       }
+      match_statistics: {
+        Row: {
+          contacts: number
+          created_at: string
+          created_by: string | null
+          event_id: string
+          footwork_errors: number
+          goals: number
+          id: string
+          intercepts: number
+          obstructions: number
+          player_id: string
+          player_of_match_coach: boolean
+          player_of_match_players: boolean
+          quarters_played: number
+          shot_attempts: number
+          tips: number
+          turnovers_lost: number
+          turnovers_won: number
+          updated_at: string
+        }
+        Insert: {
+          contacts?: number
+          created_at?: string
+          created_by?: string | null
+          event_id: string
+          footwork_errors?: number
+          goals?: number
+          id?: string
+          intercepts?: number
+          obstructions?: number
+          player_id: string
+          player_of_match_coach?: boolean
+          player_of_match_players?: boolean
+          quarters_played?: number
+          shot_attempts?: number
+          tips?: number
+          turnovers_lost?: number
+          turnovers_won?: number
+          updated_at?: string
+        }
+        Update: {
+          contacts?: number
+          created_at?: string
+          created_by?: string | null
+          event_id?: string
+          footwork_errors?: number
+          goals?: number
+          id?: string
+          intercepts?: number
+          obstructions?: number
+          player_id?: string
+          player_of_match_coach?: boolean
+          player_of_match_players?: boolean
+          quarters_played?: number
+          shot_attempts?: number
+          tips?: number
+          turnovers_lost?: number
+          turnovers_won?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       player_teams: {
         Row: {
           id: string

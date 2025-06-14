@@ -1,67 +1,81 @@
-
-import { useState, useEffect } from "react";
-import { useParams, useNavigate, Link } from "react-router-dom";
-import Layout from "@/components/Layout";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Separator } from "@/components/ui/separator";
-import { Badge } from "@/components/ui/badge";
-import { useIsMobile } from "@/hooks/use-mobile";
-// Offline functionality removed
-import { useAuth } from "@/context/AuthContext";
-import { Event, Team, Child, Attendance } from "@/types";
-// Event functionality not yet fully implemented in Supabase API
-import { Calendar, MapPin, Clock, AlertTriangle, ArrowLeft, Users } from "lucide-react";
+import { useState, useEffect } from 'react';
+import { useNavigate, useParams, Link } from 'react-router-dom';
+import Layout from '@/components/Layout';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Progress } from '@/components/ui/progress';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { ArrowLeft, Calendar, MapPin, Users, Clock, UserCheck, UserX, HelpCircle, Trophy, BarChart3 } from 'lucide-react';
+import { api } from '@/services/offlineApi';
+import { Event, Team, Child, Attendance } from '@/types';
 import { toast } from "sonner";
+import { useAuth } from '@/context/AuthContext';
+import { MatchStatsForm } from '@/components/MatchStatsForm';
+import { supabaseChildrenApi } from '@/services/supabaseApi';
 
 const EventDetailPage = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { hasRole } = useAuth();
-  const isMobile = useIsMobile();
+  
   const [event, setEvent] = useState<Event | null>(null);
   const [team, setTeam] = useState<Team | null>(null);
-  const [teamMembers, setTeamMembers] = useState<Child[]>([]);
+  const [teamPlayers, setTeamPlayers] = useState<Child[]>([]);
   const [attendance, setAttendance] = useState<Attendance[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [showStatsForm, setShowStatsForm] = useState(false);
 
-  // Load event data
   useEffect(() => {
-    const loadData = async () => {
-      if (!id) {
-        setError("Event ID not provided");
-        setLoading(false);
-        return;
-      }
-
-      try {
-        // Event API not yet implemented
-        const eventData = null;
-        
-        if (!eventData) {
-          setError("Event not found");
-          setLoading(false);
-          return;
-        }
-
-        setEvent(eventData);
-        
-        // Event-related data loading not yet implemented
-        
-      } catch (error) {
-        console.error("Error loading event data:", error);
-        setError("Failed to load event data");
-      } finally {
-        setLoading(false);
-      }
-    };
-    
-    loadData();
+    if (id) {
+      loadEventData();
+    }
   }, [id]);
 
-  // Format date for display
+  const loadEventData = async () => {
+    if (!id) return;
+
+    try {
+      setLoading(true);
+      const eventData = await api.getEventById(id);
+      setEvent(eventData);
+
+      if (eventData) {
+        const [teamData, attendanceData] = await Promise.all([
+          api.getTeamById(eventData.teamId),
+          api.getAttendanceByEventId(id)
+        ]);
+
+        if (teamData) {
+          setTeam(teamData);
+          // Get team players using Supabase API for better permissions
+          try {
+            const players = await supabaseChildrenApi.getByTeamId(teamData.id);
+            setTeamPlayers(players);
+          } catch (error) {
+            console.error('Error loading team players:', error);
+            // Fallback to local API
+            const players = await api.getChildrenByTeamId(teamData.id);
+            setTeamPlayers(players);
+          }
+        }
+
+        setAttendance(attendanceData);
+      }
+    } catch (error) {
+      console.error('Error loading event data:', error);
+      toast.error('Failed to load event data');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleBack = () => {
+    navigate('/events');
+  };
+
   const formatDate = (dateStr: string) => {
     const options: Intl.DateTimeFormatOptions = { 
       weekday: 'long', 
@@ -72,122 +86,133 @@ const EventDetailPage = () => {
     return new Date(dateStr).toLocaleDateString('en-GB', options);
   };
 
-  // Format time for display
   const formatTime = (timeStr: string) => {
     return timeStr.substring(0, 5);
   };
 
-  // Handle back button
-  const handleBack = () => {
-    navigate("/events");
-  };
-
-  if (loading) {
-    return (
-      <Layout>
-        <div className="flex items-center justify-center h-64">
-          <div className="animate-pulse flex flex-col items-center">
-            <div className="h-12 w-12 bg-muted rounded-full mb-4"></div>
-            <div className="h-4 w-32 bg-muted rounded mb-2"></div>
-            <div className="h-3 w-24 bg-muted/50 rounded"></div>
-          </div>
-        </div>
-      </Layout>
-    );
-  }
-
-  if (error || !event) {
-    return (
-      <Layout>
-        <div className="space-y-4">
-          <Button 
-            variant="outline" 
-            onClick={handleBack}
-            className="mb-4"
-            size="sm"
-          >
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to Events
-          </Button>
-          
-          <Card>
-            <CardContent className="flex flex-col items-center justify-center py-12">
-              <AlertTriangle className="h-12 w-12 text-destructive mb-4" />
-              <h2 className="text-xl font-semibold mb-2">Event Not Found</h2>
-              <p className="text-muted-foreground mb-6">{error || "The requested event could not be found"}</p>
-              <Button onClick={handleBack}>Return to Events List</Button>
-            </CardContent>
-          </Card>
-        </div>
-      </Layout>
-    );
-  }
-
-  // Get attendance status counts
-  const getAttendanceCounts = () => {
+  const getAttendanceStats = () => {
     const going = attendance.filter(a => a.rsvp === 'going').length;
     const notGoing = attendance.filter(a => a.rsvp === 'not_going').length;
-    const notResponded = teamMembers.length - going - notGoing;
+    const maybe = attendance.filter(a => a.rsvp === 'maybe').length;
+    const noResponse = Math.max(0, teamPlayers.length - attendance.length);
     
-    return { going, notGoing, notResponded };
+    return { going, notGoing, maybe, noResponse };
   };
 
-  const attendanceCounts = getAttendanceCounts();
-  
-  // Get event type display name and color
+  const getAttendanceIcon = (rsvp: string) => {
+    switch (rsvp) {
+      case 'going':
+        return <UserCheck className="h-4 w-4 text-green-600" />;
+      case 'not_going':
+        return <UserX className="h-4 w-4 text-red-600" />;
+      case 'maybe':
+        return <HelpCircle className="h-4 w-4 text-yellow-600" />;
+      default:
+        return <HelpCircle className="h-4 w-4 text-muted-foreground" />;
+    }
+  };
+
   const getEventTypeDisplay = () => {
-    switch (event.eventType) {
+    switch (event?.eventType) {
       case 'match':
-        return { name: 'Match', color: 'bg-primary/10 text-primary' };
+        return { name: 'Match', color: 'bg-primary text-primary-foreground' };
       case 'training':
         return { name: 'Training', color: 'bg-secondary text-secondary-foreground' };
       default:
         return { name: 'Other', color: 'bg-muted text-muted-foreground' };
     }
   };
-  
+
+  if (loading) {
+    return (
+      <Layout>
+        <div className="flex items-center justify-center h-64">
+          <div className="animate-pulse text-center">
+            <div className="h-8 w-48 bg-muted rounded mb-4 mx-auto"></div>
+            <div className="h-4 w-32 bg-muted rounded mx-auto"></div>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
+
+  if (!event) {
+    return (
+      <Layout>
+        <div className="text-center py-12">
+          <h2 className="text-2xl font-semibold mb-4">Event not found</h2>
+          <Button onClick={handleBack}>Return to Events</Button>
+        </div>
+      </Layout>
+    );
+  }
+
   const eventTypeDisplay = getEventTypeDisplay();
+  const attendanceStats = getAttendanceStats();
 
   return (
     <Layout>
-      <div className="space-y-4 sm:space-y-6">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+      <div className="space-y-6">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <Button 
             variant="outline" 
             onClick={handleBack}
             className="self-start"
-            size={isMobile ? "sm" : "default"}
           >
             <ArrowLeft className="mr-2 h-4 w-4" />
             Back to Events
           </Button>
           
-          {(hasRole("admin") || hasRole("coach") || hasRole("manager")) && (
-            <Button 
-              variant="outline"
-              className="self-start sm:self-auto"
-              size={isMobile ? "sm" : "default"}
-              asChild
-            >
-              <Link to={`/events/${id}/edit`}>
-                Edit Event
-              </Link>
-            </Button>
+          {(hasRole('admin') || hasRole('coach') || hasRole('manager')) && (
+            <div className="flex gap-2">
+              {event.eventType === 'match' && (
+                <Dialog open={showStatsForm} onOpenChange={setShowStatsForm}>
+                  <DialogTrigger asChild>
+                    <Button variant="outline" size="sm">
+                      <BarChart3 className="h-4 w-4 mr-2" />
+                      Match Stats
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="max-w-7xl max-h-[90vh] overflow-y-auto">
+                    <DialogHeader>
+                      <DialogTitle>Enter Match Statistics</DialogTitle>
+                    </DialogHeader>
+                    <MatchStatsForm
+                      eventId={event.id}
+                      players={teamPlayers}
+                      onClose={() => setShowStatsForm(false)}
+                      onSave={() => {
+                        toast.success('Match statistics saved successfully');
+                        loadEventData();
+                      }}
+                    />
+                  </DialogContent>
+                </Dialog>
+              )}
+              <Button 
+                variant="outline" 
+                size="sm"
+                asChild
+              >
+                <Link to={`/events/${event.id}/edit`}>
+                  Edit Event
+                </Link>
+              </Button>
+            </div>
           )}
         </div>
-        
-        {/* Offline indicator removed */}
-        
+
+        {/* Event Header */}
         <Card>
           <CardHeader>
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+            <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
               <div>
-                <Badge className={`mb-2 ${eventTypeDisplay.color}`}>
+                <Badge className={eventTypeDisplay.color}>
                   {eventTypeDisplay.name}
                 </Badge>
-                <CardTitle className="text-xl sm:text-2xl">{event.name}</CardTitle>
+                <CardTitle className="text-2xl mt-2">{event.name}</CardTitle>
                 {team && (
-                  <div className="text-sm text-muted-foreground mt-1">
+                  <div className="text-muted-foreground mt-1">
                     {team.name}
                   </div>
                 )}
@@ -204,81 +229,107 @@ const EventDetailPage = () => {
             </div>
           </CardHeader>
           
-          <CardContent className="space-y-4 sm:space-y-6">
+          <CardContent className="space-y-6">
             {/* Event Details */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="flex items-start gap-3">
-                <Calendar className="h-5 w-5 text-muted-foreground mt-0.5" />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="flex items-center gap-3">
+                <Calendar className="h-5 w-5 text-muted-foreground" />
                 <div>
                   <div className="font-medium">Date</div>
                   <div className="text-sm text-muted-foreground">{formatDate(event.date)}</div>
                 </div>
               </div>
               
-              <div className="flex items-start gap-3">
-                <Clock className="h-5 w-5 text-muted-foreground mt-0.5" />
+              <div className="flex items-center gap-3">
+                <Clock className="h-5 w-5 text-muted-foreground" />
                 <div>
                   <div className="font-medium">Time</div>
                   <div className="text-sm text-muted-foreground">{formatTime(event.time)}</div>
                 </div>
               </div>
               
-              <div className="flex items-start gap-3 sm:col-span-2">
-                <MapPin className="h-5 w-5 text-muted-foreground mt-0.5" />
+              <div className="flex items-center gap-3 md:col-span-2">
+                <MapPin className="h-5 w-5 text-muted-foreground" />
                 <div>
                   <div className="font-medium">Location</div>
                   <div className="text-sm text-muted-foreground">{event.location}</div>
                 </div>
               </div>
-              
-              {event.notes && (
-                <div className="sm:col-span-2 bg-muted p-3 rounded-md">
-                  <div className="font-medium mb-1">Notes</div>
-                  <div className="text-sm text-muted-foreground">{event.notes}</div>
-                </div>
-              )}
             </div>
-            
-            <Separator />
-            
-            {/* Attendance Section */}
-            <div>
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="font-semibold flex items-center gap-2">
-                  <Users className="h-4 w-4" />
-                  Attendance
-                </h3>
-                
-                {(hasRole("admin") || hasRole("coach") || hasRole("manager")) && (
-                  <Button 
-                    size="sm" 
-                    variant="outline"
-                    asChild
-                  >
-                    <Link to={`/events/${id}/attendance`}>
-                      Manage Attendance
-                    </Link>
-                  </Button>
-                )}
+
+            {event.notes && (
+              <div className="bg-muted p-4 rounded-lg">
+                <div className="font-medium mb-2">Notes</div>
+                <div className="text-sm">{event.notes}</div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Attendance Overview */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Users className="h-5 w-5" />
+              Attendance Overview
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="text-center p-4 bg-green-50 rounded-lg border border-green-200">
+                <UserCheck className="h-8 w-8 text-green-600 mx-auto mb-2" />
+                <div className="text-2xl font-bold text-green-700">{attendanceStats.going}</div>
+                <div className="text-sm text-green-600">Going</div>
               </div>
               
-              <div className="grid grid-cols-3 gap-2 sm:gap-4">
-                <div className="bg-primary/10 text-primary rounded p-3 text-center">
-                  <div className="text-2xl font-bold">{attendanceCounts.going}</div>
-                  <div className="text-xs sm:text-sm">Going</div>
-                </div>
-                
-                <div className="bg-destructive/10 text-destructive rounded p-3 text-center">
-                  <div className="text-2xl font-bold">{attendanceCounts.notGoing}</div>
-                  <div className="text-xs sm:text-sm">Not Going</div>
-                </div>
-                
-                <div className="bg-muted rounded p-3 text-center">
-                  <div className="text-2xl font-bold text-muted-foreground">{attendanceCounts.notResponded}</div>
-                  <div className="text-xs sm:text-sm text-muted-foreground">No Response</div>
-                </div>
+              <div className="text-center p-4 bg-red-50 rounded-lg border border-red-200">
+                <UserX className="h-8 w-8 text-red-600 mx-auto mb-2" />
+                <div className="text-2xl font-bold text-red-700">{attendanceStats.notGoing}</div>
+                <div className="text-sm text-red-600">Not Going</div>
+              </div>
+              
+              <div className="text-center p-4 bg-yellow-50 rounded-lg border border-yellow-200">
+                <HelpCircle className="h-8 w-8 text-yellow-600 mx-auto mb-2" />
+                <div className="text-2xl font-bold text-yellow-700">{attendanceStats.maybe}</div>
+                <div className="text-sm text-yellow-600">Maybe</div>
+              </div>
+              
+              <div className="text-center p-4 bg-muted rounded-lg">
+                <HelpCircle className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
+                <div className="text-2xl font-bold text-muted-foreground">{attendanceStats.noResponse}</div>
+                <div className="text-sm text-muted-foreground">No Response</div>
               </div>
             </div>
+
+            {teamPlayers.length > 0 && (
+              <div className="mt-6">
+                <h4 className="font-medium mb-4">Team Members</h4>
+                <div className="space-y-2">
+                  {teamPlayers.map(player => {
+                    const playerAttendance = attendance.find(a => a.childId === player.id);
+                    return (
+                      <div key={player.id} className="flex items-center justify-between p-3 border rounded-lg">
+                        <div className="flex items-center gap-3">
+                          <Avatar className="h-8 w-8">
+                            <AvatarImage src={player.profileImage} />
+                            <AvatarFallback>
+                              {player.name.split(' ').map(n => n[0]).join('')}
+                            </AvatarFallback>
+                          </Avatar>
+                          <span className="font-medium">{player.name}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          {getAttendanceIcon(playerAttendance?.rsvp || 'no_response')}
+                          <span className="text-sm text-muted-foreground capitalize">
+                            {playerAttendance?.rsvp?.replace('_', ' ') || 'No response'}
+                          </span>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>
