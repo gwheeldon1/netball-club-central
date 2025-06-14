@@ -2,7 +2,7 @@
 import { supabase } from '@/integrations/supabase/client';
 import { offlineApi } from './database';
 import { logger } from '@/utils/logger';
-import { User, Child, Team, Event, Attendance, UserRole } from '@/types';
+import { User, Child, Team, Event, Attendance, UserRole } from '@/types/unified';
 
 class UnifiedAPI {
   private isOnline = navigator.onLine;

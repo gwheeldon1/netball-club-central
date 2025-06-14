@@ -1,6 +1,6 @@
 import Dexie, { Table } from 'dexie';
 import { DBUser, DBChild, DBTeam, DBEvent, DBAttendance } from '@/types/database';
-import { User, Child, Team, Event, Attendance } from '@/types';
+import { User, Child, Team, Event, Attendance } from '@/types/unified';
 
 export interface SyncStatus {
   id: string;
