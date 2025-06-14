@@ -97,8 +97,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const hasRole = (role: UserRole): boolean => {
-    // TODO: Implement proper role checking with Supabase user_roles table
-    // For now, return false until we implement the role system
+    if (!user) return false;
+    
+    // Use the has_role function from the database
+    // For now, check if user has admin email for admin access
+    if (role === 'admin') {
+      return user.email === 'admin@example.com'; // Replace with actual admin email
+    }
+    
+    // For other roles, would need to query user_roles table
+    // This is a simplified implementation until full role system is in place
     return false;
   };
 

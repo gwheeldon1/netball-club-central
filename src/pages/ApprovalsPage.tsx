@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Check, X, User as UserIcon, FileText } from "lucide-react";
 import { toast } from "sonner";
+import { logger } from "@/utils/logger";
 import {
   Select,
   SelectContent,
@@ -53,7 +54,7 @@ const ApprovalsPage = () => {
         const teams = await api.getTeams();
         setAvailableTeams(teams);
       } catch (error) {
-        console.error('Error loading data:', error);
+        logger.error('Error loading data:', error);
         toast.error('Failed to load pending registrations');
       } finally {
         setLoading(false);
@@ -116,7 +117,7 @@ const ApprovalsPage = () => {
             });
 
           if (teamError) {
-            console.error('Error assigning team:', teamError);
+            logger.error('Error assigning team:', teamError);
           }
         }
       }
@@ -128,7 +129,7 @@ const ApprovalsPage = () => {
       setIsDialogOpen(false);
       setSelectedTeamId("");
     } catch (error) {
-      console.error("Error approving registration:", error);
+      logger.error("Error approving registration:", error);
       toast.error("An error occurred while approving");
     }
   };
@@ -168,7 +169,7 @@ const ApprovalsPage = () => {
       setPendingRegistrations(prev => prev.filter(r => r.id !== registration.id));
       setIsDialogOpen(false);
     } catch (error) {
-      console.error("Error rejecting registration:", error);
+      logger.error("Error rejecting registration:", error);
       toast.error("An error occurred while rejecting");
     }
   };

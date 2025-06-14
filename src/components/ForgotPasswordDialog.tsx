@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { logger } from "@/utils/logger";
 
 interface ForgotPasswordDialogProps {
   children: React.ReactNode;
@@ -48,7 +49,7 @@ export function ForgotPasswordDialog({ children }: ForgotPasswordDialogProps) {
         toast.error(data.message || "No account found with this email address");
       }
     } catch (error) {
-      console.error('Forgot password error:', error);
+      logger.error('Forgot password error:', error);
       toast.error("An unexpected error occurred");
     } finally {
       setIsLoading(false);
