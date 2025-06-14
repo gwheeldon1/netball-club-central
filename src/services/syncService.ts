@@ -139,106 +139,24 @@ export class SyncService {
   }
 
   private async syncUser(item: SyncStatus): Promise<void> {
-    switch (item.action) {
-      case 'create':
-        if (item.data) {
-          const user = this.convertDBUserToUser(item.data as unknown as DBUser);
-          await supabaseUserApi.create(user);
-        }
-        break;
-      case 'update':
-        if (item.data) {
-          await supabaseUserApi.update(item.recordId, item.data);
-        }
-        break;
-      case 'delete':
-        await supabaseUserApi.delete(item.recordId);
-        break;
-    }
+    // Sync functionality temporarily disabled - needs unified API implementation
+    logger.info('User sync not implemented with unified API yet');
   }
 
   private async syncChild(item: SyncStatus): Promise<void> {
-    switch (item.action) {
-      case 'create':
-        if (item.data) {
-          const child = this.convertDBChildToChild(item.data as unknown as DBChild);
-          await supabaseChildrenApi.create(child);
-        }
-        break;
-      case 'update':
-        if (item.data) {
-          await supabaseChildrenApi.update(item.recordId, item.data);
-        }
-        break;
-      case 'delete':
-        // Child deletion not implemented in Supabase API yet
-        logger.debug('Child deletion sync not implemented yet');
-        break;
-    }
+    // Sync functionality temporarily disabled - needs unified API implementation
+    logger.info('Child sync not implemented with unified API yet');
   }
 
   private async syncTeam(item: SyncStatus): Promise<void> {
-    switch (item.action) {
-      case 'create':
-        if (item.data) {
-          const team = this.convertDBTeamToTeam(item.data as unknown as DBTeam);
-          await supabaseTeamApi.create(team);
-        }
-        break;
-      case 'update':
-        if (item.data) {
-          await supabaseTeamApi.update(item.recordId, item.data);
-        }
-        break;
-      case 'delete':
-        await supabaseTeamApi.delete(item.recordId);
-        break;
-    }
+    // Sync functionality temporarily disabled - needs unified API implementation
+    logger.info('Team sync not implemented with unified API yet');
   }
 
   async syncFromSupabase(): Promise<void> {
     if (!this.isOnline) return;
 
-    logger.info('Starting sync from Supabase...');
-
-    try {
-      // Sync users
-      const users = await supabaseUserApi.getAll();
-      for (const user of users) {
-        const dbUser = this.convertUserToDBUser(user);
-        // Check if user exists locally
-        const existingUser = await offlineApi.getUserById(user.id);
-        if (!existingUser) {
-          // Add to local database without triggering sync
-          const { id, ...userWithoutId } = user;
-          await offlineApi.createUser(userWithoutId);
-        }
-      }
-
-      // Sync children
-      const children = await supabaseChildrenApi.getAll();
-      for (const child of children) {
-        const existingChild = await offlineApi.getChildById(child.id);
-        if (!existingChild) {
-          const { id, ...childWithoutId } = child;
-          await offlineApi.createChild(childWithoutId);
-        }
-      }
-
-      // Sync teams
-      const teams = await supabaseTeamApi.getAll();
-      for (const team of teams) {
-        const existingTeam = await offlineApi.getTeamById(team.id);
-        if (!existingTeam) {
-          const { id, ...teamWithoutId } = team;
-          await offlineApi.createTeam(teamWithoutId);
-        }
-      }
-
-      logger.info('Sync from Supabase completed');
-    } catch (error) {
-      logger.error('Failed to sync from Supabase:', error);
-    }
+    logger.info('Sync from Supabase temporarily disabled - needs unified API implementation');
   }
 
   // Manual sync trigger

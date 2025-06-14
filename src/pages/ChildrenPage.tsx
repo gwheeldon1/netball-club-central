@@ -8,7 +8,7 @@ import { Plus, Edit } from "lucide-react";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
 import { Child } from "@/types";
-import { supabaseChildrenApi } from "@/services/supabaseApi";
+import { api } from '@/services/unifiedApi';
 
 const ChildrenPage = () => {
   const { currentUser } = useAuth();

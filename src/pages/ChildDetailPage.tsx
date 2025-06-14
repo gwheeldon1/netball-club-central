@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ArrowLeft, Edit, Calendar, Activity, Trophy, Heart } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
-import { supabaseChildrenApi } from "@/services/supabaseApi";
+import { api } from '@/services/unifiedApi';
 import { toast } from "sonner";
 import FileUpload from "@/components/FileUpload";
 import { SubscriptionManagement } from "@/components/SubscriptionManagement";

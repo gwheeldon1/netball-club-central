@@ -11,7 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useAuth } from "@/context/AuthContext";
 import { toast } from "sonner";
 import FileUpload from "@/components/FileUpload";
-import { supabaseChildrenApi } from "@/services/supabaseApi";
+import { api } from '@/services/unifiedApi';
 import { Child } from "@/types";
 
 const NewChildPage = () => {

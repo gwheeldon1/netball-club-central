@@ -10,14 +10,18 @@ Complete migration from old supabaseApi to unified API architecture
 - [ ] Test all components after migration
 
 ## Files to Fix
-- [ ] src/pages/ApprovalsPage.tsx
-- [ ] src/pages/ChildDetailPage.tsx  
-- [ ] src/pages/ChildrenPage.tsx
-- [ ] src/pages/Dashboard.tsx
-- [ ] src/pages/EditTeamPage.tsx
-- [ ] src/pages/UserProfilePage.tsx
-- [ ] src/pages/TeamDetailPage.tsx
-- [ ] src/services/syncService.ts
+- [ ] src/pages/ApprovalsPage.tsx (needs view first)
+- [x] src/pages/ChildDetailPage.tsx  
+- [x] src/pages/ChildrenPage.tsx
+- [ ] src/pages/Dashboard.tsx (needs view first)
+- [ ] src/pages/EditTeamPage.tsx (needs view first)
+- [x] src/pages/UserProfilePage.tsx
+- [x] src/pages/TeamDetailPage.tsx
+- [x] src/pages/NewChildPage.tsx
+- [x] src/pages/NewTeamPage.tsx
+- [x] src/pages/RegistrationPage.tsx
+- [x] src/pages/EventsPage.tsx
+- [ ] src/services/syncService.ts (needs complete refactor - uses old API extensively)
 
 ## Definition of Done
 - [ ] Zero TypeScript build errors
