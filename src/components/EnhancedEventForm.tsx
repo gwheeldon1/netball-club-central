@@ -14,6 +14,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { useToast } from '@/hooks/use-toast';
 import { format, addDays } from 'date-fns';
 import { createRecurringEvents, RecurringEventData } from '@/services/eventRecurrenceApi';
+import { logger } from '@/utils/logger';
 
 const eventSchema = z.object({
   title: z.string().min(1, 'Title is required'),
@@ -139,7 +140,7 @@ const EnhancedEventForm: React.FC<EnhancedEventFormProps> = ({
 
       onSuccess();
     } catch (error) {
-      console.error('Error creating event:', error);
+      logger.error('Error creating event:', error);
       toast({
         title: 'Error',
         description: 'Failed to create event. Please try again.',

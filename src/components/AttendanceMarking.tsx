@@ -10,6 +10,7 @@ import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { CheckCircle, XCircle, AlertTriangle, Clock, User } from 'lucide-react';
+import { logger } from '@/utils/logger';
 
 interface Player {
   id: string;
@@ -93,7 +94,7 @@ const AttendanceMarking: React.FC<AttendanceMarkingProps> = ({ eventId, eventTit
       });
     },
     onError: (error) => {
-      console.error('Error updating attendance:', error);
+      logger.error('Error updating attendance:', error);
       toast({
         title: 'Error',
         description: 'Failed to update attendance',

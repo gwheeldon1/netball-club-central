@@ -15,6 +15,7 @@ import { toast } from "sonner";
 import { User, Heart, Shield, Camera, FileText } from "lucide-react";
 import FileUpload from "@/components/FileUpload";
 import { supabase } from "@/integrations/supabase/client";
+import { logger } from "@/utils/logger";
 
 const registrationSchema = z.object({
   // Player Information
@@ -157,7 +158,7 @@ const EnhancedRegistration = ({ onSuccess }: EnhancedRegistrationProps) => {
         onSuccess();
       }
     } catch (error) {
-      console.error('Registration error:', error);
+      logger.error('Registration error:', error);
       toast.error("Failed to submit registration. Please try again.");
     } finally {
       setIsSubmitting(false);

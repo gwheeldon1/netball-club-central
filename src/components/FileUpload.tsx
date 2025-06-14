@@ -7,6 +7,7 @@ import Cropper from 'react-easy-crop';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Slider } from "@/components/ui/slider";
 import { supabase } from "@/integrations/supabase/client";
+import { logger } from "@/utils/logger";
 
 interface FileUploadProps {
   onUpload: (url: string) => void;
@@ -104,7 +105,7 @@ const FileUpload = ({ onUpload, currentImage, className, aspectRatio = 1, bucket
         }, 'image/jpeg', 0.95); // JPEG at 95% quality
       });
     } catch (error) {
-      console.error("Error creating cropped image:", error);
+      logger.error("Error creating cropped image:", error);
       return null;
     }
   };
@@ -128,7 +129,7 @@ const FileUpload = ({ onUpload, currentImage, className, aspectRatio = 1, bucket
           });
 
         if (error) {
-          console.error('Upload error:', error);
+          logger.error('Upload error:', error);
           toast.error('Failed to upload image');
           return;
         }
@@ -148,7 +149,7 @@ const FileUpload = ({ onUpload, currentImage, className, aspectRatio = 1, bucket
         toast.success("Image uploaded successfully");
       }
     } catch (error) {
-      console.error("Error confirming crop:", error);
+      logger.error("Error confirming crop:", error);
       toast.error("Failed to process image");
     } finally {
       setIsUploading(false);
