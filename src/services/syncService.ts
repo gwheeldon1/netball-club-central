@@ -142,7 +142,7 @@ export class SyncService {
     switch (item.action) {
       case 'create':
         if (item.data) {
-          const user = this.convertDBUserToUser(item.data as DBUser);
+          const user = this.convertDBUserToUser(item.data as unknown as DBUser);
           await supabaseUserApi.create(user);
         }
         break;
@@ -161,7 +161,7 @@ export class SyncService {
     switch (item.action) {
       case 'create':
         if (item.data) {
-          const child = this.convertDBChildToChild(item.data as DBChild);
+          const child = this.convertDBChildToChild(item.data as unknown as DBChild);
           await supabaseChildrenApi.create(child);
         }
         break;
@@ -181,7 +181,7 @@ export class SyncService {
     switch (item.action) {
       case 'create':
         if (item.data) {
-          const team = this.convertDBTeamToTeam(item.data as DBTeam);
+          const team = this.convertDBTeamToTeam(item.data as unknown as DBTeam);
           await supabaseTeamApi.create(team);
         }
         break;
