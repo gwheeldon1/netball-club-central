@@ -171,14 +171,22 @@ export type Database = {
       }
       guardians: {
         Row: {
+          additional_notes: string | null
+          allergies: string | null
           approval_status: string | null
           approved_at: string | null
           approved_by: string | null
           code_of_conduct_accepted: boolean | null
+          dietary_requirements: string | null
           email: string | null
+          emergency_contact_name: string | null
+          emergency_contact_phone: string | null
+          emergency_contact_relationship: string | null
           first_name: string
           id: string
           last_name: string
+          medical_conditions: string | null
+          medications: string | null
           phone: string | null
           photo_consent: boolean | null
           player_id: string | null
@@ -189,14 +197,22 @@ export type Database = {
           terms_accepted: boolean | null
         }
         Insert: {
+          additional_notes?: string | null
+          allergies?: string | null
           approval_status?: string | null
           approved_at?: string | null
           approved_by?: string | null
           code_of_conduct_accepted?: boolean | null
+          dietary_requirements?: string | null
           email?: string | null
+          emergency_contact_name?: string | null
+          emergency_contact_phone?: string | null
+          emergency_contact_relationship?: string | null
           first_name: string
           id?: string
           last_name: string
+          medical_conditions?: string | null
+          medications?: string | null
           phone?: string | null
           photo_consent?: boolean | null
           player_id?: string | null
@@ -207,14 +223,22 @@ export type Database = {
           terms_accepted?: boolean | null
         }
         Update: {
+          additional_notes?: string | null
+          allergies?: string | null
           approval_status?: string | null
           approved_at?: string | null
           approved_by?: string | null
           code_of_conduct_accepted?: boolean | null
+          dietary_requirements?: string | null
           email?: string | null
+          emergency_contact_name?: string | null
+          emergency_contact_phone?: string | null
+          emergency_contact_relationship?: string | null
           first_name?: string
           id?: string
           last_name?: string
+          medical_conditions?: string | null
+          medications?: string | null
           phone?: string | null
           photo_consent?: boolean | null
           player_id?: string | null
@@ -464,61 +488,97 @@ export type Database = {
       }
       players: {
         Row: {
+          additional_medical_notes: string | null
           address: string | null
+          allergies: string | null
           approval_status: string | null
           approved_at: string | null
           approved_by: string | null
           city: string | null
+          code_of_conduct_accepted: boolean | null
+          data_processing_consent: boolean | null
           date_of_birth: string | null
+          dietary_requirements: string | null
           email: string | null
+          emergency_contact_name: string | null
+          emergency_contact_phone: string | null
+          emergency_contact_relationship: string | null
           first_name: string
           gender: string | null
           id: string
           last_name: string
+          medical_conditions: string | null
+          medications: string | null
           phone: string | null
+          photo_consent: boolean | null
           postal_code: string | null
           profile_image: string | null
           rejection_reason: string | null
           sign_up_date: string | null
           team_preference: string | null
+          terms_accepted: boolean | null
         }
         Insert: {
+          additional_medical_notes?: string | null
           address?: string | null
+          allergies?: string | null
           approval_status?: string | null
           approved_at?: string | null
           approved_by?: string | null
           city?: string | null
+          code_of_conduct_accepted?: boolean | null
+          data_processing_consent?: boolean | null
           date_of_birth?: string | null
+          dietary_requirements?: string | null
           email?: string | null
+          emergency_contact_name?: string | null
+          emergency_contact_phone?: string | null
+          emergency_contact_relationship?: string | null
           first_name: string
           gender?: string | null
           id?: string
           last_name: string
+          medical_conditions?: string | null
+          medications?: string | null
           phone?: string | null
+          photo_consent?: boolean | null
           postal_code?: string | null
           profile_image?: string | null
           rejection_reason?: string | null
           sign_up_date?: string | null
           team_preference?: string | null
+          terms_accepted?: boolean | null
         }
         Update: {
+          additional_medical_notes?: string | null
           address?: string | null
+          allergies?: string | null
           approval_status?: string | null
           approved_at?: string | null
           approved_by?: string | null
           city?: string | null
+          code_of_conduct_accepted?: boolean | null
+          data_processing_consent?: boolean | null
           date_of_birth?: string | null
+          dietary_requirements?: string | null
           email?: string | null
+          emergency_contact_name?: string | null
+          emergency_contact_phone?: string | null
+          emergency_contact_relationship?: string | null
           first_name?: string
           gender?: string | null
           id?: string
           last_name?: string
+          medical_conditions?: string | null
+          medications?: string | null
           phone?: string | null
+          photo_consent?: boolean | null
           postal_code?: string | null
           profile_image?: string | null
           rejection_reason?: string | null
           sign_up_date?: string | null
           team_preference?: string | null
+          terms_accepted?: boolean | null
         }
         Relationships: [
           {
