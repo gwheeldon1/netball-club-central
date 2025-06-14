@@ -71,7 +71,6 @@ const AnalyticsDashboard = () => {
         loadAttendanceAnalytics()
       ]);
     } catch (error) {
-      console.error('Error loading analytics data:', error);
       toast.error("Failed to load analytics data");
     } finally {
       setLoading(false);
@@ -218,7 +217,7 @@ const AnalyticsDashboard = () => {
       }
 
       // Calculate attendance
-      const presentCount = event.event_responses?.filter((r: any) => r.attendance_status === 'present').length || 0;
+      const presentCount = event.event_responses?.filter((r) => r.attendance_status === 'present').length || 0;
       teamStat.averageAttendance += presentCount;
     });
 
@@ -256,10 +255,10 @@ const AnalyticsDashboard = () => {
     const attendanceAnalytics = data?.map((event: any) => {
       const responses = event.event_responses || [];
       const totalPlayers = responses.length;
-      const presentCount = responses.filter((r: any) => r.attendance_status === 'present').length;
-      const absentCount = responses.filter((r: any) => r.attendance_status === 'absent').length;
-      const injuredCount = responses.filter((r: any) => r.attendance_status === 'injured').length;
-      const lateCount = responses.filter((r: any) => r.attendance_status === 'late').length;
+      const presentCount = responses.filter((r) => r.attendance_status === 'present').length;
+      const absentCount = responses.filter((r) => r.attendance_status === 'absent').length;
+      const injuredCount = responses.filter((r) => r.attendance_status === 'injured').length;
+      const lateCount = responses.filter((r) => r.attendance_status === 'late').length;
 
       return {
         eventId: event.id,
@@ -278,7 +277,7 @@ const AnalyticsDashboard = () => {
   };
 
   const exportData = (type: string) => {
-    let data: any[] = [];
+    let data: unknown[] = [];
     let filename = "";
 
     switch (type) {

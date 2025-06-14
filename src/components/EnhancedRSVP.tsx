@@ -38,9 +38,9 @@ interface EnhancedRSVPProps {
 }
 
 const RSVP_OPTIONS = [
-  { value: 'going', label: 'Going', icon: UserCheck, color: 'text-green-600', bgColor: 'bg-green-50 border-green-200' },
-  { value: 'maybe', label: 'Maybe', icon: HelpCircle, color: 'text-yellow-600', bgColor: 'bg-yellow-50 border-yellow-200' },
-  { value: 'not_going', label: 'Not Going', icon: UserX, color: 'text-red-600', bgColor: 'bg-red-50 border-red-200' }
+  { value: 'going', label: 'Going', icon: UserCheck, color: 'text-primary', bgColor: 'bg-primary/10 border-primary/20' },
+  { value: 'maybe', label: 'Maybe', icon: HelpCircle, color: 'text-muted-foreground', bgColor: 'bg-muted border-border' },
+  { value: 'not_going', label: 'Not Going', icon: UserX, color: 'text-destructive', bgColor: 'bg-destructive/10 border-destructive/20' }
 ];
 
 export const EnhancedRSVP: React.FC<EnhancedRSVPProps> = ({ 
@@ -312,11 +312,11 @@ export const EnhancedRSVP: React.FC<EnhancedRSVPProps> = ({
                             >
                               {RSVP_OPTIONS.find(opt => opt.value === playerResponse.rsvp_status)?.label}
                             </Badge>
-                          ) : (
-                            <Badge variant="outline" className="bg-gray-50">
-                              Not Responded
-                            </Badge>
-                          )}
+                           ) : (
+                             <Badge variant="outline" className="bg-muted">
+                               Not Responded
+                             </Badge>
+                           )}
                         </div>
 
                         <div className="flex gap-2">

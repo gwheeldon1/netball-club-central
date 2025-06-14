@@ -26,10 +26,10 @@ interface NotificationSystemProps {
 }
 
 const NOTIFICATION_TYPES = [
-  { value: 'info', label: 'Information', color: 'bg-blue-500' },
-  { value: 'success', label: 'Success', color: 'bg-green-500' },
-  { value: 'warning', label: 'Warning', color: 'bg-yellow-500' },
-  { value: 'error', label: 'Error', color: 'bg-red-500' },
+  { value: 'info', label: 'Information', color: 'bg-primary' },
+  { value: 'success', label: 'Success', color: 'bg-primary' },
+  { value: 'warning', label: 'Warning', color: 'bg-destructive' },
+  { value: 'error', label: 'Error', color: 'bg-destructive' },
 ];
 
 export const NotificationSystem: React.FC<NotificationSystemProps> = ({ userId }) => {
@@ -164,7 +164,7 @@ export const NotificationSystem: React.FC<NotificationSystemProps> = ({ userId }
 
   const getNotificationIcon = (notificationType: string) => {
     const typeConfig = NOTIFICATION_TYPES.find(t => t.value === notificationType);
-    return typeConfig?.color || 'bg-gray-500';
+    return typeConfig?.color || 'bg-muted';
   };
 
   const unreadCount = notifications.filter(n => !n.read).length;
@@ -209,7 +209,7 @@ export const NotificationSystem: React.FC<NotificationSystemProps> = ({ userId }
                 <select
                   id="notification-type"
                   value={type}
-                  onChange={(e) => setType(e.target.value as any)}
+                  onChange={(e) => setType(e.target.value as 'info' | 'success' | 'warning' | 'error')}
                   className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
                 >
                   {NOTIFICATION_TYPES.map(type => (

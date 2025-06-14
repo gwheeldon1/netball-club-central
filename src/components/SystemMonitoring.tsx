@@ -40,7 +40,12 @@ const SystemMonitoring = () => {
   const [systemMetrics, setSystemMetrics] = useState<SystemMetric[]>([]);
   const [auditLogs, setAuditLogs] = useState<AuditLogEntry[]>([]);
   const [databaseStats, setDatabaseStats] = useState<DatabaseStats | null>(null);
-  const [performanceData, setPerformanceData] = useState<any[]>([]);
+  const [performanceData, setPerformanceData] = useState<Array<{
+    time: string;
+    responseTime: number;
+    requests: number;
+    errors: number;
+  }>>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -58,7 +63,6 @@ const SystemMonitoring = () => {
         loadPerformanceData()
       ]);
     } catch (error) {
-      console.error('Error loading system data:', error);
       toast.error("Failed to load system monitoring data");
     } finally {
       setLoading(false);
@@ -127,7 +131,7 @@ const SystemMonitoring = () => {
 
       setAuditLogs(data || []);
     } catch (error) {
-      console.error('Error loading audit logs:', error);
+      // Silently handle error - audit logs are not critical
     }
   };
 
@@ -151,7 +155,7 @@ const SystemMonitoring = () => {
         activeSubscriptions: subscriptionsResult.count || 0,
       });
     } catch (error) {
-      console.error('Error loading database stats:', error);
+      // Silently handle error - stats are not critical
     }
   };
 
@@ -175,26 +179,26 @@ const SystemMonitoring = () => {
   const getStatusIcon = (status: string) => {
     switch (status) {
       case 'healthy':
-        return <CheckCircle className="h-4 w-4 text-green-500" />;
+        return <CheckCircle className="h-4 w-4 text-primary" />;
       case 'warning':
-        return <AlertTriangle className="h-4 w-4 text-yellow-500" />;
+        return <AlertTriangle className="h-4 w-4 text-destructive" />;
       case 'critical':
-        return <XCircle className="h-4 w-4 text-red-500" />;
+        return <XCircle className="h-4 w-4 text-destructive" />;
       default:
-        return <Clock className="h-4 w-4 text-gray-500" />;
+        return <Clock className="h-4 w-4 text-muted-foreground" />;
     }
   };
 
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'healthy':
-        return 'bg-green-500/10 text-green-700 dark:text-green-400';
+        return 'bg-primary/10 text-primary';
       case 'warning':
-        return 'bg-yellow-500/10 text-yellow-700 dark:text-yellow-400';
+        return 'bg-destructive/10 text-destructive';
       case 'critical':
-        return 'bg-red-500/10 text-red-700 dark:text-red-400';
+        return 'bg-destructive/10 text-destructive';
       default:
-        return 'bg-gray-500/10 text-gray-700 dark:text-gray-400';
+        return 'bg-muted text-muted-foreground';
     }
   };
 

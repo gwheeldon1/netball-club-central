@@ -14,7 +14,29 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 
+interface UserRole {
+  role: string;
+  is_active: boolean;
+}
+
+interface Player {
+  id: string;
+}
+
 interface Guardian {
+  id: string;
+  first_name: string;
+  last_name: string;
+  email: string;
+  phone?: string;
+  approval_status: string;
+  registration_date: string;
+  profile_image?: string;
+  user_roles?: UserRole[];
+  players?: Player[];
+}
+
+interface UserWithMetadata {
   id: string;
   first_name: string;
   last_name: string;
@@ -35,8 +57,8 @@ interface BulkAction {
 }
 
 const AdminUserManagement = () => {
-  const [users, setUsers] = useState<Guardian[]>([]);
-  const [filteredUsers, setFilteredUsers] = useState<Guardian[]>([]);
+  const [users, setUsers] = useState<UserWithMetadata[]>([]);
+  const [filteredUsers, setFilteredUsers] = useState<UserWithMetadata[]>([]);
   const [selectedUsers, setSelectedUsers] = useState<Set<string>>(new Set());
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
@@ -79,7 +101,7 @@ const AdminUserManagement = () => {
 
       if (guardiansError) throw guardiansError;
 
-      const usersWithMetadata = guardiansData?.map(guardian => ({
+      const usersWithMetadata: UserWithMetadata[] = guardiansData?.map((guardian: any) => ({
         id: guardian.id,
         first_name: guardian.first_name,
         last_name: guardian.last_name,
@@ -95,7 +117,6 @@ const AdminUserManagement = () => {
 
       setUsers(usersWithMetadata);
     } catch (error) {
-      console.error('Error loading users:', error);
       toast.error("Failed to load users");
     } finally {
       setLoading(false);
@@ -210,7 +231,6 @@ const AdminUserManagement = () => {
       setShowBulkDialog(false);
       await loadUsers();
     } catch (error) {
-      console.error('Error processing bulk action:', error);
       toast.error(`Failed to ${selectedBulkAction.label.toLowerCase()}`);
     } finally {
       setProcessing(false);
@@ -220,7 +240,7 @@ const AdminUserManagement = () => {
   const getUserStatusBadge = (status: string) => {
     switch (status) {
       case 'approved':
-        return <Badge className="bg-green-500/10 text-green-700 dark:text-green-400">Approved</Badge>;
+        return <Badge variant="default">Approved</Badge>;
       case 'pending':
         return <Badge variant="outline">Pending</Badge>;
       case 'rejected':
