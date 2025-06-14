@@ -255,45 +255,8 @@ const RegistrationPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Hero Section */}
-      <div className="bg-gradient-to-br from-primary/10 via-background to-primary/5 border-b">
-        <div className="container mx-auto px-6 py-16">
-          <div className="max-w-4xl mx-auto text-center space-y-8">
-            <div className="inline-flex items-center justify-center w-20 h-20 bg-primary rounded-full shadow-lg">
-              <Star className="h-10 w-10 text-primary-foreground" />
-            </div>
-            
-            <div className="space-y-4">
-              <h1 className="text-4xl md:text-5xl font-bold text-foreground">
-                Join Our Netball Club
-              </h1>
-              <p className="text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-                Get your children involved in the sport they'll love. Professional coaching, friendly environment, and a community that cares.
-              </p>
-            </div>
-            
-            {/* Trust indicators */}
-            <div className="flex flex-wrap items-center justify-center gap-6 md:gap-8 text-sm text-muted-foreground pt-4">
-                  <div className="flex items-center gap-2">
-                    <Users className="h-4 w-4 text-primary" />
-                    <span>200+ Active Players</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Shield className="h-4 w-4 text-primary" />
-                    <span>Safeguarding Certified</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <CheckCircle className="h-4 w-4 text-primary" />
-                    <span>England Netball Approved</span>
-                  </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Registration Form */}
-      <div className="container mx-auto px-6 py-16">
+    <div className="min-h-screen bg-background py-16">
+      <div className="container mx-auto px-6">
         <div className="max-w-2xl mx-auto">
           <Card className="shadow-2xl border-0 bg-card">
             <CardHeader className="text-center py-8">
