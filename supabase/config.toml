@@ -1,1 +1,20 @@
 project_id = "esodellaeyuexfuqomre"
+
+[auth]
+enabled = true
+site_url = "http://localhost:3000"
+additional_redirect_urls = ["https://localhost:3000"]
+jwt_expiry = 3600
+external_email_enabled = true
+external_phone_enabled = false
+enable_signup = true
+enable_confirmations = false
+
+[functions.create-subscription]
+verify_jwt = true
+
+[functions.check-subscription] 
+verify_jwt = true
+
+[functions.customer-portal]
+verify_jwt = true

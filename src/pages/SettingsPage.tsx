@@ -3,6 +3,7 @@ import Layout from "@/components/Layout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { RoleManagement } from "@/components/RoleManagement";
+import { SystemSettings } from "@/components/SystemSettings";
 import { Shield, Users, Settings, Database } from "lucide-react";
 
 const SettingsPage = () => {
@@ -66,14 +67,7 @@ const SettingsPage = () => {
           </TabsContent>
 
           <TabsContent value="system" className="mt-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>System Settings</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground">System configuration options will be implemented here.</p>
-              </CardContent>
-            </Card>
+            <SystemSettings />
           </TabsContent>
 
           <TabsContent value="data" className="mt-6">

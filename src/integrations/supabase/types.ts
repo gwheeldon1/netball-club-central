@@ -360,9 +360,11 @@ export type Database = {
           guardian_id: string
           id: string
           payment_method: string | null
+          payment_type: string | null
           processed_at: string | null
           status: string
           stripe_charge_id: string | null
+          stripe_invoice_id: string | null
           stripe_payment_intent_id: string | null
           subscription_id: string
           updated_at: string
@@ -378,9 +380,11 @@ export type Database = {
           guardian_id: string
           id?: string
           payment_method?: string | null
+          payment_type?: string | null
           processed_at?: string | null
           status: string
           stripe_charge_id?: string | null
+          stripe_invoice_id?: string | null
           stripe_payment_intent_id?: string | null
           subscription_id: string
           updated_at?: string
@@ -396,9 +400,11 @@ export type Database = {
           guardian_id?: string
           id?: string
           payment_method?: string | null
+          payment_type?: string | null
           processed_at?: string | null
           status?: string
           stripe_charge_id?: string | null
+          stripe_invoice_id?: string | null
           stripe_payment_intent_id?: string | null
           subscription_id?: string
           updated_at?: string
@@ -534,12 +540,16 @@ export type Database = {
       subscriptions: {
         Row: {
           amount_pence: number
+          auto_renew: boolean
           billing_cycle: string
+          cancellation_reason: string | null
+          cancelled_at: string | null
           created_at: string
           created_by: string | null
           end_date: string | null
           guardian_id: string
           id: string
+          next_billing_date: string | null
           player_id: string
           start_date: string
           status: string
@@ -549,12 +559,16 @@ export type Database = {
         }
         Insert: {
           amount_pence: number
+          auto_renew?: boolean
           billing_cycle?: string
+          cancellation_reason?: string | null
+          cancelled_at?: string | null
           created_at?: string
           created_by?: string | null
           end_date?: string | null
           guardian_id: string
           id?: string
+          next_billing_date?: string | null
           player_id: string
           start_date?: string
           status?: string
@@ -564,12 +578,16 @@ export type Database = {
         }
         Update: {
           amount_pence?: number
+          auto_renew?: boolean
           billing_cycle?: string
+          cancellation_reason?: string | null
+          cancelled_at?: string | null
           created_at?: string
           created_by?: string | null
           end_date?: string | null
           guardian_id?: string
           id?: string
+          next_billing_date?: string | null
           player_id?: string
           start_date?: string
           status?: string
@@ -593,6 +611,39 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      system_settings: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          setting_key: string
+          setting_type: string
+          setting_value: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          setting_key: string
+          setting_type?: string
+          setting_value: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          setting_key?: string
+          setting_type?: string
+          setting_value?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       teams: {
         Row: {
