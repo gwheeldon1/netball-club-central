@@ -9,6 +9,67 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      analytics_events: {
+        Row: {
+          event_id: string | null
+          event_name: string
+          event_type: string
+          id: string
+          player_id: string | null
+          properties: Json | null
+          session_id: string | null
+          team_id: string | null
+          timestamp: string
+          user_id: string | null
+        }
+        Insert: {
+          event_id?: string | null
+          event_name: string
+          event_type: string
+          id?: string
+          player_id?: string | null
+          properties?: Json | null
+          session_id?: string | null
+          team_id?: string | null
+          timestamp?: string
+          user_id?: string | null
+        }
+        Update: {
+          event_id?: string | null
+          event_name?: string
+          event_type?: string
+          id?: string
+          player_id?: string | null
+          properties?: Json | null
+          session_id?: string | null
+          team_id?: string | null
+          timestamp?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "analytics_events_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "analytics_events_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "analytics_events_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       audit_log: {
         Row: {
           action: string
@@ -39,6 +100,42 @@ export type Database = {
           old_values?: Json | null
           record_id?: string
           table_name?: string
+        }
+        Relationships: []
+      }
+      dashboard_widgets: {
+        Row: {
+          configuration: Json
+          created_at: string
+          id: string
+          is_active: boolean | null
+          position: Json
+          title: string
+          updated_at: string
+          user_id: string
+          widget_type: string
+        }
+        Insert: {
+          configuration?: Json
+          created_at?: string
+          id?: string
+          is_active?: boolean | null
+          position?: Json
+          title: string
+          updated_at?: string
+          user_id: string
+          widget_type: string
+        }
+        Update: {
+          configuration?: Json
+          created_at?: string
+          id?: string
+          is_active?: boolean | null
+          position?: Json
+          title?: string
+          updated_at?: string
+          user_id?: string
+          widget_type?: string
         }
         Relationships: []
       }
@@ -550,6 +647,60 @@ export type Database = {
           },
         ]
       }
+      performance_metrics: {
+        Row: {
+          calculated_at: string
+          id: string
+          metadata: Json | null
+          metric_name: string
+          metric_type: string
+          period_end: string
+          period_start: string
+          player_id: string | null
+          team_id: string | null
+          value: number
+        }
+        Insert: {
+          calculated_at?: string
+          id?: string
+          metadata?: Json | null
+          metric_name: string
+          metric_type: string
+          period_end: string
+          period_start: string
+          player_id?: string | null
+          team_id?: string | null
+          value: number
+        }
+        Update: {
+          calculated_at?: string
+          id?: string
+          metadata?: Json | null
+          metric_name?: string
+          metric_type?: string
+          period_end?: string
+          period_start?: string
+          player_id?: string | null
+          team_id?: string | null
+          value?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "performance_metrics_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "performance_metrics_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       player_teams: {
         Row: {
           id: string
@@ -744,6 +895,51 @@ export type Database = {
           profile_image?: string | null
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      reports: {
+        Row: {
+          data: Json
+          description: string | null
+          expires_at: string | null
+          filters: Json | null
+          generated_at: string
+          generated_by: string | null
+          id: string
+          is_public: boolean | null
+          period_end: string | null
+          period_start: string | null
+          report_type: string
+          title: string
+        }
+        Insert: {
+          data: Json
+          description?: string | null
+          expires_at?: string | null
+          filters?: Json | null
+          generated_at?: string
+          generated_by?: string | null
+          id?: string
+          is_public?: boolean | null
+          period_end?: string | null
+          period_start?: string | null
+          report_type: string
+          title: string
+        }
+        Update: {
+          data?: Json
+          description?: string | null
+          expires_at?: string | null
+          filters?: Json | null
+          generated_at?: string
+          generated_by?: string | null
+          id?: string
+          is_public?: boolean | null
+          period_end?: string | null
+          period_start?: string | null
+          report_type?: string
+          title?: string
         }
         Relationships: []
       }
@@ -994,9 +1190,21 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      dashboard_stats: {
+        Row: {
+          metric: string | null
+          unit: string | null
+          updated_at: number | null
+          value: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
+      calculate_attendance_rate: {
+        Args: { p_team_id?: string; p_start_date?: string; p_end_date?: string }
+        Returns: number
+      }
       calculate_uk_age_group: {
         Args: { date_of_birth: string }
         Returns: string
@@ -1004,6 +1212,10 @@ export type Database = {
       can_access_team: {
         Args: { team_id: string }
         Returns: boolean
+      }
+      get_team_performance_summary: {
+        Args: { p_team_id: string; p_start_date?: string; p_end_date?: string }
+        Returns: Json
       }
       get_user_roles: {
         Args: { user_id: string }

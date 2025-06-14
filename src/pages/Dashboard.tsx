@@ -7,6 +7,9 @@ import { Calendar, Award, Users, User, MapPin, Clock, ChevronRight, Plus } from 
 import { Link } from "react-router-dom";
 import { api } from '@/services/api';
 import { Team, Event, Child } from "@/types";
+import { AnalyticsDashboard } from "@/components/analytics/AnalyticsDashboard";
+import { RoleManagement } from "@/components/RoleManagement";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const Dashboard = () => {
   const {
@@ -57,7 +60,15 @@ const Dashboard = () => {
   }
   return <Layout>
       <div className="space-y-6 sm:space-y-8">
-        <div className="grid gap-6 sm:gap-8 lg:grid-cols-2">
+        <Tabs defaultValue="overview" className="w-full">
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="overview">Overview</TabsTrigger>
+            <TabsTrigger value="analytics">Analytics</TabsTrigger>
+            {hasRole("admin") && <TabsTrigger value="management">Management</TabsTrigger>}
+          </TabsList>
+          
+          <TabsContent value="overview" className="space-y-6 mt-6">
+            <div className="grid gap-6 sm:gap-8 lg:grid-cols-2">
           {/* Upcoming Events */}
           <Card className="border-0 shadow-lg">
             <CardHeader className="pb-3 sm:pb-4 px-4 sm:px-6">
@@ -231,6 +242,18 @@ const Dashboard = () => {
               </div>
             </CardContent>
           </Card>}
+          </TabsContent>
+          
+          <TabsContent value="analytics" className="mt-6">
+            <AnalyticsDashboard />
+          </TabsContent>
+          
+          {hasRole("admin") && (
+            <TabsContent value="management" className="mt-6">
+              <RoleManagement />
+            </TabsContent>
+          )}
+        </Tabs>
       </div>
     </Layout>;
 };
