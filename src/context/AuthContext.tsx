@@ -5,15 +5,19 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from "sonner";
 import { logger } from '@/utils/logger';
 import { UserRole, UserProfile } from '@/types/unified';
+import { rolesApi } from '@/services/api/roles';
 
 interface AuthContextType {
   user: SupabaseUser | null;
   session: Session | null;
   currentUser: SupabaseUser | null; // For backward compatibility
   userProfile: UserProfile | null;
+  userRoles: UserRole[];
   login: (email: string, password: string) => Promise<boolean>;
   logout: () => Promise<void>;
   hasRole: (role: UserRole) => boolean;
+  hasAnyRole: (roles: UserRole[]) => boolean;
+  refreshUserRoles: () => Promise<void>;
   isAuthenticated: boolean;
   loading: boolean;
 }
@@ -24,6 +28,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<SupabaseUser | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
+  const [userRoles, setUserRoles] = useState<UserRole[]>([]);
   const [loading, setLoading] = useState(true);
 
   // Fetch user profile data
@@ -59,6 +64,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  // Fetch user roles
+  const fetchUserRoles = async (userId: string) => {
+    try {
+      const roles = await rolesApi.getUserRoles(userId);
+      setUserRoles(roles);
+    } catch (error) {
+      logger.error('Error fetching user roles:', error);
+      setUserRoles([]);
+    }
+  };
+
+  // Refresh user roles (for use after role changes)
+  const refreshUserRoles = async () => {
+    if (user?.id) {
+      await fetchUserRoles(user.id);
+    }
+  };
+
   useEffect(() => {
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
@@ -67,12 +90,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUser(session?.user ?? null);
         
         if (session?.user) {
-          // Fetch profile data asynchronously
+          // Fetch profile data and roles asynchronously
           setTimeout(() => {
             fetchUserProfile(session.user.id);
+            fetchUserRoles(session.user.id);
           }, 0);
         } else {
           setUserProfile(null);
+          setUserRoles([]);
         }
         
         setLoading(false);
@@ -140,21 +165,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const hasRole = (role: UserRole): boolean => {
-    if (!user) return false;
-    
-    // Use proper database role checking
-    // This is a simplified check - in production you'd query the user_roles table
-    // For now, check email for admin access
-    if (role === 'admin') {
-      return user.email === 'admin@netballclub.com' || user.email === 'admin@example.com';
-    }
-    
-    // Default to parent role for authenticated users
-    if (role === 'parent') {
-      return true;
-    }
-    
-    return false;
+    return userRoles.includes(role);
+  };
+
+  const hasAnyRole = (roles: UserRole[]): boolean => {
+    return roles.some(role => userRoles.includes(role));
   };
 
   const isAuthenticated = !!user;
@@ -165,9 +180,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       session,
       currentUser: user, // For backward compatibility
       userProfile,
+      userRoles,
       login, 
       logout, 
-      hasRole, 
+      hasRole,
+      hasAnyRole,
+      refreshUserRoles,
       isAuthenticated,
       loading
     }}>
