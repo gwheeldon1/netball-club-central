@@ -5,24 +5,27 @@ import { ThemeProvider } from '@/components/theme-provider';
 import { AuthProvider } from '@/context/AuthContext';
 import { ErrorBoundary } from '@/utils/errorBoundary';
 import ProtectedRoute from '@/components/ProtectedRoute';
-import Dashboard from '@/pages/Dashboard';
-import LoginPage from '@/pages/LoginPage';
-import RegistrationPage from '@/pages/RegistrationPage';
-import TeamsPage from '@/pages/TeamsPage';
-import TeamDetailPage from '@/pages/TeamDetailPage';
-import EditTeamPage from '@/pages/EditTeamPage';
-import ChildrenPage from '@/pages/ChildrenPage';
-import ChildDetailPage from '@/pages/ChildDetailPage';
-import NewChildPage from '@/pages/NewChildPage';
-import NewTeamPage from '@/pages/NewTeamPage';
-import EventsPage from '@/pages/EventsPage';
-import EventDetailPage from '@/pages/EventDetailPage';
-import ApprovalsPage from '@/pages/ApprovalsPage';
-import UserProfilePage from '@/pages/UserProfilePage';
-import SettingsPage from '@/pages/SettingsPage';
-import NotFound from '@/pages/NotFound';
-import UnauthorizedPage from '@/pages/UnauthorizedPage';
-import DesignSystemPage from '@/pages/DesignSystemPage';
+import {
+  Dashboard,
+  LoginPage,
+  RegistrationPage,
+  TeamsPage,
+  TeamDetailPage,
+  EditTeamPage,
+  ChildrenPage,
+  ChildDetailPage,
+  NewChildPage,
+  NewTeamPage,
+  EventsPage,
+  EventDetailPage,
+  ApprovalsPage,
+  UserProfilePage,
+  SettingsPage,
+  NotFound,
+  UnauthorizedPage,
+  DesignSystemPage,
+  withLazyLoading,
+} from '@/components/LazyComponents';
 import './App.css';
 
 function App() {
@@ -32,11 +35,12 @@ function App() {
       <AuthProvider>
         <Router>
           <Routes>
+            {/* Public routes with lazy loading */}
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegistrationPage />} />
             <Route path="/unauthorized" element={<UnauthorizedPage />} />
             
-            {/* Protected routes */}
+            {/* Protected routes with lazy loading */}
             <Route path="/" element={
               <ProtectedRoute>
                 <Dashboard />
