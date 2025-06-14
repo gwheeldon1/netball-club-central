@@ -83,7 +83,10 @@ export const EnhancedRSVP: React.FC<EnhancedRSVPProps> = ({
 
       const { data, error } = await query;
       if (error) throw error;
-      return data as Event[];
+      return (data || []).map(item => ({
+        ...item,
+        teams: item.teams || { name: '', age_group: '' }
+      })) as Event[];
     }
   });
 
@@ -97,7 +100,7 @@ export const EnhancedRSVP: React.FC<EnhancedRSVPProps> = ({
         .from('event_responses')
         .select(`
           *,
-          players (
+          players!inner (
             id,
             first_name,
             last_name
@@ -107,7 +110,10 @@ export const EnhancedRSVP: React.FC<EnhancedRSVPProps> = ({
         .eq('player_id', playerId);
 
       if (error) throw error;
-      return data as EventResponse[];
+      return (data || []).map(item => ({
+        ...item,
+        players: item.players || { id: '', first_name: '', last_name: '' }
+      })) as EventResponse[];
     },
     enabled: !!playerId && events.length > 0
   });

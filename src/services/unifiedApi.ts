@@ -506,32 +506,30 @@ class UnifiedAPI {
         const { data, error } = await supabase
           .from('players')
           .select(`
-            *,
-            player_teams (
-              team_id,
-              teams (
-                age_group
-              )
-            )
+            id,
+            first_name,
+            last_name,
+            date_of_birth,
+            medical_conditions,
+            additional_medical_notes,
+            profile_image,
+            approval_status
           `);
         
         if (error) throw error;
         
-        return data?.map(player => {
-          const teamAssignment = player.player_teams?.[0];
-          return {
-            id: player.id,
-            name: `${player.first_name} ${player.last_name}`,
-            dateOfBirth: player.date_of_birth || '',
-            medicalInfo: player.medical_conditions || '',
-            notes: player.additional_medical_notes || '',
-            profileImage: player.profile_image || '',
-            teamId: teamAssignment?.team_id || '',
-            ageGroup: teamAssignment?.teams?.age_group || '',
-            parentId: '', // Will need to be resolved from guardians relationship
-            status: player.approval_status as 'pending' | 'approved' | 'rejected'
-          };
-        }) || [];
+        return data?.map(player => ({
+          id: player.id,
+          name: `${player.first_name} ${player.last_name}`,
+          dateOfBirth: player.date_of_birth || '',
+          medicalInfo: player.medical_conditions || '',
+          notes: player.additional_medical_notes || '',
+          profileImage: player.profile_image || '',
+          teamId: '',
+          ageGroup: '',
+          parentId: '',
+          status: player.approval_status as 'pending' | 'approved' | 'rejected'
+        })) || [];
       },
       () => offlineApi.getChildren(),
       'getChildren'
@@ -541,32 +539,48 @@ class UnifiedAPI {
   async getChildrenByTeamId(teamId: string): Promise<Child[]> {
     return this.withOfflineFallback(
       async () => {
-        const { data, error } = await supabase
+        // Simple approach: get player IDs from player_teams, then get player details
+        const { data: playerTeams, error: ptError } = await supabase
           .from('player_teams')
-          .select(`
-            players (
-              *
-            ),
-            teams (
-              age_group
-            )
-          `)
+          .select('player_id')
           .eq('team_id', teamId);
         
-        if (error) throw error;
+        if (ptError) throw ptError;
         
-        return data?.map(pt => ({
-          id: pt.players.id,
-          name: `${pt.players.first_name} ${pt.players.last_name}`,
-          dateOfBirth: pt.players.date_of_birth || '',
-          medicalInfo: pt.players.medical_conditions || '',
-          notes: pt.players.additional_medical_notes || '',
-          profileImage: pt.players.profile_image || '',
+        if (!playerTeams || playerTeams.length === 0) {
+          return [];
+        }
+        
+        const playerIds = playerTeams.map(pt => pt.player_id);
+        
+        const { data: players, error: playersError } = await supabase
+          .from('players')
+          .select(`
+            id,
+            first_name,
+            last_name,
+            date_of_birth,
+            medical_conditions,
+            additional_medical_notes,
+            profile_image,
+            approval_status
+          `)
+          .in('id', playerIds);
+        
+        if (playersError) throw playersError;
+        
+        return (players || []).map(player => ({
+          id: player.id,
+          name: `${player.first_name} ${player.last_name}`,
+          dateOfBirth: player.date_of_birth || '',
+          medicalInfo: player.medical_conditions || '',
+          notes: player.additional_medical_notes || '',
+          profileImage: player.profile_image || '',
           teamId: teamId,
-          ageGroup: pt.teams?.age_group || '',
+          ageGroup: '',
           parentId: '',
-          status: pt.players.approval_status as 'pending' | 'approved' | 'rejected'
-        })) || [];
+          status: player.approval_status as 'pending' | 'approved' | 'rejected'
+        }));
       },
       () => offlineApi.getChildrenByTeamId(teamId),
       'getChildrenByTeamId'

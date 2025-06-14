@@ -56,7 +56,7 @@ const CalendarView: React.FC<CalendarViewProps> = ({
         .from('events')
         .select(`
           *,
-          teams (
+          teams!left (
             name,
             age_group
           )
@@ -73,7 +73,10 @@ const CalendarView: React.FC<CalendarViewProps> = ({
 
       const { data, error } = await query;
       if (error) throw error;
-      return data as Event[];
+      return (data || []).map(item => ({
+        ...item,
+        teams: item.teams || { name: '', age_group: '' }
+      })) as Event[];
     }
   });
 

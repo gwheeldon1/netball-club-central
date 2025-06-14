@@ -54,7 +54,7 @@ const AttendanceMarking: React.FC<AttendanceMarkingProps> = ({ eventId, eventTit
         .from('event_responses')
         .select(`
           *,
-          players (
+          players!inner (
             id,
             first_name,
             last_name,
@@ -64,7 +64,10 @@ const AttendanceMarking: React.FC<AttendanceMarkingProps> = ({ eventId, eventTit
         .eq('event_id', eventId);
 
       if (error) throw error;
-      return data as EventResponse[];
+      return (data || []).map(item => ({
+        ...item,
+        players: item.players || { id: '', first_name: '', last_name: '', profile_image: null }
+      })) as EventResponse[];
     }
   });
 
