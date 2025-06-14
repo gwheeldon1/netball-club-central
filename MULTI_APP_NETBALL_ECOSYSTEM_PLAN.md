@@ -1,17 +1,14 @@
 # Multi-App Netball Ecosystem Development Plan
 
 ## Overview
-This document outlines the comprehensive development plan for the Multi-App Netball Ecosystem - a suite of interconnected applications serving different stakeholders in the netball community.
+This document outlines the development plan for the **3-App Netball Ecosystem** - a focused suite of interconnected applications serving the core stakeholders in netball club management.
 
 ## 🏗️ System Architecture
 
-### Core Applications
-1. **Club Management App** (Current - Primary Hub)
-2. **Parent/Guardian App** 
-3. **Coach Mobile App**
-4. **Player Mobile App**
-5. **Admin Dashboard**
-6. **Public Website**
+### Core Applications (3 Apps Total)
+1. **Club Admin App** (Current - Web Application)
+2. **Parent App** (Mobile Application)  
+3. **Coach App** (Mobile Application)
 
 ### Shared Infrastructure
 - **Unified Backend API** (Supabase)
@@ -22,13 +19,14 @@ This document outlines the comprehensive development plan for the Multi-App Netb
 
 ## 📱 Application Breakdown
 
-### 1. Club Management App (Current App)
+### 1. Club Admin App (Web Application)
 **Status:** ✅ In Development  
 **Target Users:** Club administrators, team managers  
+**Platform:** Web (React + TypeScript)
 **Current Features:**
 - ✅ Team management (CRUD operations)
 - ✅ Player registration & approval workflow
-- ✅ Basic events system
+- ✅ Events system (create, edit, delete events)
 - ✅ User roles & permissions
 - ✅ Attendance tracking
 
@@ -38,22 +36,26 @@ This document outlines the comprehensive development plan for the Multi-App Netb
 - [ ] Communication hub (announcements, messaging)
 - [ ] Reporting & analytics dashboard
 - [ ] Match statistics management
+- [ ] Parent/Coach communication tools
 
-### 2. Parent/Guardian App
+### 2. Parent App (Mobile Application)
 **Status:** 🔄 Next Priority  
 **Target Users:** Parents and guardians of players  
+**Platform:** React Native (iOS/Android)
 **Core Features:**
 - [ ] Child registration & profile management
 - [ ] Event calendar & RSVP functionality
 - [ ] Payment processing (fees, match costs)
-- [ ] Communication with coaches/managers
+- [ ] Communication with coaches/club admin
 - [ ] Match attendance & pickup coordination
 - [ ] Performance updates & match reports
 - [ ] Push notifications for important updates
+- [ ] Photo sharing (match photos, team updates)
 
-### 3. Coach Mobile App
+### 3. Coach App (Mobile Application)
 **Status:** 🔄 High Priority  
 **Target Users:** Team coaches and assistant coaches  
+**Platform:** React Native (iOS/Android)
 **Core Features:**
 - [ ] Team roster management
 - [ ] Training session planning
@@ -63,164 +65,130 @@ This document outlines the comprehensive development plan for the Multi-App Netb
 - [ ] Parent communication
 - [ ] Attendance marking
 - [ ] Training drill library
-
-### 4. Player Mobile App
-**Status:** 🔄 Medium Priority  
-**Target Users:** Players (age-appropriate interface)  
-**Core Features:**
-- [ ] Personal profile & achievements
-- [ ] Match schedule & results
-- [ ] Training schedule
-- [ ] Performance statistics
-- [ ] Goal setting & tracking
-- [ ] Team communication
-- [ ] Educational resources (rules, techniques)
-
-### 5. Admin Dashboard
-**Status:** 🔄 Medium Priority  
-**Target Users:** System administrators, league officials  
-**Core Features:**
-- [ ] Multi-club management
-- [ ] System analytics & reporting
-- [ ] User management across all apps
-- [ ] Financial oversight
-- [ ] Content management
-- [ ] System monitoring & maintenance
-
-### 6. Public Website
-**Status:** 🔄 Low Priority  
-**Target Users:** General public, potential new members  
-**Core Features:**
-- [ ] Club information & contact
-- [ ] Registration portal
-- [ ] Public match schedules & results
-- [ ] News & announcements
-- [ ] Photo galleries
-- [ ] Coaching staff profiles
+- [ ] Quick event creation/updates
 
 ## 🔄 Development Phases
 
-### Phase 1: Foundation (Current)
-**Timeline:** Weeks 1-8  
+### Phase 1: Complete Club Admin App (Current)
+**Timeline:** Weeks 1-6  
 **Objectives:**
-- ✅ Complete core club management features
-- ✅ Establish robust authentication system
-- ✅ Implement basic event management
+- ✅ Complete events system implementation
 - [ ] Finalize user roles & permissions
-- [ ] Complete data migration & cleanup
+- [ ] Implement communication system
+- [ ] Complete payment processing
+- [ ] Finalize data cleanup & optimization
 
-### Phase 2: Parent/Guardian App
-**Timeline:** Weeks 9-16  
+### Phase 2: Parent Mobile App
+**Timeline:** Weeks 7-14  
 **Objectives:**
-- [ ] Build React Native parent app
+- [ ] Set up React Native development environment
+- [ ] Build core parent app features
 - [ ] Implement child registration flow
-- [ ] Create payment processing system
+- [ ] Create payment processing integration
 - [ ] Develop notification system
-- [ ] Integrate with club management app
+- [ ] Beta testing with parent users
 
 ### Phase 3: Coach Mobile App
-**Timeline:** Weeks 17-24  
+**Timeline:** Weeks 15-22  
 **Objectives:**
 - [ ] Build React Native coach app
 - [ ] Implement match day tools
 - [ ] Create training session management
 - [ ] Develop performance tracking
 - [ ] Real-time match statistics
+- [ ] Integration testing with admin app
 
-### Phase 4: Player App & System Integration
-**Timeline:** Weeks 25-32  
+### Phase 4: System Integration & Launch
+**Timeline:** Weeks 23-28  
 **Objectives:**
-- [ ] Build age-appropriate player app
 - [ ] Complete cross-app communication
 - [ ] Implement advanced analytics
-- [ ] Performance optimization
-- [ ] Beta testing across all apps
-
-### Phase 5: Admin Dashboard & Public Website
-**Timeline:** Weeks 33-40  
-**Objectives:**
-- [ ] Build comprehensive admin dashboard
-- [ ] Create public-facing website
-- [ ] Implement league-wide features
-- [ ] Complete documentation
+- [ ] Performance optimization across all apps
+- [ ] Comprehensive testing
 - [ ] Production deployment
+- [ ] User training & onboarding
 
 ## 🛠️ Technical Implementation
 
 ### Backend Architecture
 - **Database:** Supabase PostgreSQL
-- **Authentication:** Supabase Auth
-- **API:** Unified REST/GraphQL API
-- **Real-time:** Supabase Realtime
+- **Authentication:** Supabase Auth (shared across all 3 apps)
+- **API:** Unified REST API
+- **Real-time:** Supabase Realtime for live updates
 - **File Storage:** Supabase Storage
-- **Edge Functions:** Supabase Functions
+- **Push Notifications:** Firebase Cloud Messaging
 
 ### Frontend Technologies
-- **Web Apps:** React + TypeScript + Tailwind CSS
-- **Mobile Apps:** React Native + TypeScript
-- **Shared Components:** Common design system
+- **Club Admin App:** React + TypeScript + Tailwind CSS
+- **Parent App:** React Native + TypeScript
+- **Coach App:** React Native + TypeScript
+- **Shared Components:** Common design system library
 - **State Management:** React Query + Context API
 
 ### Cross-Platform Features
-- **Push Notifications:** Firebase Cloud Messaging
-- **Offline Support:** Progressive Web App capabilities
+- **Unified Authentication:** Single sign-on across all apps
+- **Real-time Updates:** Live sync of events, attendance, messages
+- **Offline Support:** Core functionality works offline
 - **Data Sync:** Optimistic UI with conflict resolution
-- **Analytics:** Custom analytics dashboard
 
-## 📊 Data Flow & Integration
+## 📊 Data Flow Between Apps
 
-### Core Data Entities
-- **Users:** Unified user system across all apps
-- **Teams:** Shared team data and rosters
-- **Events:** Synchronized calendar across platforms
-- **Attendance:** Real-time attendance tracking
-- **Payments:** Centralized financial processing
+### Core Data Synchronization
+- **Users & Roles:** Shared user system with app-specific permissions
+- **Teams & Players:** Real-time roster updates across all apps
+- **Events & Schedules:** Instant calendar sync
+- **Attendance:** Live attendance marking and viewing
 - **Communications:** Cross-app messaging system
+- **Payments:** Centralized payment processing
 
-### API Design Principles
-- **Consistency:** Unified API patterns across all endpoints
-- **Security:** Role-based access control
-- **Performance:** Efficient queries and caching
-- **Scalability:** Designed for multi-club expansion
+### App-Specific Data
+- **Club Admin:** Full administrative data, reports, analytics
+- **Parent App:** Child-specific data, payment history, communication
+- **Coach App:** Team-specific data, training plans, match statistics
 
 ## 🎯 Success Metrics
 
-### User Engagement
-- Daily/Monthly active users per app
-- Session duration and frequency
-- Feature adoption rates
-- User retention rates
+### User Adoption
+- Club Admin App: 100% admin/manager adoption
+- Parent App: 80%+ parent adoption rate
+- Coach App: 100% coach adoption rate
 
 ### Operational Efficiency
-- Registration processing time
-- Communication effectiveness
-- Administrative time savings
-- Error reduction in data entry
+- 50% reduction in administrative time
+- 90% faster event communication
+- 100% digital attendance tracking
+- 80% reduction in payment processing time
 
-### Business Impact
-- Club membership growth
-- Revenue increase through streamlined payments
-- Coach/volunteer satisfaction
-- Parent engagement levels
+### User Satisfaction
+- 90%+ user satisfaction scores
+- 50% reduction in support tickets
+- Increased parent engagement with club activities
 
 ## 🚀 Next Immediate Steps
 
 ### Week 1-2 Priorities:
-1. **Complete current Events System** ✅
-2. **Implement User Roles & Permissions**
-3. **Design Parent App wireframes**
-4. **Set up React Native development environment**
-5. **Create shared design system foundation**
+1. **Complete User Roles & Permissions** in Club Admin App
+2. **Implement Communication System** (announcements, messaging)
+3. **Finalize Payment Processing** integration
+4. **Design Parent App wireframes** and user flows
+5. **Set up React Native development environment**
 
 ### Technical Prerequisites:
-- [ ] Finalize database schema for multi-app support
-- [ ] Establish CI/CD pipeline for multiple apps
-- [ ] Set up development environments
-- [ ] Create shared component library
-- [ ] Implement comprehensive testing strategy
+- [ ] Finalize database schema for mobile app support
+- [ ] Create shared React Native component library
+- [ ] Set up CI/CD pipeline for mobile apps
+- [ ] Implement push notification infrastructure
+- [ ] Design app icon and branding assets
+
+## 📋 Key Decisions Made
+- **3 Apps Only:** Focused scope for better execution
+- **Mobile-First:** Parent and Coach apps prioritize mobile experience
+- **Shared Backend:** Single Supabase instance for all apps
+- **React Native:** Cross-platform mobile development
+- **Progressive Deployment:** One app at a time for controlled rollout
 
 ---
 
 **Last Updated:** Current  
-**Next Review:** Weekly team meetings  
+**Next Review:** Weekly progress reviews  
 **Document Owner:** Development Team
