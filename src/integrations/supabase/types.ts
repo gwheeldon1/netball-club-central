@@ -1001,6 +1001,10 @@ export type Database = {
         Args: { date_of_birth: string }
         Returns: string
       }
+      can_access_team: {
+        Args: { team_id: string }
+        Returns: boolean
+      }
       get_user_roles: {
         Args: { user_id: string }
         Returns: Database["public"]["Enums"]["user_role"][]
@@ -1022,6 +1026,14 @@ export type Database = {
           check_role: Database["public"]["Enums"]["user_role"]
           check_team_id: string
         }
+        Returns: boolean
+      }
+      is_admin: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
+      user_has_role: {
+        Args: { check_role: Database["public"]["Enums"]["user_role"] }
         Returns: boolean
       }
     }
