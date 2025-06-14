@@ -82,17 +82,17 @@ export class ApiClient {
     };
   }
 
-  // Supabase query wrapper
+  // Supabase query wrapper - simplified with type assertion
   async supabaseQuery<T>(
-    queryBuilder: any,
+    queryBuilder: unknown,
     operationName: string,
     allowOffline: boolean = true
   ): Promise<ApiResponse<T>> {
     return this.request(async () => {
-      const { data, error } = await queryBuilder;
+      const { data, error } = await (queryBuilder as Promise<{ data: T | null; error: { message: string; code?: string } | null }>);
       
       if (error) {
-        throw new ApiError(error.message, error.code);
+        throw new ApiError(error.message, undefined, error.code);
       }
       
       return data;

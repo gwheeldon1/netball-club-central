@@ -16,19 +16,26 @@ import {
   AttendanceUpdateRequest,
 } from './types';
 import { User, Child, Team, Event, Attendance, UserRole } from '@/types';
+import { 
+  DatabaseGuardian, 
+  DatabasePlayer, 
+  DatabaseTeam, 
+  DatabaseEvent, 
+  DatabaseEventResponse 
+} from '@/types/database-enhanced';
 
 class UnifiedApiService {
   // User operations
-  async getUsers(): Promise<ApiResponse<User[]>> {
+  async getUsers(): Promise<ApiResponse<DatabaseGuardian[]>> {
     return apiClient.supabaseQuery(
       supabase.from('guardians').select('*'),
       'getUsers'
     );
   }
 
-  async getUserById(id: string): Promise<ApiResponse<any | null>> {
+  async getUserById(id: string): Promise<ApiResponse<DatabaseGuardian | null>> {
     // Try online first, fallback to offline
-    const onlineResult = await apiClient.supabaseQuery(
+    const onlineResult = await apiClient.supabaseQuery<DatabaseGuardian | null>(
       supabase.from('guardians').select('*').eq('id', id).maybeSingle(),
       'getUserById',
       false
@@ -42,7 +49,7 @@ class UnifiedApiService {
     try {
       const offlineUser = await offlineApi.getUserById(id);
       return {
-        data: offlineUser,
+        data: offlineUser as unknown as DatabaseGuardian,
         success: !!offlineUser,
       };
     } catch (error) {
@@ -54,8 +61,8 @@ class UnifiedApiService {
     }
   }
 
-  async createUser(userData: UserCreateRequest): Promise<ApiResponse<any>> {
-    const result = await apiClient.supabaseQuery(
+  async createUser(userData: UserCreateRequest): Promise<ApiResponse<DatabaseGuardian>> {
+    const result = await apiClient.supabaseQuery<DatabaseGuardian>(
       supabase.from('guardians').insert(userData).select().single(),
       'createUser'
     );
@@ -72,20 +79,20 @@ class UnifiedApiService {
         };
         const offlineUser = await offlineApi.createUser(offlineUserData);
         return {
-          data: offlineUser,
+          data: offlineUser as unknown as DatabaseGuardian,
           success: true,
         };
       } catch (error) {
         logger.error('Failed to create user offline:', error);
-        return result;
+        return result as ApiResponse<DatabaseGuardian>;
       }
     }
 
     return result;
   }
 
-  async updateUser(id: string, userData: UserUpdateRequest): Promise<ApiResponse<any>> {
-    const result = await apiClient.supabaseQuery(
+  async updateUser(id: string, userData: UserUpdateRequest): Promise<ApiResponse<DatabaseGuardian>> {
+    const result = await apiClient.supabaseQuery<DatabaseGuardian>(
       supabase.from('guardians').update(userData).eq('id', id).select().single(),
       'updateUser'
     );
@@ -95,12 +102,12 @@ class UnifiedApiService {
       try {
         const offlineUser = await offlineApi.updateUser(id, userData);
         return {
-          data: offlineUser,
+          data: offlineUser as unknown as DatabaseGuardian,
           success: true,
         };
       } catch (error) {
         logger.error('Failed to update user offline:', error);
-        return result;
+        return result as ApiResponse<DatabaseGuardian>;
       }
     }
 

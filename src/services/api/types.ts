@@ -2,7 +2,7 @@
 import { User, Child, Team, Event, Attendance, UserRole } from '@/types';
 
 // Base API response structure
-export interface ApiResponse<T = any> {
+export interface ApiResponse<T = unknown> {
   data?: T;
   error?: string;
   success: boolean;
@@ -117,7 +117,7 @@ export interface SyncItem {
   tableName: string;
   recordId: string;
   action: 'create' | 'update' | 'delete';
-  data?: any;
+  data?: unknown;
   timestamp: number;
   retries: number;
 }
