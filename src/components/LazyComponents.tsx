@@ -25,29 +25,32 @@ export const UnauthorizedPage = React.lazy(() => import('@/pages/UnauthorizedPag
 export const DesignSystemPage = React.lazy(() => import('@/pages/DesignSystemPage'));
 export const SubscriptionSuccessPage = React.lazy(() => import('@/pages/SubscriptionSuccessPage'));
 
-// Page loading fallback component
+// Optimized page loading fallback component
 export function PageLoadingFallback() {
   return (
     <div className="min-h-screen bg-background">
       <div className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container flex h-14 items-center">
-          <Skeleton variant="rectangular" width={120} height={24} />
+          <div className="h-6 w-32 bg-muted rounded animate-pulse" />
           <div className="ml-auto flex items-center space-x-4">
-            <Skeleton variant="circular" width={32} height={32} />
+            <div className="h-8 w-8 bg-muted rounded-full animate-pulse" />
           </div>
         </div>
       </div>
       <div className="container py-6">
         <div className="space-y-6">
-          <Skeleton variant="text" width="40%" height={32} />
+          <div className="h-8 w-2/5 bg-muted rounded animate-pulse" />
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {Array.from({ length: 6 }).map((_, i) => (
               <div key={i} className="rounded-lg border p-6 space-y-4">
-                <Skeleton variant="text" width="60%" height={20} />
-                <Skeleton variant="text" lines={2} />
+                <div className="h-5 w-3/5 bg-muted rounded animate-pulse" />
+                <div className="space-y-2">
+                  <div className="h-4 w-full bg-muted rounded animate-pulse" />
+                  <div className="h-4 w-4/5 bg-muted rounded animate-pulse" />
+                </div>
                 <div className="flex space-x-2">
-                  <Skeleton variant="rounded" width={80} height={32} />
-                  <Skeleton variant="rounded" width={80} height={32} />
+                  <div className="h-8 w-20 bg-muted rounded animate-pulse" />
+                  <div className="h-8 w-20 bg-muted rounded animate-pulse" />
                 </div>
               </div>
             ))}
