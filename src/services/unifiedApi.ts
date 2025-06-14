@@ -116,7 +116,7 @@ class UnifiedAPI {
             )
           `)
           .eq('id', id)
-          .single();
+          .maybeSingle();
         
         if (error || !data) return undefined;
         
@@ -222,7 +222,7 @@ class UnifiedAPI {
           .from('teams')
           .select('*')
           .eq('id', id)
-          .single();
+          .maybeSingle();
         
         if (error || !data) return undefined;
         
@@ -377,7 +377,7 @@ class UnifiedAPI {
           .from('events')
           .select('*')
           .eq('id', id)
-          .single();
+          .maybeSingle();
         
         if (error || !data) return undefined;
         

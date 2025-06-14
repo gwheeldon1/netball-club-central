@@ -162,7 +162,7 @@ export const EnhancedRSVP: React.FC<EnhancedRSVPProps> = ({
         .select('id')
         .eq('event_id', eventId)
         .eq('player_id', playerId)
-        .single();
+        .maybeSingle();
 
       if (existingResponse) {
         const { error } = await supabase
