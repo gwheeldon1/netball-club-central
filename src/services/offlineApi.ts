@@ -150,7 +150,7 @@ class OfflineFirstAPI {
 
   // Sync utilities
   async forceSync(): Promise<void> {
-    return await syncService.forcSync();
+    return await syncService.forceSync();
   }
 
   getOnlineStatus(): boolean {

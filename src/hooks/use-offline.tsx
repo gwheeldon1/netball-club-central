@@ -30,7 +30,7 @@ export function useOffline() {
 
   const forceSync = async () => {
     try {
-      await syncService.forcSync();
+      await syncService.forceSync();
     } catch (error) {
       console.error('Force sync failed:', error);
     }

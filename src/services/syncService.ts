@@ -224,7 +224,7 @@ export class SyncService {
   }
 
   // Manual sync trigger
-  async forcSync(): Promise<void> {
+  async forceSync(): Promise<void> {
     await this.syncToSupabase();
     await this.syncFromSupabase();
   }
