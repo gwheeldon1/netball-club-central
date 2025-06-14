@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { syncService } from '@/services/syncService';
+import { logger } from '@/utils/logger';
 
 export function useOffline() {
   const [isOnline, setIsOnline] = useState(navigator.onLine);
@@ -32,7 +33,7 @@ export function useOffline() {
     try {
       await syncService.forceSync();
     } catch (error) {
-      console.error('Force sync failed:', error);
+      logger.error('Force sync failed:', error);
     }
   };
 

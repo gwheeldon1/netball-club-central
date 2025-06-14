@@ -1,5 +1,6 @@
 import { supabase } from "@/integrations/supabase/client";
 import { addDays, addWeeks, addMonths, format, parseISO } from "date-fns";
+import { logger } from "@/utils/logger";
 
 export interface RecurringEventData {
   title: string;
@@ -104,7 +105,7 @@ export const createRecurringEvents = async (eventData: RecurringEventData) => {
 
     return { success: true, parentEvent, recurringCount: recurringEvents.length };
   } catch (error) {
-    console.error('Error creating recurring events:', error);
+    logger.error('Error creating recurring events:', error);
     throw error;
   }
 };
@@ -142,7 +143,7 @@ export const updateRecurringSeries = async (
 
     return { success: true };
   } catch (error) {
-    console.error('Error updating recurring series:', error);
+    logger.error('Error updating recurring series:', error);
     throw error;
   }
 };
@@ -188,7 +189,7 @@ export const deleteRecurringSeries = async (
 
     return { success: true };
   } catch (error) {
-    console.error('Error deleting recurring series:', error);
+    logger.error('Error deleting recurring series:', error);
     throw error;
   }
 };

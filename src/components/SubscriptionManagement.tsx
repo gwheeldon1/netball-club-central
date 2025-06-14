@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/components/ui/use-toast';
 import { CreditCard, Calendar, AlertCircle, CheckCircle } from 'lucide-react';
 import { format } from 'date-fns';
+import { logger } from '@/utils/logger';
 
 interface SubscriptionInfo {
   subscribed: boolean;
@@ -37,7 +38,7 @@ export const SubscriptionManagement = ({ playerId, playerName }: SubscriptionMan
       if (error) throw error;
       setSubscriptionInfo(data);
     } catch (error) {
-      console.error('Error checking subscription:', error);
+      logger.error('Error checking subscription:', error);
       toast({
         title: "Error",
         description: "Failed to check subscription status",
@@ -67,7 +68,7 @@ export const SubscriptionManagement = ({ playerId, playerName }: SubscriptionMan
         description: "You'll be redirected to Stripe to complete your subscription",
       });
     } catch (error) {
-      console.error('Error creating subscription:', error);
+      logger.error('Error creating subscription:', error);
       toast({
         title: "Error",
         description: "Failed to create subscription",
@@ -95,7 +96,7 @@ export const SubscriptionManagement = ({ playerId, playerName }: SubscriptionMan
         description: "You'll be redirected to manage your subscription",
       });
     } catch (error) {
-      console.error('Error opening customer portal:', error);
+      logger.error('Error opening customer portal:', error);
       toast({
         title: "Error",
         description: "Failed to open subscription management",

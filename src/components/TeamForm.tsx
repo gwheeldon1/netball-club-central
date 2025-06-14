@@ -28,6 +28,7 @@ import {
 
 import { Team } from "@/types";
 import { supabaseTeamApi } from "@/services/supabaseApi";
+import { logger } from "@/utils/logger";
 
 const teamSchema = z.object({
   name: z.string().min(2, { message: "Team name must be at least 2 characters" }),
@@ -97,7 +98,7 @@ const TeamForm = ({ team, mode }: TeamFormProps) => {
         navigate(`/teams/${team.id}`);
       }
     } catch (error) {
-      console.error("Error saving team:", error);
+      logger.error("Error saving team:", error);
       toast.error("Failed to save team. Please try again.");
     } finally {
       setIsSubmitting(false);

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { supabaseRoleApi } from '@/services/supabaseApi';
+import { logger } from '@/utils/logger';
 
 interface UserPermissions {
   isAdmin: boolean;
@@ -34,7 +35,7 @@ export const usePermissions = (): UserPermissions => {
           .map(r => r.teamId!);
         setUserTeams(teams);
       } catch (error) {
-        console.error('Error loading user teams:', error);
+        logger.error('Error loading user teams:', error);
         setUserTeams([]);
       } finally {
         setLoading(false);

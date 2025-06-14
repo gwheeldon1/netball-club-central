@@ -1,5 +1,6 @@
 import { supabase } from '@/integrations/supabase/client';
 import { User, Child, Team, Event, Attendance, UserRole } from '@/types';
+import { logger } from '@/utils/logger';
 
 /**
  * Supabase API service with role-based permissions enforcement
@@ -22,7 +23,7 @@ const getCurrentUserPermissions = async () => {
     
     return { isAdmin, userTeams, userId: user.id, roles: roles || [] };
   } catch (error) {
-    console.error('Error getting user permissions:', error);
+    logger.error('Error getting user permissions:', error);
     return { isAdmin: false, userTeams: [], userId: user.id, roles: [] };
   }
 };

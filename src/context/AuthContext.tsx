@@ -3,6 +3,7 @@ import { createContext, useContext, useState, ReactNode, useEffect } from 'react
 import { User, UserRole } from '../types';
 import { api } from '@/services/offlineApi';
 import { toast } from "sonner";
+import { logger } from '@/utils/logger';
 
 interface AuthContextType {
   currentUser: User | null;
@@ -30,7 +31,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setCurrentUser(user);
         setIsAuthenticated(true);
       } catch (error) {
-        console.error('Error parsing stored user data', error);
+        logger.error('Error parsing stored user data', error);
         localStorage.removeItem(AUTH_STORAGE_KEY);
       }
     }
@@ -52,7 +53,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return true;
       }
     } catch (error) {
-      console.error('Error during login:', error);
+      logger.error('Error during login:', error);
       toast.error("Login failed");
     }
     

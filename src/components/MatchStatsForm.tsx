@@ -10,6 +10,7 @@ import { toast } from 'sonner';
 import { matchStatsApi, MatchStatistics } from '@/services/matchStatsApi';
 import { Child } from '@/types';
 import { Trophy, Target, Shield, AlertTriangle, Users } from 'lucide-react';
+import { logger } from '@/utils/logger';
 
 interface MatchStatsFormProps {
   eventId: string;
@@ -91,7 +92,7 @@ export function MatchStatsForm({ eventId, players, onClose, onSave }: MatchStats
 
       setPlayerStats(statsMap);
     } catch (error) {
-      console.error('Error loading existing stats:', error);
+      logger.error('Error loading existing stats:', error);
       toast.error('Failed to load existing statistics');
     } finally {
       setLoading(false);
@@ -135,7 +136,7 @@ export function MatchStatsForm({ eventId, players, onClose, onSave }: MatchStats
       onSave();
       onClose();
     } catch (error) {
-      console.error('Error saving match stats:', error);
+      logger.error('Error saving match stats:', error);
       toast.error('Failed to save match statistics');
     } finally {
       setSaving(false);

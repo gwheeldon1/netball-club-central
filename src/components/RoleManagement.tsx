@@ -10,6 +10,7 @@ import { UserRole, User, Team } from '@/types';
 import { useAuth } from '@/context/AuthContext';
 import { toast } from 'sonner';
 import { Shield, Users, AlertTriangle, Trash2 } from 'lucide-react';
+import { logger } from '@/utils/logger';
 
 export function RoleManagement() {
   const { currentUser, hasRole } = useAuth();
@@ -53,13 +54,13 @@ export function RoleManagement() {
           const roles = await supabaseRoleApi.getUserRoles(user.id);
           roleAssignments[user.id] = roles;
         } catch (error) {
-          console.error(`Error loading roles for user ${user.id}:`, error);
+          logger.error(`Error loading roles for user ${user.id}:`, error);
           roleAssignments[user.id] = [];
         }
       }
       setUserRoles(roleAssignments);
     } catch (error) {
-      console.error('Error loading data:', error);
+      logger.error('Error loading data:', error);
       toast.error('Failed to load data');
     } finally {
       setLoading(false);
@@ -94,7 +95,7 @@ export function RoleManagement() {
       // Reload data
       await loadData();
     } catch (error) {
-      console.error('Error assigning role:', error);
+      logger.error('Error assigning role:', error);
       toast.error('Failed to assign role');
     }
   };
@@ -107,7 +108,7 @@ export function RoleManagement() {
       // Reload data
       await loadData();
     } catch (error) {
-      console.error('Error removing role:', error);
+      logger.error('Error removing role:', error);
       toast.error('Failed to remove role');
     }
   };

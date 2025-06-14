@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/components/ui/use-toast';
 import { Settings, Save, Loader2 } from 'lucide-react';
+import { logger } from '@/utils/logger';
 
 interface SystemSetting {
   id: string;
@@ -33,7 +34,7 @@ export const SystemSettings = () => {
       if (error) throw error;
       setSettings(data || []);
     } catch (error) {
-      console.error('Error loading settings:', error);
+      logger.error('Error loading settings:', error);
       toast({
         title: "Error",
         description: "Failed to load system settings",
@@ -65,7 +66,7 @@ export const SystemSettings = () => {
         description: "Setting updated successfully",
       });
     } catch (error) {
-      console.error('Error updating setting:', error);
+      logger.error('Error updating setting:', error);
       toast({
         title: "Error",
         description: "Failed to update setting",
