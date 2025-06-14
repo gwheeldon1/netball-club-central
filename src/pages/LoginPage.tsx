@@ -59,7 +59,7 @@ const LoginPage = () => {
           <CardHeader className="space-y-1 pb-4">
             <CardTitle className="text-xl md:text-2xl text-center">Sign In</CardTitle>
           </CardHeader>
-          <form onSubmit={handleSubmit}>
+          <form onSubmit={handleSubmit} autoComplete="on">
             <CardContent className="space-y-4 pt-1">
               <div className="space-y-2">
                 <Label htmlFor="email" className="text-sm font-medium">Email Address</Label>
@@ -67,7 +67,17 @@ const LoginPage = () => {
                   <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
                     <MailIcon className="h-5 w-5 text-muted-foreground" />
                   </div>
-                  <Input id="email" type="email" placeholder="name@example.com" value={email} onChange={e => setEmail(e.target.value)} required className="pl-10 h-11 text-base" />
+                   <Input 
+                     id="email" 
+                     type="email" 
+                     placeholder="name@example.com" 
+                     value={email} 
+                     onChange={e => setEmail(e.target.value)} 
+                     required 
+                     className="pl-10 h-11 text-base"
+                     autoComplete="email"
+                     name="email"
+                   />
                 </div>
               </div>
               <div className="space-y-2">
@@ -81,7 +91,17 @@ const LoginPage = () => {
                   <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
                     <LockIcon className="h-5 w-5 text-muted-foreground" />
                   </div>
-                  <Input id="password" type="password" placeholder="••••••••" value={password} onChange={e => setPassword(e.target.value)} required className="pl-10 h-11 text-base" />
+                   <Input 
+                     id="password" 
+                     type="password" 
+                     placeholder="••••••••" 
+                     value={password} 
+                     onChange={e => setPassword(e.target.value)} 
+                     required 
+                     className="pl-10 h-11 text-base"
+                     autoComplete="current-password"
+                     name="password"
+                   />
                 </div>
               </div>
             </CardContent>
