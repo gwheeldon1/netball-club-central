@@ -36,7 +36,7 @@ class OfflineFirstAPI {
       ...user,
       roles: user.roles as string[]
     };
-    const newUser = await dbApi.createUser(dbUser as any);
+    const newUser = await dbApi.createUser(dbUser);
     return {
       ...newUser,
       roles: newUser.roles as UserRole[]
@@ -48,7 +48,7 @@ class OfflineFirstAPI {
       ...updates,
       roles: updates.roles ? updates.roles as string[] : undefined
     };
-    const updatedUser = await dbApi.updateUser(id, dbUpdates as any);
+    const updatedUser = await dbApi.updateUser(id, dbUpdates);
     if (!updatedUser) return undefined;
     return {
       ...updatedUser,

@@ -9,7 +9,7 @@ export interface SyncStatus {
   action: 'create' | 'update' | 'delete';
   timestamp: number;
   synced: boolean;
-  data?: any;
+  data?: Record<string, unknown>;
 }
 
 export class NetballDatabase extends Dexie {
@@ -42,7 +42,7 @@ export class OfflineAPI {
     tableName: string, 
     recordId: string, 
     action: 'create' | 'update' | 'delete',
-    data?: any
+    data?: Record<string, unknown>
   ) {
     await db.syncQueue.add({
       id: `${tableName}_${recordId}_${Date.now()}`,
