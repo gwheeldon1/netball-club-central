@@ -16,6 +16,8 @@ import {
   ChildDetailPage,
   NewChildPage,
   NewTeamPage,
+  NewEventPage,
+  EditEventPage,
   EventsPage,
   EventDetailPage,
   ApprovalsPage,
@@ -95,12 +97,24 @@ function App() {
               </ProtectedRoute>
             } />
             
+            <Route path="/events/new" element={
+              <ProtectedRoute allowedRoles={['admin', 'coach', 'manager']}>
+                <NewEventPage />
+              </ProtectedRoute>
+            } />
+
             <Route path="/events/:id" element={
               <ProtectedRoute>
                 <EventDetailPage />
               </ProtectedRoute>
             } />
             
+            <Route path="/events/:id/edit" element={
+              <ProtectedRoute allowedRoles={['admin', 'coach', 'manager']}>
+                <EditEventPage />
+              </ProtectedRoute>
+            } />
+
             <Route path="/approvals" element={
               <ProtectedRoute allowedRoles={['admin', 'coach', 'manager']}>
                 <ApprovalsPage />

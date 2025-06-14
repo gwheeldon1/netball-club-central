@@ -15,6 +15,8 @@ export const NewChildPage = React.lazy(() => import('@/pages/NewChildPage'));
 export const NewTeamPage = React.lazy(() => import('@/pages/NewTeamPage'));
 export const EventsPage = React.lazy(() => import('@/pages/EventsPage'));
 export const EventDetailPage = React.lazy(() => import('@/pages/EventDetailPage'));
+export const NewEventPage = React.lazy(() => import('@/pages/NewEventPage'));
+export const EditEventPage = React.lazy(() => import('@/pages/EditEventPage'));
 export const ApprovalsPage = React.lazy(() => import('@/pages/ApprovalsPage'));
 export const UserProfilePage = React.lazy(() => import('@/pages/UserProfilePage'));
 export const SettingsPage = React.lazy(() => import('@/pages/SettingsPage'));

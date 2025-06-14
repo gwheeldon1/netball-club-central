@@ -39,11 +39,14 @@ export interface DBEvent {
   time: string;
   location: string;
   notes?: string;
-  eventType: 'training' | 'match' | 'other';
+  description?: string;
+  eventType: 'training' | 'match' | 'social' | 'meeting' | 'other';
   teamId: string;
   recurring?: boolean;
   recurrencePattern?: string;
   opponent?: string;
+  isHome?: boolean;
+  requiresRSVP?: boolean;
 }
 
 export interface DBAttendance {

@@ -361,7 +361,7 @@ class UnifiedAPI {
           time: '00:00', // Default time since not stored separately
           location: event.location || '',
           notes: event.description || '',
-          eventType: event.event_type as 'training' | 'match' | 'other',
+          eventType: event.event_type as 'training' | 'match' | 'social' | 'meeting' | 'other',
           teamId: event.team_id || ''
         } as Event)) || [];
       },
@@ -388,7 +388,7 @@ class UnifiedAPI {
           time: '00:00',
           location: data.location || '',
           notes: data.description || '',
-          eventType: data.event_type as 'training' | 'match' | 'other',
+          eventType: data.event_type as 'training' | 'match' | 'social' | 'meeting' | 'other',
           teamId: data.team_id || ''
         } as Event;
       },
@@ -422,7 +422,7 @@ class UnifiedAPI {
           time: event.time,
           location: data.location || '',
           notes: data.description || '',
-          eventType: data.event_type as 'training' | 'match' | 'other',
+          eventType: data.event_type as 'training' | 'match' | 'social' | 'meeting' | 'other',
           teamId: data.team_id || ''
         };
       } catch (error) {
@@ -462,7 +462,7 @@ class UnifiedAPI {
           time: updates.time || '00:00',
           location: data.location || '',
           notes: data.description || '',
-          eventType: data.event_type as 'training' | 'match' | 'other',
+          eventType: data.event_type as 'training' | 'match' | 'social' | 'meeting' | 'other',
           teamId: data.team_id || ''
         };
       } catch (error) {
