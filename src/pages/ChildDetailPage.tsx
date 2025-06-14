@@ -12,6 +12,7 @@ import { useAuth } from "@/context/AuthContext";
 import { supabaseChildrenApi } from "@/services/supabaseApi";
 import { toast } from "sonner";
 import FileUpload from "@/components/FileUpload";
+import { SubscriptionManagement } from "@/components/SubscriptionManagement";
 
 const ChildDetailPage = () => {
   const { id } = useParams<{ id: string }>();
@@ -223,8 +224,9 @@ const ChildDetailPage = () => {
           <Card className="md:col-span-2">
             <CardContent className="p-6">
               <Tabs defaultValue="details" className="w-full">
-                <TabsList className="grid w-full grid-cols-4">
+                <TabsList className="grid w-full grid-cols-5">
                   <TabsTrigger value="details">Details</TabsTrigger>
+                  <TabsTrigger value="subscription">Subscription</TabsTrigger>
                   <TabsTrigger value="performance">Performance</TabsTrigger>
                   <TabsTrigger value="attendance">Attendance</TabsTrigger>
                   <TabsTrigger value="medical">Medical</TabsTrigger>
@@ -266,6 +268,13 @@ const ChildDetailPage = () => {
                   {(!child.notes && child.status === 'approved') && (
                     <p className="text-muted-foreground">No additional information provided.</p>
                   )}
+                </TabsContent>
+                
+                <TabsContent value="subscription" className="mt-6">
+                  <SubscriptionManagement 
+                    playerId={child.id}
+                    playerName={child.name}
+                  />
                 </TabsContent>
                 
                 <TabsContent value="performance" className="mt-6">

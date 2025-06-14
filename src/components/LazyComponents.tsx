@@ -21,6 +21,7 @@ export const SettingsPage = React.lazy(() => import('@/pages/SettingsPage'));
 export const NotFound = React.lazy(() => import('@/pages/NotFound'));
 export const UnauthorizedPage = React.lazy(() => import('@/pages/UnauthorizedPage'));
 export const DesignSystemPage = React.lazy(() => import('@/pages/DesignSystemPage'));
+export const SubscriptionSuccessPage = React.lazy(() => import('@/pages/SubscriptionSuccessPage'));
 
 // Page loading fallback component
 export function PageLoadingFallback() {
