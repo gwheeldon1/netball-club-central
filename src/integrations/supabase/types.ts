@@ -45,9 +45,11 @@ export type Database = {
       event_responses: {
         Row: {
           attendance_marked_at: string | null
+          attendance_status: string | null
           attended: boolean | null
           event_id: string | null
           id: string
+          marked_by: string | null
           notes: string | null
           player_id: string | null
           response_date: string | null
@@ -55,9 +57,11 @@ export type Database = {
         }
         Insert: {
           attendance_marked_at?: string | null
+          attendance_status?: string | null
           attended?: boolean | null
           event_id?: string | null
           id?: string
+          marked_by?: string | null
           notes?: string | null
           player_id?: string | null
           response_date?: string | null
@@ -65,9 +69,11 @@ export type Database = {
         }
         Update: {
           attendance_marked_at?: string | null
+          attendance_status?: string | null
           attended?: boolean | null
           event_id?: string | null
           id?: string
+          marked_by?: string | null
           notes?: string | null
           player_id?: string | null
           response_date?: string | null
@@ -79,6 +85,13 @@ export type Database = {
             columns: ["event_id"]
             isOneToOne: false
             referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "event_responses_marked_by_fkey"
+            columns: ["marked_by"]
+            isOneToOne: false
+            referencedRelation: "guardians"
             referencedColumns: ["id"]
           },
           {
@@ -99,6 +112,11 @@ export type Database = {
           id: string
           is_home: boolean | null
           location: string | null
+          parent_event_id: string | null
+          recurrence_days: string[] | null
+          recurrence_end_date: string | null
+          recurrence_interval: number | null
+          recurrence_type: string | null
           team_id: string | null
           title: string
         }
@@ -110,6 +128,11 @@ export type Database = {
           id?: string
           is_home?: boolean | null
           location?: string | null
+          parent_event_id?: string | null
+          recurrence_days?: string[] | null
+          recurrence_end_date?: string | null
+          recurrence_interval?: number | null
+          recurrence_type?: string | null
           team_id?: string | null
           title: string
         }
@@ -121,10 +144,22 @@ export type Database = {
           id?: string
           is_home?: boolean | null
           location?: string | null
+          parent_event_id?: string | null
+          recurrence_days?: string[] | null
+          recurrence_end_date?: string | null
+          recurrence_interval?: number | null
+          recurrence_type?: string | null
           team_id?: string | null
           title?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "events_parent_event_id_fkey"
+            columns: ["parent_event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "events_team_id_fkey"
             columns: ["team_id"]
@@ -269,6 +304,122 @@ export type Database = {
         }
         Relationships: []
       }
+      notifications: {
+        Row: {
+          created_at: string
+          id: string
+          message: string
+          read: boolean
+          related_event_id: string | null
+          title: string
+          type: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          message: string
+          read?: boolean
+          related_event_id?: string | null
+          title: string
+          type?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          message?: string
+          read?: boolean
+          related_event_id?: string | null
+          title?: string
+          type?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notifications_related_event_id_fkey"
+            columns: ["related_event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      payments: {
+        Row: {
+          amount_pence: number
+          billing_period_end: string | null
+          billing_period_start: string | null
+          created_at: string
+          currency: string
+          description: string | null
+          failure_reason: string | null
+          guardian_id: string
+          id: string
+          payment_method: string | null
+          processed_at: string | null
+          status: string
+          stripe_charge_id: string | null
+          stripe_payment_intent_id: string | null
+          subscription_id: string
+          updated_at: string
+        }
+        Insert: {
+          amount_pence: number
+          billing_period_end?: string | null
+          billing_period_start?: string | null
+          created_at?: string
+          currency?: string
+          description?: string | null
+          failure_reason?: string | null
+          guardian_id: string
+          id?: string
+          payment_method?: string | null
+          processed_at?: string | null
+          status: string
+          stripe_charge_id?: string | null
+          stripe_payment_intent_id?: string | null
+          subscription_id: string
+          updated_at?: string
+        }
+        Update: {
+          amount_pence?: number
+          billing_period_end?: string | null
+          billing_period_start?: string | null
+          created_at?: string
+          currency?: string
+          description?: string | null
+          failure_reason?: string | null
+          guardian_id?: string
+          id?: string
+          payment_method?: string | null
+          processed_at?: string | null
+          status?: string
+          stripe_charge_id?: string | null
+          stripe_payment_intent_id?: string | null
+          subscription_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_payments_guardian"
+            columns: ["guardian_id"]
+            isOneToOne: false
+            referencedRelation: "guardians"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_payments_subscription"
+            columns: ["subscription_id"]
+            isOneToOne: false
+            referencedRelation: "subscriptions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       player_teams: {
         Row: {
           id: string
@@ -376,6 +527,69 @@ export type Database = {
             columns: ["team_preference"]
             isOneToOne: false
             referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      subscriptions: {
+        Row: {
+          amount_pence: number
+          billing_cycle: string
+          created_at: string
+          created_by: string | null
+          end_date: string | null
+          guardian_id: string
+          id: string
+          player_id: string
+          start_date: string
+          status: string
+          stripe_customer_id: string | null
+          stripe_subscription_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          amount_pence: number
+          billing_cycle?: string
+          created_at?: string
+          created_by?: string | null
+          end_date?: string | null
+          guardian_id: string
+          id?: string
+          player_id: string
+          start_date?: string
+          status?: string
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          amount_pence?: number
+          billing_cycle?: string
+          created_at?: string
+          created_by?: string | null
+          end_date?: string | null
+          guardian_id?: string
+          id?: string
+          player_id?: string
+          start_date?: string
+          status?: string
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_subscriptions_guardian"
+            columns: ["guardian_id"]
+            isOneToOne: false
+            referencedRelation: "guardians"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_subscriptions_player"
+            columns: ["player_id"]
+            isOneToOne: true
+            referencedRelation: "players"
             referencedColumns: ["id"]
           },
         ]
