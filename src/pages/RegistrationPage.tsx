@@ -275,18 +275,18 @@ const RegistrationPage = () => {
             
             {/* Trust indicators */}
             <div className="flex flex-wrap items-center justify-center gap-6 md:gap-8 text-sm text-muted-foreground pt-4">
-              <div className="flex items-center gap-2">
-                <Users className="h-4 w-4 text-primary" />
-                <span>200+ Active Players</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Shield className="h-4 w-4 text-primary" />
-                <span>Safeguarding Certified</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <CheckCircle className="h-4 w-4 text-primary" />
-                <span>England Netball Approved</span>
-              </div>
+                  <div className="flex items-center gap-2">
+                    <Users className="h-4 w-4 text-primary" />
+                    <span>200+ Active Players</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Shield className="h-4 w-4 text-primary" />
+                    <span>Safeguarding Certified</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <CheckCircle className="h-4 w-4 text-primary" />
+                    <span>England Netball Approved</span>
+                  </div>
             </div>
           </div>
         </div>
@@ -309,7 +309,7 @@ const RegistrationPage = () => {
             <form onSubmit={handleSubmit} className="space-y-10">
               {/* Parent Details Section */}
               <div className="space-y-6">
-                <h3 className="text-lg font-semibold text-foreground flex items-center gap-3 pb-2 border-b border-muted">
+                <h3 className="text-lg font-semibold text-foreground flex items-center gap-3 pb-2 border-b border-border">
                   <User className="h-5 w-5 text-primary" />
                   Your Information
                 </h3>
@@ -385,7 +385,7 @@ const RegistrationPage = () => {
 
               {/* Children Details Section */}
               <div className="space-y-6">
-                <div className="flex items-center justify-between pb-2 border-b border-muted">
+                <div className="flex items-center justify-between pb-2 border-b border-border">
                   <h3 className="text-lg font-semibold text-foreground flex items-center gap-3">
                     <Users className="h-5 w-5 text-primary" />
                     Children Information
