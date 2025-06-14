@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowLeft, Save, Upload } from "lucide-react";
 import { toast } from "sonner";
-import { supabaseTeamApi } from "@/services/supabaseApi";
+import { api } from '@/services/unifiedApi';
 import { usePermissions } from "@/hooks/usePermissions";
 import FileUpload from "@/components/FileUpload";
 
@@ -83,7 +83,7 @@ const NewTeamPage = () => {
         icon: formData.iconImage,
       };
 
-      await supabaseTeamApi.create(teamData);
+      await api.createTeam(teamData);
       
       toast.success("Team created successfully!");
       navigate("/teams");

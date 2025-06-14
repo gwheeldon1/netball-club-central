@@ -21,7 +21,7 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { supabaseTeamApi } from "@/services/supabaseApi";
+import { api } from '@/services/unifiedApi';
 import { useIsMobile } from "@/hooks/use-mobile";
 // Offline functionality removed
 
@@ -43,9 +43,9 @@ const EventsPage = () => {
   useEffect(() => {
     const loadData = async () => {
       try {
-        // Events API not yet implemented
+        // Events API not yet implemented in unified API
         const eventsData: Event[] = [];
-        const teamsData = await supabaseTeamApi.getAll();
+        const teamsData = await api.getTeams();
         
         setEvents(eventsData);
         setFilteredEvents(eventsData);

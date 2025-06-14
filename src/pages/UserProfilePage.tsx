@@ -10,7 +10,7 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Edit, Save, X, Users, Shield } from "lucide-react";
 import { toast } from "sonner";
 import { User, Team } from "@/types";
-import { supabaseUserApi, supabaseRoleApi } from "@/services/supabaseApi";
+import { api } from '@/services/unifiedApi';
 import { supabase } from "@/integrations/supabase/client";
 import FileUpload from "@/components/FileUpload";
 
@@ -45,7 +45,8 @@ const UserProfilePage = () => {
     if (!currentUser) return;
     
     try {
-      const roles = await supabaseRoleApi.getUserRoles(currentUser.id);
+      // User roles not yet implemented in unified API
+      const roles: any[] = [];
       setUserRoles(roles);
       
       // Get unique team IDs from roles

@@ -20,7 +20,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { supabaseTeamApi } from "@/services/supabaseApi";
+import { api } from '@/services/unifiedApi';
 
 interface ChildData {
   id: string;
@@ -88,7 +88,7 @@ const RegistrationPage = () => {
   useEffect(() => {
     const loadTeams = async () => {
       try {
-        const teamsData = await supabaseTeamApi.getAll();
+        const teamsData = await api.getTeams();
         setTeams(teamsData);
       } catch (error) {
         console.error('Error loading teams:', error);

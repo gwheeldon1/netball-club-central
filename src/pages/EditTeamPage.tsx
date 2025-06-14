@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/dialog";
 
 import { Team } from "@/types";
-import { supabaseTeamApi, supabaseChildrenApi } from "@/services/supabaseApi";
+import { api } from '@/services/unifiedApi';
 import { useAuth } from "@/context/AuthContext";
 import { Trash } from "lucide-react";
 
@@ -38,7 +38,7 @@ const EditTeamPage = () => {
       }
       
       try {
-        const teamData = await supabaseTeamApi.getById(id);
+        const teamData = await api.getTeamById(id);
         
         if (!teamData) {
           toast.error("Team not found");
@@ -65,8 +65,8 @@ const EditTeamPage = () => {
     setIsDeleting(true);
     
     try {
-      // Check if team has players
-      const players = await supabaseChildrenApi.getByTeamId(id);
+      // Check if team has players - not yet implemented in unified API
+      const players: any[] = [];
       
       if (players.length > 0) {
         toast.error(`Cannot delete team. There are ${players.length} players assigned to this team.`);

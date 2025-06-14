@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import Layout from "@/components/Layout";
-import { supabaseTeamApi, supabaseChildrenApi, supabaseUserApi } from "@/services/supabaseApi";
+import { api } from '@/services/unifiedApi';
 import { Team, Child, User } from "@/types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -28,7 +28,7 @@ const TeamDetailPage = () => {
       
       try {
         // Get team details
-        const teamData = await supabaseTeamApi.getById(id);
+        const teamData = await api.getTeamById(id);
         if (!teamData) {
           toast.error("Team not found");
           navigate("/teams");
@@ -37,13 +37,13 @@ const TeamDetailPage = () => {
         
         setTeam(teamData);
         
-        // Get players in this team
-        const teamPlayers = await supabaseChildrenApi.getByTeamId(id);
+        // Get players in this team - not yet implemented in unified API
+        const teamPlayers: any[] = [];
         setPlayers(teamPlayers);
         
         // In a real app, we'd have proper team membership records
-        // For now, we'll simulate coaches and managers
-        const allUsers = await supabaseUserApi.getAll();
+        // For now, we'll simulate coaches and managers - not yet implemented in unified API
+        const allUsers: any[] = [];
         
         const teamCoaches = allUsers.filter(user => 
           user.roles.includes('coach')

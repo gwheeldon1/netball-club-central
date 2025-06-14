@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
 import Layout from "@/components/Layout";
-import { supabaseChildrenApi, supabaseTeamApi, supabaseUserApi } from "@/services/supabaseApi";
+import { api } from '@/services/unifiedApi';
 import { Child, Team, User } from "@/types";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -50,7 +50,7 @@ const ApprovalsPage = () => {
 
         setPendingRegistrations(pendingGuardians || []);
         
-        const teams = await supabaseTeamApi.getAll();
+        const teams = await api.getTeams();
         setAvailableTeams(teams);
       } catch (error) {
         console.error('Error loading data:', error);

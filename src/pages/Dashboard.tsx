@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Calendar, Award, Users, User, MapPin, Clock, ChevronRight, Plus } from "lucide-react";
 import { Link } from "react-router-dom";
-import { supabaseTeamApi, supabaseChildrenApi } from "@/services/supabaseApi";
+import { api } from '@/services/unifiedApi';
 import { Team, Event, Child } from "@/types";
 
 const Dashboard = () => {
@@ -25,15 +25,15 @@ const Dashboard = () => {
     const loadDashboardData = async () => {
       try {
         // Get teams
-        const teamsData = await supabaseTeamApi.getAll();
+        const teamsData = await api.getTeams();
         setTeams(teamsData);
         setTeamCount(teamsData.length);
 
-        // Events functionality not yet implemented in Supabase API
+        // Events functionality not yet implemented in unified API
         setUpcomingEvents([]);
 
         // Count children with pending status
-        const allChildren = await supabaseChildrenApi.getAll();
+        const allChildren = await api.getChildren();
         const pending = allChildren.filter(child => child.status === 'pending').length;
         setPendingApprovals(pending);
 
