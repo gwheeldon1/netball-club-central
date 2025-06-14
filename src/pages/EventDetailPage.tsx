@@ -9,12 +9,12 @@ import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { ArrowLeft, Calendar, MapPin, Users, Clock, UserCheck, UserX, HelpCircle, Trophy, BarChart3 } from 'lucide-react';
-import { api } from '@/services/offlineApi';
+import { api } from '@/services/unifiedApi';
 import { Event, Team, Child, Attendance } from '@/types';
 import { toast } from "sonner";
 import { useAuth } from '@/context/AuthContext';
 import { MatchStatsForm } from '@/components/MatchStatsForm';
-import { supabaseChildrenApi } from '@/services/supabaseApi';
+// Using unified API instead
 
 const EventDetailPage = () => {
   const { id } = useParams<{ id: string }>();
@@ -50,16 +50,9 @@ const EventDetailPage = () => {
 
         if (teamData) {
           setTeam(teamData);
-          // Get team players using Supabase API for better permissions
-          try {
-            const players = await supabaseChildrenApi.getByTeamId(teamData.id);
-            setTeamPlayers(players);
-          } catch (error) {
-            console.error('Error loading team players:', error);
-            // Fallback to local API
-            const players = await api.getChildrenByTeamId(teamData.id);
-            setTeamPlayers(players);
-          }
+          // Get team players using unified API
+          const players = await api.getChildrenByTeamId(teamData.id);
+          setTeamPlayers(players);
         }
 
         setAttendance(attendanceData);
