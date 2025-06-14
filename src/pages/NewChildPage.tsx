@@ -11,7 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useAuth } from "@/context/AuthContext";
 import { toast } from "sonner";
 import FileUpload from "@/components/FileUpload";
-import { childrenApi } from "@/services/api";
+import { supabaseChildrenApi } from "@/services/supabaseApi";
 import { Child } from "@/types";
 
 const NewChildPage = () => {
@@ -85,7 +85,7 @@ const NewChildPage = () => {
         ageGroup,
       };
       
-      const createdChild = childrenApi.create(newChild);
+      const createdChild = await supabaseChildrenApi.create(newChild);
       
       toast.success("Child registration submitted successfully!");
       navigate("/children");

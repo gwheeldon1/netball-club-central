@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ArrowLeft, Edit, Calendar, Activity, Trophy, Heart } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
-import { childrenApi } from "@/services/api";
+import { supabaseChildrenApi } from "@/services/supabaseApi";
 import { toast } from "sonner";
 import FileUpload from "@/components/FileUpload";
 
@@ -30,8 +30,9 @@ const ChildDetailPage = () => {
   });
 
   useEffect(() => {
-    if (id && currentUser) {
-      const childData = childrenApi.getById(id);
+    const fetchChild = async () => {
+      if (id && currentUser) {
+        const childData = await supabaseChildrenApi.getById(id);
       
       if (childData) {
         // Check if this child belongs to the current user
@@ -49,7 +50,9 @@ const ChildDetailPage = () => {
       
       // Load attendance history and performance stats
       loadChildStats(id);
-    }
+      }
+    };
+    fetchChild();
   }, [id, currentUser, navigate]);
 
   const loadChildStats = async (childId: string) => {
@@ -118,13 +121,18 @@ const ChildDetailPage = () => {
     }
   };
   
-  const handleImageUpload = (url: string) => {
+  const handleImageUpload = async (url: string) => {
     if (child && id) {
-      const updatedChild = childrenApi.update(id, { profileImage: url });
-      if (updatedChild) {
-        setChild(updatedChild);
-        toast.success("Profile image updated successfully");
-      } else {
+      try {
+        const updatedChild = await supabaseChildrenApi.update(id, { profileImage: url });
+        if (updatedChild) {
+          setChild(updatedChild);
+          toast.success("Profile image updated successfully");
+        } else {
+          toast.error("Failed to update profile image");
+        }
+      } catch (error) {
+        console.error("Error updating profile image:", error);
         toast.error("Failed to update profile image");
       }
     }

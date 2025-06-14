@@ -8,7 +8,7 @@ import { Plus, Edit } from "lucide-react";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
 import { Child } from "@/types";
-import { childrenApi } from "@/services/api";
+import { supabaseChildrenApi } from "@/services/supabaseApi";
 
 const ChildrenPage = () => {
   const { currentUser } = useAuth();
@@ -16,11 +16,20 @@ const ChildrenPage = () => {
   const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
-    if (currentUser) {
-      const children = childrenApi.getByParentId(currentUser.id);
-      setMyChildren(children);
-      setLoading(false);
-    }
+    const fetchChildren = async () => {
+      if (currentUser) {
+        try {
+          const children = await supabaseChildrenApi.getByParentId(currentUser.id);
+          setMyChildren(children);
+        } catch (error) {
+          console.error('Error fetching children:', error);
+          toast.error('Failed to load children');
+        } finally {
+          setLoading(false);
+        }
+      }
+    };
+    fetchChildren();
   }, [currentUser]);
 
   const getStatusBadgeColor = (status: 'pending' | 'approved' | 'rejected') => {

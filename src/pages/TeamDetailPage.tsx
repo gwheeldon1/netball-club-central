@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import Layout from "@/components/Layout";
-import { teamApi, childrenApi, userApi } from "@/services/api";
+import { supabaseTeamApi, supabaseChildrenApi, supabaseUserApi } from "@/services/supabaseApi";
 import { Team, Child, User } from "@/types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -23,38 +23,43 @@ const TeamDetailPage = () => {
   const [loading, setLoading] = useState(true);
   
   useEffect(() => {
-    const loadTeamData = () => {
+    const loadTeamData = async () => {
       if (!id) return;
       
-      // Get team details
-      const teamData = teamApi.getById(id);
-      if (!teamData) {
-        toast.error("Team not found");
-        navigate("/teams");
-        return;
+      try {
+        // Get team details
+        const teamData = await supabaseTeamApi.getById(id);
+        if (!teamData) {
+          toast.error("Team not found");
+          navigate("/teams");
+          return;
+        }
+        
+        setTeam(teamData);
+        
+        // Get players in this team
+        const teamPlayers = await supabaseChildrenApi.getByTeamId(id);
+        setPlayers(teamPlayers);
+        
+        // In a real app, we'd have proper team membership records
+        // For now, we'll simulate coaches and managers
+        const allUsers = await supabaseUserApi.getAll();
+        
+        const teamCoaches = allUsers.filter(user => 
+          user.roles.includes('coach')
+        );
+        setCoaches(teamCoaches.slice(0, 2)); // Just take a couple for demo
+        
+        const teamManagers = allUsers.filter(user => 
+          user.roles.includes('manager')
+        );
+        setManagers(teamManagers.slice(0, 1)); // Just take one for demo
+      } catch (error) {
+        console.error("Error loading team data:", error);
+        toast.error("Failed to load team data");
+      } finally {
+        setLoading(false);
       }
-      
-      setTeam(teamData);
-      
-      // Get players in this team
-      const teamPlayers = childrenApi.getByTeamId(id);
-      setPlayers(teamPlayers);
-      
-      // In a real app, we'd have proper team membership records
-      // For now, we'll simulate coaches and managers
-      const allUsers = userApi.getAll();
-      
-      const teamCoaches = allUsers.filter(user => 
-        user.roles.includes('coach')
-      );
-      setCoaches(teamCoaches.slice(0, 2)); // Just take a couple for demo
-      
-      const teamManagers = allUsers.filter(user => 
-        user.roles.includes('manager')
-      );
-      setManagers(teamManagers.slice(0, 1)); // Just take one for demo
-      
-      setLoading(false);
     };
     
     loadTeamData();

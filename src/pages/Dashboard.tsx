@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Calendar, Award, Users, User, MapPin, Clock, ChevronRight, Plus } from "lucide-react";
 import { Link } from "react-router-dom";
-import { teamApi, childrenApi, eventApi } from "@/services/api";
+import { supabaseTeamApi, supabaseChildrenApi } from "@/services/supabaseApi";
 import { Team, Event, Child } from "@/types";
 
 const Dashboard = () => {
@@ -25,22 +25,15 @@ const Dashboard = () => {
     const loadDashboardData = async () => {
       try {
         // Get teams
-        const teamsData = await teamApi.getAll();
+        const teamsData = await supabaseTeamApi.getAll();
         setTeams(teamsData);
         setTeamCount(teamsData.length);
 
-        // Get events (in a real app, we would filter by date)
-        const eventsData = await eventApi.getAll();
-        // Sort events by date and time to get upcoming events
-        const sortedEvents = eventsData.sort((a, b) => {
-          const dateA = new Date(`${a.date}T${a.time}`);
-          const dateB = new Date(`${b.date}T${b.time}`);
-          return dateA.getTime() - dateB.getTime();
-        });
-        setUpcomingEvents(sortedEvents.slice(0, 3));
+        // Events functionality not yet implemented in Supabase API
+        setUpcomingEvents([]);
 
         // Count children with pending status
-        const allChildren = await childrenApi.getAll();
+        const allChildren = await supabaseChildrenApi.getAll();
         const pending = allChildren.filter(child => child.status === 'pending').length;
         setPendingApprovals(pending);
 

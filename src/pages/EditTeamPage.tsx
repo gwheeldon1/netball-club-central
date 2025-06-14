@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/dialog";
 
 import { Team } from "@/types";
-import { teamApi, childrenApi } from "@/services/api";
+import { supabaseTeamApi, supabaseChildrenApi } from "@/services/supabaseApi";
 import { useAuth } from "@/context/AuthContext";
 import { Trash } from "lucide-react";
 
@@ -30,7 +30,7 @@ const EditTeamPage = () => {
   const [isDeleting, setIsDeleting] = useState(false);
   
   useEffect(() => {
-    const loadTeam = () => {
+    const loadTeam = async () => {
       if (!id) {
         toast.error("Team ID is missing");
         navigate("/teams");
@@ -38,7 +38,7 @@ const EditTeamPage = () => {
       }
       
       try {
-        const teamData = teamApi.getById(id);
+        const teamData = await supabaseTeamApi.getById(id);
         
         if (!teamData) {
           toast.error("Team not found");
@@ -66,7 +66,7 @@ const EditTeamPage = () => {
     
     try {
       // Check if team has players
-      const players = childrenApi.getByTeamId(id);
+      const players = await supabaseChildrenApi.getByTeamId(id);
       
       if (players.length > 0) {
         toast.error(`Cannot delete team. There are ${players.length} players assigned to this team.`);
@@ -75,7 +75,9 @@ const EditTeamPage = () => {
         return;
       }
       
-      const success = teamApi.delete(id);
+      // Team deletion not yet implemented in Supabase API
+      toast.info("Team deletion functionality coming soon");
+      const success = false;
       
       if (success) {
         toast.success("Team deleted successfully");

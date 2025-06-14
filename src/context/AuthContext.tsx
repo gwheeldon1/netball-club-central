@@ -1,9 +1,8 @@
 
 import { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import { User, UserRole } from '../types';
-import { userApi } from '../services/api';
+import { supabaseUserApi } from '@/services/supabaseApi';
 import { toast } from "sonner";
-import { useOffline } from '@/hooks/use-offline';
 
 interface AuthContextType {
   currentUser: User | null;
@@ -11,8 +10,6 @@ interface AuthContextType {
   logout: () => void;
   hasRole: (role: UserRole) => boolean;
   isAuthenticated: boolean;
-  isOffline: boolean;
-  lastOnlineTime: Date | null;
 }
 
 const AUTH_STORAGE_KEY = 'netball_auth_user';
@@ -22,7 +19,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
-  const { isOffline, lastOnlineTime } = useOffline({ showToasts: true });
+  // Offline functionality removed for simplicity
 
   // Load previously authenticated user from localStorage on init
   useEffect(() => {
@@ -43,7 +40,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // In a real app, this would be an API call to authenticate
     // For our offline-first approach, we use localStorage API service
     try {
-      const user = userApi.getByEmail(email.toLowerCase());
+      const user = await supabaseUserApi.getByEmail(email.toLowerCase());
       
       if (user) {
         // In a real app, we'd check the password hash
@@ -56,9 +53,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     } catch (error) {
       console.error('Error during login:', error);
-      if (isOffline) {
-        toast.error("Cannot verify credentials in offline mode");
-      }
+      toast.error("Login failed");
     }
     
     return false;
@@ -81,9 +76,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       login, 
       logout, 
       hasRole, 
-      isAuthenticated,
-      isOffline,
-      lastOnlineTime
+      isAuthenticated
     }}>
       {children}
     </AuthContext.Provider>

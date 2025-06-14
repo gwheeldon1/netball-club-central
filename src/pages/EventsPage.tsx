@@ -21,12 +21,12 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { eventApi, teamApi } from "@/services/api";
+import { supabaseTeamApi } from "@/services/supabaseApi";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { useOffline } from "@/hooks/use-offline";
+// Offline functionality removed
 
 const EventsPage = () => {
-  const { hasRole, isOffline } = useAuth();
+  const { hasRole } = useAuth();
   const isMobile = useIsMobile();
   const [events, setEvents] = useState<Event[]>([]);
   const [teams, setTeams] = useState<Team[]>([]);
@@ -43,8 +43,9 @@ const EventsPage = () => {
   useEffect(() => {
     const loadData = async () => {
       try {
-        const eventsData = eventApi.getAll();
-        const teamsData = teamApi.getAll();
+        // Events API not yet implemented
+        const eventsData: Event[] = [];
+        const teamsData = await supabaseTeamApi.getAll();
         
         setEvents(eventsData);
         setFilteredEvents(eventsData);
@@ -161,15 +162,7 @@ const EventsPage = () => {
           )}
         </div>
         
-        {/* Offline Alert */}
-        {isOffline && (
-          <Alert className="bg-background border-border">
-            <AlertTriangle className="h-4 w-4" />
-            <AlertDescription>
-              You are offline. Events data may not be up to date.
-            </AlertDescription>
-          </Alert>
-        )}
+        {/* Offline alert removed */}
         
         <div className="space-y-4">
           <div className="relative">

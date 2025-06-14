@@ -8,17 +8,17 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { useOffline } from "@/hooks/use-offline";
+// Offline functionality removed
 import { useAuth } from "@/context/AuthContext";
 import { Event, Team, Child, Attendance } from "@/types";
-import { eventApi, teamApi, childrenApi, attendanceApi } from "@/services/api";
+// Event functionality not yet fully implemented in Supabase API
 import { Calendar, MapPin, Clock, AlertTriangle, ArrowLeft, Users } from "lucide-react";
 import { toast } from "sonner";
 
 const EventDetailPage = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { hasRole, isOffline } = useAuth();
+  const { hasRole } = useAuth();
   const isMobile = useIsMobile();
   const [event, setEvent] = useState<Event | null>(null);
   const [team, setTeam] = useState<Team | null>(null);
@@ -37,7 +37,8 @@ const EventDetailPage = () => {
       }
 
       try {
-        const eventData = eventApi.getById(id);
+        // Event API not yet implemented
+        const eventData = null;
         
         if (!eventData) {
           setError("Event not found");
@@ -47,17 +48,7 @@ const EventDetailPage = () => {
 
         setEvent(eventData);
         
-        // Load related data
-        if (eventData.teamId) {
-          const teamData = teamApi.getById(eventData.teamId);
-          setTeam(teamData || null);
-          
-          const members = childrenApi.getByTeamId(eventData.teamId);
-          setTeamMembers(members);
-          
-          const attendanceData = attendanceApi.getByEventId(id);
-          setAttendance(attendanceData);
-        }
+        // Event-related data loading not yet implemented
         
       } catch (error) {
         console.error("Error loading event data:", error);
@@ -185,14 +176,7 @@ const EventDetailPage = () => {
           )}
         </div>
         
-        {isOffline && (
-          <Alert className="bg-background border-border">
-            <AlertTriangle className="h-4 w-4 text-destructive" />
-            <AlertDescription className="text-muted-foreground text-sm">
-              You are offline. Some features may be limited.
-            </AlertDescription>
-          </Alert>
-        )}
+        {/* Offline indicator removed */}
         
         <Card>
           <CardHeader>

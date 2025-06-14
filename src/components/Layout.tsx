@@ -17,8 +17,7 @@ const Layout = ({
   const {
     currentUser,
     logout,
-    hasRole,
-    isOffline
+    hasRole
   } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [headerHeight, setHeaderHeight] = useState(73); // Default fallback
@@ -91,7 +90,7 @@ const Layout = ({
                   <Bell className="h-8 w-8" />
                 </Link>
               </Button>}
-            {isOffline && <WifiOff className="h-4 w-4 text-muted-foreground" />}
+            {/* Offline indicator removed */}
           </div>
         </div>
       </div>
@@ -128,11 +127,7 @@ const Layout = ({
                 </div>
               </Link>
               
-              {/* Offline indicator */}
-              {isOffline && <div className="flex items-center mt-3 px-3 py-2 bg-muted rounded-md text-muted-foreground gap-2 lg:flex hidden">
-                  <WifiOff className="h-4 w-4" />
-                  <span className="text-xs">Offline Mode</span>
-                </div>}
+              {/* Offline indicator removed */}
             </div>}
 
           {/* Navigation links */}

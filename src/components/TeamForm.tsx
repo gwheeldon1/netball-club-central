@@ -27,7 +27,7 @@ import {
 } from "@/components/ui/select";
 
 import { Team } from "@/types";
-import { teamApi } from "@/services/api";
+import { supabaseTeamApi } from "@/services/supabaseApi";
 
 const teamSchema = z.object({
   name: z.string().min(2, { message: "Team name must be at least 2 characters" }),
@@ -80,7 +80,7 @@ const TeamForm = ({ team, mode }: TeamFormProps) => {
     try {
       if (mode === "create") {
         // Ensure we pass all required properties with their proper types
-        const newTeam = teamApi.create({
+        const newTeam = await supabaseTeamApi.create({
           name: data.name,          // Required field
           ageGroup: data.ageGroup,  // Required field
           category: data.category,  // Required field
@@ -92,8 +92,8 @@ const TeamForm = ({ team, mode }: TeamFormProps) => {
         toast.success("Team created successfully");
         navigate(`/teams/${newTeam.id}`);
       } else if (team) {
-        teamApi.update(team.id, data);
-        toast.success("Team updated successfully");
+        // Update not yet implemented in Supabase API
+        toast.info("Team update functionality coming soon");
         navigate(`/teams/${team.id}`);
       }
     } catch (error) {
