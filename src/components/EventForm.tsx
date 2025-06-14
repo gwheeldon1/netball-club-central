@@ -26,7 +26,7 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 
 import { Event, Team } from "@/types";
-import { api } from "@/services/unifiedApi";
+import { api } from "@/services/api";
 import { logger } from "@/utils/logger";
 import { RecurringEventForm } from "@/components/events/RecurringEventForm";
 import { RecurringEventService } from "@/services/recurringEventService";

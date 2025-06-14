@@ -1,7 +1,9 @@
-// Unified API service - Re-export of the main unified API
-// This file maintains backward compatibility
-// Re-export the unified API
-export { api } from '../unifiedApi';
+// Consolidated API - Single entry point for all data operations
+export { userApi } from './users';
+export { teamApi } from './teams';
+export { eventApi } from './events';
+export { childApi } from './children';
+export { attendanceApi } from './attendance';
+export { api } from './unified';
 
-// Export types for consumers
-export * from './types';
+// Note: Update all imports from '@/services/unifiedApi' to '@/services/api'

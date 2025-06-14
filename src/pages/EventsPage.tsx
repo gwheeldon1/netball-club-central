@@ -21,7 +21,7 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { api } from '@/services/unifiedApi';
+import { api } from '@/services/api';
 import { useIsMobile } from "@/hooks/use-mobile";
 import { logger } from '@/utils/logger';
 
