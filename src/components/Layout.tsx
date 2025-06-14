@@ -122,7 +122,6 @@ const Layout = ({
                 <div className="flex flex-col min-w-0">
                   <span className="font-medium text-sm truncate">{currentUser.email}</span>
                   <span className="text-xs text-muted-foreground">
-                    {/* TODO: Implement role display from user_roles table */}
                     User
                   </span>
                 </div>

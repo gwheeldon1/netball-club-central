@@ -99,14 +99,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const hasRole = (role: UserRole): boolean => {
     if (!user) return false;
     
-    // Use the has_role function from the database
-    // For now, check if user has admin email for admin access
+    // Temporary admin check - replace with proper role system
     if (role === 'admin') {
-      return user.email === 'admin@example.com'; // Replace with actual admin email
+      return user.email === 'admin@netballclub.com' || user.email === 'admin@example.com';
     }
     
-    // For other roles, would need to query user_roles table
-    // This is a simplified implementation until full role system is in place
+    // Default to parent role for now - this will be replaced with proper role queries
+    if (role === 'parent') {
+      return true; // All logged-in users can be considered parents for now
+    }
+    
     return false;
   };
 
