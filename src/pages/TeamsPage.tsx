@@ -45,11 +45,11 @@ const TeamsPage = () => {
 
   return (
     <Layout>
-      <div className="space-y-6">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div className="space-y-4 sm:space-y-6">
+        <div className="flex flex-col gap-3 sm:gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight">Teams</h1>
-            <p className="text-muted-foreground mt-1">
+            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Teams</h1>
+            <p className="text-muted-foreground mt-1 text-sm sm:text-base">
               {permissions.isAdmin 
                 ? "Manage all teams and their members"
                 : permissions.userTeams.length > 0
@@ -59,7 +59,7 @@ const TeamsPage = () => {
           </div>
           
           {permissions.isAdmin && (
-            <Button className="bg-primary hover:bg-primary/90" asChild>
+            <Button className="bg-primary hover:bg-primary/90 w-full sm:w-auto" asChild>
               <Link to="/teams/new">
                 <Plus className="mr-2 h-4 w-4" />
                 Create Team
@@ -69,32 +69,32 @@ const TeamsPage = () => {
         </div>
         
         {/* Teams grid */}
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
           {teams.length > 0 ? (
             teams.map((team) => (
               <Link key={team.id} to={`/teams/${team.id}`} className="hover:no-underline">
                 <Card className="h-full transition-all hover:shadow-md overflow-hidden">
-                  <CardHeader className="flex flex-row items-center gap-3">
-                    <div className="w-12 h-12 rounded-full overflow-hidden flex-shrink-0 bg-accent flex items-center justify-center">
-                      <Users className="h-6 w-6 text-primary" />
+                  <CardHeader className="flex flex-row items-center gap-3 p-4 sm:p-6">
+                    <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full overflow-hidden flex-shrink-0 bg-accent flex items-center justify-center">
+                      <Users className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
                     </div>
-                    <div>
-                      <CardTitle className="text-xl">{team.name}</CardTitle>
-                      <p className="text-sm text-muted-foreground">{team.ageGroup}</p>
+                    <div className="min-w-0 flex-1">
+                      <CardTitle className="text-lg sm:text-xl truncate">{team.name}</CardTitle>
+                      <p className="text-sm text-muted-foreground truncate">{team.ageGroup}</p>
                     </div>
                   </CardHeader>
-                  <CardContent>
-                    <div className="mt-3 flex items-center gap-1">
-                      <Users className="h-4 w-4 text-primary" />
-                      <span className="text-sm text-muted-foreground">Team Details</span>
+                  <CardContent className="p-4 sm:p-6 pt-0">
+                    <div className="mt-2 sm:mt-3 flex items-center gap-1">
+                      <Users className="h-3 w-3 sm:h-4 sm:w-4 text-primary flex-shrink-0" />
+                      <span className="text-xs sm:text-sm text-muted-foreground">Team Details</span>
                     </div>
                   </CardContent>
                 </Card>
               </Link>
             ))
           ) : (
-            <div className="col-span-full text-center py-12">
-              <p className="text-muted-foreground">No teams found.</p>
+            <div className="col-span-full text-center py-8 sm:py-12">
+              <p className="text-muted-foreground text-sm sm:text-base">No teams found.</p>
             </div>
           )}
         </div>

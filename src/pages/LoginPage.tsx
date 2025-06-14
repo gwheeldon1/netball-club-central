@@ -39,33 +39,33 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-background to-muted/50 px-4 py-12">
-      <div className="w-full max-w-md space-y-8">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-background to-muted/50 px-4 py-8 sm:py-12">
+      <div className="w-full max-w-md space-y-6 sm:space-y-8">
         <div className="text-center">
-          <div className="flex justify-center mb-6">
+          <div className="flex justify-center mb-4 sm:mb-6">
             <div className="relative">
-              <div className="w-16 h-16 md:w-20 md:h-20 bg-primary rounded-full flex items-center justify-center shadow-lg">
-                <Award className="h-9 w-9 md:h-11 md:w-11 text-primary-foreground" />
+              <div className="w-14 h-14 sm:w-16 sm:h-16 lg:w-20 lg:h-20 bg-primary rounded-full flex items-center justify-center shadow-lg">
+                <Award className="h-7 w-7 sm:h-9 sm:w-9 lg:h-11 lg:w-11 text-primary-foreground" />
               </div>
-              <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-background rounded-full flex items-center justify-center shadow-md border border-border">
-                <div className="w-4 h-4 bg-primary rounded-full"></div>
+              <div className="absolute -bottom-1 -right-1 w-5 h-5 sm:w-6 sm:h-6 bg-background rounded-full flex items-center justify-center shadow-md border border-border">
+                <div className="w-3 h-3 sm:w-4 sm:h-4 bg-primary rounded-full"></div>
               </div>
             </div>
           </div>
-          <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-foreground">Club Management</h1>
+          <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold tracking-tight text-foreground">Club Management</h1>
         </div>
 
         <Card className="shadow-lg">
-          <CardHeader className="space-y-1 pb-4">
-            <CardTitle className="text-xl md:text-2xl text-center">Sign In</CardTitle>
+          <CardHeader className="space-y-1 pb-3 sm:pb-4 px-4 sm:px-6">
+            <CardTitle className="text-lg sm:text-xl lg:text-2xl text-center">Sign In</CardTitle>
           </CardHeader>
           <form onSubmit={handleSubmit} autoComplete="on">
-            <CardContent className="space-y-4 pt-1">
+            <CardContent className="space-y-4 pt-1 px-4 sm:px-6">
               <div className="space-y-2">
                 <Label htmlFor="email" className="text-sm font-medium">Email Address</Label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                    <MailIcon className="h-5 w-5 text-muted-foreground" />
+                    <MailIcon className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground" />
                   </div>
                    <Input 
                      id="email" 
@@ -74,7 +74,7 @@ const LoginPage = () => {
                      value={email} 
                      onChange={e => setEmail(e.target.value)} 
                      required 
-                     className="pl-10 h-11 text-base"
+                     className="pl-9 sm:pl-10 h-10 sm:h-11 text-base"
                      autoComplete="email"
                      name="email"
                    />
@@ -89,7 +89,7 @@ const LoginPage = () => {
                 </div>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                    <LockIcon className="h-5 w-5 text-muted-foreground" />
+                    <LockIcon className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground" />
                   </div>
                    <Input 
                      id="password" 
@@ -98,15 +98,15 @@ const LoginPage = () => {
                      value={password} 
                      onChange={e => setPassword(e.target.value)} 
                      required 
-                     className="pl-10 h-11 text-base"
+                     className="pl-9 sm:pl-10 h-10 sm:h-11 text-base"
                      autoComplete="current-password"
                      name="password"
                    />
                 </div>
               </div>
             </CardContent>
-            <CardFooter className="flex-col space-y-4 pt-2">
-              <Button type="submit" className="w-full h-11 text-base" disabled={isLoading}>
+            <CardFooter className="flex-col space-y-4 pt-2 px-4 sm:px-6 pb-4 sm:pb-6">
+              <Button type="submit" className="w-full h-10 sm:h-11 text-base" disabled={isLoading}>
                 {isLoading ? (
                   <>
                     <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-primary-foreground" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -130,45 +130,45 @@ const LoginPage = () => {
         </Card>
 
         <Card className="shadow-sm">
-          <CardHeader className="pb-3">
+          <CardHeader className="pb-2 sm:pb-3 px-4 sm:px-6">
             <CardTitle className="text-center text-sm font-medium">Demo Accounts</CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm">
+          <CardContent className="px-4 sm:px-6">
+            <div className="grid grid-cols-1 gap-2 text-sm">
               <div className="flex items-center p-3 bg-accent rounded-lg border">
-                <div className="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center mr-3">
+                <div className="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center mr-3 flex-shrink-0">
                   <span className="text-xs font-medium text-blue-600 dark:text-blue-400">P</span>
                 </div>
-                <div className="text-left">
+                <div className="text-left min-w-0 flex-1">
                   <p className="font-medium text-foreground">Parent</p>
-                  <p className="text-xs text-muted-foreground">sarah.johnson@example.com</p>
+                  <p className="text-xs text-muted-foreground truncate">sarah.johnson@example.com</p>
                 </div>
               </div>
               <div className="flex items-center p-3 bg-accent rounded-lg border">
-                <div className="w-8 h-8 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center mr-3">
+                <div className="w-8 h-8 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center mr-3 flex-shrink-0">
                   <span className="text-xs font-medium text-green-600 dark:text-green-400">C</span>
                 </div>
-                <div className="text-left">
+                <div className="text-left min-w-0 flex-1">
                   <p className="font-medium text-foreground">Coach</p>
-                  <p className="text-xs text-muted-foreground">james.williams@example.com</p>
+                  <p className="text-xs text-muted-foreground truncate">james.williams@example.com</p>
                 </div>
               </div>
               <div className="flex items-center p-3 bg-accent rounded-lg border">
-                <div className="w-8 h-8 rounded-full bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center mr-3">
+                <div className="w-8 h-8 rounded-full bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center mr-3 flex-shrink-0">
                   <span className="text-xs font-medium text-purple-600 dark:text-purple-400">M</span>
                 </div>
-                <div className="text-left">
+                <div className="text-left min-w-0 flex-1">
                   <p className="font-medium text-foreground">Manager</p>
-                  <p className="text-xs text-muted-foreground">emma.davis@example.com</p>
+                  <p className="text-xs text-muted-foreground truncate">emma.davis@example.com</p>
                 </div>
               </div>
               <div className="flex items-center p-3 bg-accent rounded-lg border">
-                <div className="w-8 h-8 rounded-full bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center mr-3">
+                <div className="w-8 h-8 rounded-full bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center mr-3 flex-shrink-0">
                   <span className="text-xs font-medium text-amber-600 dark:text-amber-400">A</span>
                 </div>
-                <div className="text-left">
+                <div className="text-left min-w-0 flex-1">
                   <p className="font-medium text-foreground">Admin</p>
-                  <p className="text-xs text-muted-foreground">michael.brown@example.com</p>
+                  <p className="text-xs text-muted-foreground truncate">michael.brown@example.com</p>
                 </div>
               </div>
             </div>
