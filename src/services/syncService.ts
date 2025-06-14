@@ -1,7 +1,6 @@
 import { offlineApi, SyncStatus } from './database';
 // Sync service functionality needs to be refactored to use unified API
-import { DBUser, DBChild, DBTeam, DBEvent, DBAttendance } from '@/types/database';
-import { User, Child, Team, Event, Attendance, UserRole } from '@/types';
+import { User, Child, Team, Event, Attendance, UserRole } from '@/types/unified';
 import { logger } from '@/utils/logger';
 
 export class SyncService {
@@ -27,46 +26,6 @@ export class SyncService {
         this.syncToSupabase();
       }
     }, 30000);
-  }
-
-  // Convert between DB types and API types
-  private convertDBUserToUser(dbUser: DBUser): User {
-    return {
-      ...dbUser,
-      roles: dbUser.roles as UserRole[]
-    };
-  }
-
-  private convertUserToDBUser(user: User): DBUser {
-    return {
-      ...user,
-      roles: user.roles as string[]
-    };
-  }
-
-  private convertDBChildToChild(dbChild: DBChild): Child {
-    return dbChild as Child;
-  }
-
-  private convertChildToDBChild(child: Child): DBChild {
-    return child as DBChild;
-  }
-
-  private convertDBTeamToTeam(dbTeam: DBTeam): Team {
-    return dbTeam as Team;
-  }
-
-  private convertTeamToDBTeam(team: Team): DBTeam {
-    return {
-      id: team.id,
-      name: team.name,
-      ageGroup: team.ageGroup,
-      category: team.category,
-      profileImage: team.profileImage,
-      bannerImage: team.bannerImage,
-      icon: team.icon,
-      description: team.description
-    };
   }
 
   async syncToSupabase(): Promise<void> {

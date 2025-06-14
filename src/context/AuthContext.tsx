@@ -40,7 +40,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return;
       }
       
-      setUserProfile(data);
+      if (data) {
+        const profile: UserProfile = {
+          id: data.id,
+          userId: data.user_id,
+          firstName: data.first_name,
+          lastName: data.last_name,
+          email: data.email,
+          phone: data.phone,
+          profileImage: data.profile_image,
+          createdAt: data.created_at,
+          updatedAt: data.updated_at
+        };
+        setUserProfile(profile);
+      }
     } catch (error) {
       logger.error('Unexpected error fetching profile:', error);
     }
