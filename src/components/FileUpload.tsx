@@ -166,7 +166,7 @@ const FileUpload = ({ onUpload, currentImage, className, aspectRatio = 1, bucket
   return (
     <>
       <div className={`flex flex-col items-center ${className}`}>
-        <div className="w-32 h-32 relative mb-3 bg-gray-100 rounded-full overflow-hidden flex items-center justify-center border">
+        <div className="w-32 h-32 relative mb-3 bg-muted rounded-full overflow-hidden flex items-center justify-center border border-border">
           {currentImage ? (
             <img 
               src={currentImage} 
@@ -174,7 +174,7 @@ const FileUpload = ({ onUpload, currentImage, className, aspectRatio = 1, bucket
               className="w-full h-full object-cover"
             />
           ) : (
-            <User className="h-12 w-12 text-gray-400" />
+            <User className="h-12 w-12 text-muted-foreground" />
           )}
         </div>
         

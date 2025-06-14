@@ -26,11 +26,11 @@ const ChildrenPage = () => {
   const getStatusBadgeColor = (status: 'pending' | 'approved' | 'rejected') => {
     switch (status) {
       case 'approved':
-        return "bg-green-100 text-green-800";
+        return "bg-primary/10 text-primary";
       case 'rejected':
-        return "bg-red-100 text-red-800";
+        return "bg-destructive/10 text-destructive";
       default:
-        return "bg-yellow-100 text-yellow-800";
+        return "bg-secondary text-secondary-foreground";
     }
   };
 
@@ -64,7 +64,7 @@ const ChildrenPage = () => {
             </p>
           </div>
           
-          <Button className="bg-netball-500 hover:bg-netball-600" asChild>
+          <Button asChild>
             <Link to="/children/new">
               <Plus className="mr-2 h-4 w-4" />
               Register New Child
@@ -139,7 +139,7 @@ const ChildrenPage = () => {
             <p className="text-muted-foreground mb-6">
               Register your children to get started with the netball club.
             </p>
-            <Button className="bg-netball-500 hover:bg-netball-600" asChild>
+            <Button asChild>
               <Link to="/children/new">
                 <Plus className="mr-2 h-4 w-4" />
                 Register New Child
