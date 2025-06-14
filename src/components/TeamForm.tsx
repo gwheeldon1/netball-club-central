@@ -93,9 +93,23 @@ const TeamForm = ({ team, mode }: TeamFormProps) => {
         toast.success("Team created successfully");
         navigate(`/teams/${newTeam.id}`);
       } else if (team) {
-        // Update not yet implemented in Supabase API
-        toast.info("Team update functionality coming soon");
-        navigate(`/teams/${team.id}`);
+        // Update existing team using unified API
+        const updatedTeam = await api.updateTeam(team.id, {
+          name: data.name,
+          ageGroup: data.ageGroup,
+          category: data.category,
+          description: data.description,
+          profileImage: data.profileImage,
+          bannerImage: data.bannerImage,
+          icon: data.icon,
+        });
+        
+        if (updatedTeam) {
+          toast.success("Team updated successfully");
+          navigate(`/teams/${updatedTeam.id}`);
+        } else {
+          toast.error("Failed to update team");
+        }
       }
     } catch (error) {
       logger.error("Error saving team:", error);

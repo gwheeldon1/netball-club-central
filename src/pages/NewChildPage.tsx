@@ -73,8 +73,8 @@ const NewChildPage = () => {
       else if (age <= 16) ageGroup = 'U16';
       else ageGroup = 'U18';
       
-      // Create the new child record
-      const newChild: Omit<Child, 'id'> = {
+      // Create the new child record using unified API
+      const newChild = await api.createChild({
         name: formData.name,
         dateOfBirth: formData.dateOfBirth,
         medicalInfo: formData.medicalInfo,
@@ -83,10 +83,8 @@ const NewChildPage = () => {
         parentId: currentUser.id,
         status: 'pending',
         ageGroup,
-      };
-      
-      // Child creation functionality needs to be implemented in unified API
-      toast.info('Child registration functionality coming soon');
+        teamId: '' // Will be assigned later by admin
+      });
       
       toast.success("Child registration submitted successfully!");
       navigate("/children");

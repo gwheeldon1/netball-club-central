@@ -75,16 +75,10 @@ const EditTeamPage = () => {
         return;
       }
       
-      // Team deletion not yet implemented in Supabase API
-      toast.info("Team deletion functionality coming soon");
-      const success = false;
-      
-      if (success) {
-        toast.success("Team deleted successfully");
-        navigate("/teams");
-      } else {
-        toast.error("Failed to delete team");
-      }
+      // Delete team using unified API
+      await api.deleteTeam(id);
+      toast.success("Team deleted successfully");
+      navigate("/teams");
     } catch (error) {
       console.error("Error deleting team:", error);
       toast.error("An error occurred while deleting the team");
