@@ -4,7 +4,7 @@ import Layout from "@/components/Layout";
 import { Event, Team } from "@/types";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Calendar, Search, Filter, AlertTriangle, Plus, MapPin, Clock } from "lucide-react";
+import { Calendar, Search, Filter, AlertTriangle, Plus, MapPin, Clock, RotateCcw } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
@@ -43,8 +43,7 @@ const EventsPage = () => {
   useEffect(() => {
     const loadData = async () => {
       try {
-        // Events API not yet implemented in unified API
-        const eventsData: Event[] = [];
+        const eventsData = await api.getEvents();
         const teamsData = await api.getTeams();
         
         setEvents(eventsData);
