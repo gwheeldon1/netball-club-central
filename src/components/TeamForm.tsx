@@ -27,7 +27,7 @@ import {
 } from "@/components/ui/select";
 
 import { Team } from "@/types";
-import { supabaseTeamApi } from "@/services/supabaseApi";
+import { api } from "@/services/unifiedApi";
 import { logger } from "@/utils/logger";
 
 const teamSchema = z.object({
@@ -81,7 +81,7 @@ const TeamForm = ({ team, mode }: TeamFormProps) => {
     try {
       if (mode === "create") {
         // Ensure we pass all required properties with their proper types
-        const newTeam = await supabaseTeamApi.create({
+        const newTeam = await api.createTeam({
           name: data.name,          // Required field
           ageGroup: data.ageGroup,  // Required field
           category: data.category,  // Required field

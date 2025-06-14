@@ -9,7 +9,7 @@ import { Plus, Users } from "lucide-react";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
 import { Team } from "@/types";
-import { supabaseTeamApi } from "@/services/supabaseApi";
+import { api } from "@/services/unifiedApi";
 
 const TeamsPage = () => {
   const { currentUser } = useAuth();
@@ -20,7 +20,7 @@ const TeamsPage = () => {
   useEffect(() => {
     const loadTeams = async () => {
       try {
-        const teamsData = await supabaseTeamApi.getAll();
+        const teamsData = await api.getTeams();
         setTeams(teamsData);
       } catch (error) {
         console.error('Error loading teams:', error);
