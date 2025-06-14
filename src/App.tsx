@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Toaster } from 'sonner';
 import { ThemeProvider } from '@/components/theme-provider';
 import { AuthProvider } from '@/context/AuthContext';
+import { ErrorBoundary } from '@/utils/errorBoundary';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import Dashboard from '@/pages/Dashboard';
 import LoginPage from '@/pages/LoginPage';
@@ -26,7 +27,8 @@ import './App.css';
 
 function App() {
   return (
-    <ThemeProvider defaultTheme="light" storageKey="netball-theme">
+    <ErrorBoundary>
+      <ThemeProvider defaultTheme="light" storageKey="netball-theme">
       <AuthProvider>
         <Router>
           <Routes>
@@ -121,6 +123,7 @@ function App() {
         <Toaster position="top-right" />
       </AuthProvider>
     </ThemeProvider>
+    </ErrorBoundary>
   );
 }
 
