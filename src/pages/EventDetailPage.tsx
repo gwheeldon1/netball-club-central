@@ -14,7 +14,7 @@ import { Event, Team, Child, Attendance } from '@/types';
 import { toast } from "sonner";
 import { useAuth } from '@/context/AuthContext';
 import { MatchStatsForm } from '@/components/MatchStatsForm';
-// Using unified API instead
+import { logger } from '@/utils/logger';
 
 const EventDetailPage = () => {
   const { id } = useParams<{ id: string }>();
@@ -58,7 +58,7 @@ const EventDetailPage = () => {
         setAttendance(attendanceData);
       }
     } catch (error) {
-      console.error('Error loading event data:', error);
+      logger.error('Error loading event data:', error);
       toast.error('Failed to load event data');
     } finally {
       setLoading(false);

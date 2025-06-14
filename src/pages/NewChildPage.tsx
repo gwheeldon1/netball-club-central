@@ -13,6 +13,7 @@ import { toast } from "sonner";
 import FileUpload from "@/components/FileUpload";
 import { api } from '@/services/unifiedApi';
 import { Child } from "@/types";
+import { logger } from '@/utils/logger';
 
 const NewChildPage = () => {
   const navigate = useNavigate();
@@ -89,7 +90,7 @@ const NewChildPage = () => {
       toast.success("Child registration submitted successfully!");
       navigate("/children");
     } catch (error) {
-      console.error("Error submitting form:", error);
+      logger.error("Error submitting form:", error);
       toast.error("There was a problem submitting the form");
     } finally {
       setIsSubmitting(false);

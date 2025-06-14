@@ -36,13 +36,11 @@ function App() {
       <AuthProvider>
         <Router>
           <Routes>
-            {/* Public routes with lazy loading */}
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegistrationPage />} />
             <Route path="/subscription-success" element={<SubscriptionSuccessPage />} />
             <Route path="/unauthorized" element={<UnauthorizedPage />} />
             
-            {/* Protected routes with lazy loading */}
             <Route path="/" element={
               <ProtectedRoute>
                 <Dashboard />

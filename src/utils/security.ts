@@ -2,6 +2,8 @@
  * Input sanitization utilities for XSS prevention
  */
 
+import { logger } from './logger';
+
 // HTML entities to escape
 const HTML_ENTITIES: Record<string, string> = {
   '&': '&amp;',
@@ -165,7 +167,7 @@ export class SecureStorage {
       const encoded = btoa(serialized); // Simple encoding (not cryptographically secure)
       sessionStorage.setItem(key, encoded);
     } catch (error) {
-      console.warn('Failed to store item securely:', error);
+      logger.warn('Failed to store item securely:', error);
     }
   }
 
@@ -177,7 +179,7 @@ export class SecureStorage {
       const serialized = atob(encoded);
       return JSON.parse(serialized);
     } catch (error) {
-      console.warn('Failed to retrieve item securely:', error);
+      logger.warn('Failed to retrieve item securely:', error);
       return null;
     }
   }

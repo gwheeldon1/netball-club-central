@@ -23,7 +23,7 @@ import {
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { api } from '@/services/unifiedApi';
 import { useIsMobile } from "@/hooks/use-mobile";
-// Offline functionality removed
+import { logger } from '@/utils/logger';
 
 const EventsPage = () => {
   const { hasRole } = useAuth();
@@ -51,7 +51,7 @@ const EventsPage = () => {
         setFilteredEvents(eventsData);
         setTeams(teamsData);
       } catch (error) {
-        console.error("Error loading events data:", error);
+        logger.error("Error loading events data:", error);
       } finally {
         setLoading(false);
       }
@@ -161,8 +161,6 @@ const EventsPage = () => {
             </Button>
           )}
         </div>
-        
-        {/* Offline alert removed */}
         
         <div className="space-y-4">
           <div className="relative">

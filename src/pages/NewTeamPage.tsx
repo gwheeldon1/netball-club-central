@@ -13,6 +13,7 @@ import { toast } from "sonner";
 import { api } from '@/services/unifiedApi';
 import { usePermissions } from "@/hooks/usePermissions";
 import FileUpload from "@/components/FileUpload";
+import { logger } from '@/utils/logger';
 
 const NewTeamPage = () => {
   const navigate = useNavigate();
@@ -88,7 +89,7 @@ const NewTeamPage = () => {
       toast.success("Team created successfully!");
       navigate("/teams");
     } catch (error) {
-      console.error("Error creating team:", error);
+      logger.error("Error creating team:", error);
       toast.error("Failed to create team. Please try again.");
     } finally {
       setLoading(false);

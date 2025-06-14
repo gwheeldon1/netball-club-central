@@ -19,6 +19,7 @@ import { Team } from "@/types";
 import { api } from '@/services/unifiedApi';
 import { useAuth } from "@/context/AuthContext";
 import { Trash } from "lucide-react";
+import { logger } from "@/utils/logger";
 
 const EditTeamPage = () => {
   const { id } = useParams<{ id: string }>();
@@ -48,7 +49,7 @@ const EditTeamPage = () => {
         
         setTeam(teamData);
       } catch (error) {
-        console.error("Error loading team:", error);
+        logger.error("Error loading team:", error);
         toast.error("Failed to load team data");
         navigate("/teams");
       } finally {
@@ -80,7 +81,7 @@ const EditTeamPage = () => {
       toast.success("Team deleted successfully");
       navigate("/teams");
     } catch (error) {
-      console.error("Error deleting team:", error);
+      logger.error("Error deleting team:", error);
       toast.error("An error occurred while deleting the team");
     } finally {
       setIsDeleting(false);
