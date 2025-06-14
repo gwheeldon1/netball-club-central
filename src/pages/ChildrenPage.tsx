@@ -76,7 +76,7 @@ const ChildrenPage = () => {
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {myChildren.map((child) => (
               <Card key={child.id} className="overflow-hidden">
-                <div className="relative h-32 bg-gray-100">
+                <div className="relative h-32 bg-muted">
                   {child.profileImage ? (
                     <img 
                       src={child.profileImage} 
@@ -85,7 +85,7 @@ const ChildrenPage = () => {
                     />
                   ) : (
                     <div className="flex items-center justify-center h-full">
-                      <span className="text-gray-400">No profile image</span>
+                      <span className="text-muted-foreground">No profile image</span>
                     </div>
                   )}
                   <div 
@@ -134,7 +134,7 @@ const ChildrenPage = () => {
             ))}
           </div>
         ) : (
-          <div className="text-center py-12 bg-gray-50 rounded-lg">
+          <div className="text-center py-12 bg-muted rounded-lg">
             <h3 className="text-lg font-medium mb-2">No Children Registered</h3>
             <p className="text-muted-foreground mb-6">
               Register your children to get started with the netball club.

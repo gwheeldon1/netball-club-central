@@ -101,8 +101,8 @@ const TeamDetailPage = () => {
             <div className="h-48 md:h-64 w-full bg-gradient-to-r from-primary/20 to-primary/30" />
           )}
           
-          <div className={`absolute bottom-0 left-0 right-0 p-6 flex items-center gap-4 ${team.bannerImage ? 'text-white' : 'text-gray-900'}`}>
-            <div className="w-16 h-16 sm:w-24 sm:h-24 rounded-full overflow-hidden border-4 border-white bg-white">
+          <div className={`absolute bottom-0 left-0 right-0 p-6 flex items-center gap-4 ${team.bannerImage ? 'text-primary-foreground' : 'text-foreground'}`}>
+            <div className="w-16 h-16 sm:w-24 sm:h-24 rounded-full overflow-hidden border-4 border-background bg-background">
               <img 
                 src={team.icon || team.profileImage || "/placeholder.svg"} 
                 alt="" 
@@ -157,7 +157,7 @@ const TeamDetailPage = () => {
                 </CardHeader>
                 <CardContent>
                   {team.description ? (
-                    <p className="text-gray-600 whitespace-pre-line">{team.description}</p>
+                    <p className="text-muted-foreground whitespace-pre-line">{team.description}</p>
                   ) : (
                     <p className="text-muted-foreground">No team description available.</p>
                   )}
