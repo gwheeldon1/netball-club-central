@@ -42,6 +42,50 @@ export type Database = {
         }
         Relationships: []
       }
+      event_recurrence: {
+        Row: {
+          created_at: string
+          days_of_week: number[] | null
+          end_date: string | null
+          id: string
+          max_occurrences: number | null
+          parent_event_id: string
+          recurrence_interval: number
+          recurrence_type: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          days_of_week?: number[] | null
+          end_date?: string | null
+          id?: string
+          max_occurrences?: number | null
+          parent_event_id: string
+          recurrence_interval?: number
+          recurrence_type: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          days_of_week?: number[] | null
+          end_date?: string | null
+          id?: string
+          max_occurrences?: number | null
+          parent_event_id?: string
+          recurrence_interval?: number
+          recurrence_type?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_recurrence_parent_event_id_fkey"
+            columns: ["parent_event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       event_responses: {
         Row: {
           attendance_marked_at: string | null
@@ -125,7 +169,9 @@ export type Database = {
           event_type: string
           id: string
           is_home: boolean | null
+          is_recurring: boolean | null
           location: string | null
+          occurrence_date: string | null
           parent_event_id: string | null
           recurrence_days: string[] | null
           recurrence_end_date: string | null
@@ -141,7 +187,9 @@ export type Database = {
           event_type: string
           id?: string
           is_home?: boolean | null
+          is_recurring?: boolean | null
           location?: string | null
+          occurrence_date?: string | null
           parent_event_id?: string | null
           recurrence_days?: string[] | null
           recurrence_end_date?: string | null
@@ -157,7 +205,9 @@ export type Database = {
           event_type?: string
           id?: string
           is_home?: boolean | null
+          is_recurring?: boolean | null
           location?: string | null
+          occurrence_date?: string | null
           parent_event_id?: string | null
           recurrence_days?: string[] | null
           recurrence_end_date?: string | null
