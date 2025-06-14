@@ -321,6 +321,51 @@ export const supabaseTeamApi = {
     
     return mapTeamToTeam(newTeam);
   },
+
+  update: async (id: string, updates: Partial<Team>): Promise<Team | undefined> => {
+    const permissions = await getCurrentUserPermissions();
+    
+    // Only admins can update teams
+    if (!permissions.isAdmin) {
+      throw new Error('Unauthorized: Only admins can update teams');
+    }
+
+    const supabaseUpdates: any = {};
+    if (updates.name) supabaseUpdates.name = updates.name;
+    if (updates.ageGroup) supabaseUpdates.age_group = updates.ageGroup;
+    if (updates.category) supabaseUpdates.category = updates.category;
+    if (updates.description) supabaseUpdates.description = updates.description;
+    if (updates.profileImage) supabaseUpdates.profile_image = updates.profileImage;
+    if (updates.bannerImage) supabaseUpdates.banner_image = updates.bannerImage;
+    if (updates.icon) supabaseUpdates.icon_image = updates.icon;
+
+    const { data: team, error } = await supabase
+      .from('teams')
+      .update(supabaseUpdates)
+      .eq('id', id)
+      .select()
+      .single();
+    
+    if (error || !team) return undefined;
+    
+    return mapTeamToTeam(team);
+  },
+
+  delete: async (id: string): Promise<void> => {
+    const permissions = await getCurrentUserPermissions();
+    
+    // Only admins can delete teams
+    if (!permissions.isAdmin) {
+      throw new Error('Unauthorized: Only admins can delete teams');
+    }
+
+    const { error } = await supabase
+      .from('teams')
+      .delete()
+      .eq('id', id);
+    
+    if (error) throw error;
+  },
 };
 
 /**
@@ -394,6 +439,71 @@ export const supabaseUserApi = {
     if (!user) return undefined;
     
     return supabaseUserApi.getById(user.id);
+  },
+
+  create: async (user: Omit<User, 'id'>): Promise<User> => {
+    const [firstName, ...lastNameParts] = user.name.split(' ');
+    const lastName = lastNameParts.join(' ');
+    
+    const { data: guardian, error } = await supabase
+      .from('guardians')
+      .insert({
+        first_name: firstName,
+        last_name: lastName,
+        email: user.email,
+        phone: user.phone,
+        approval_status: 'pending',
+      })
+      .select()
+      .single();
+    
+    if (error) throw error;
+    
+    // Assign default parent role
+    await supabaseRoleApi.assignRole(guardian.id, 'parent');
+    
+    return mapGuardianToUser(guardian);
+  },
+
+  update: async (id: string, updates: Partial<User>): Promise<User | undefined> => {
+    const supabaseUpdates: any = {};
+    
+    if (updates.name) {
+      const [firstName, ...lastNameParts] = updates.name.split(' ');
+      supabaseUpdates.first_name = firstName;
+      supabaseUpdates.last_name = lastNameParts.join(' ');
+    }
+    
+    if (updates.email) supabaseUpdates.email = updates.email;
+    if (updates.phone) supabaseUpdates.phone = updates.phone;
+    
+    const { data: guardian, error } = await supabase
+      .from('guardians')
+      .update(supabaseUpdates)
+      .eq('id', id)
+      .select(`
+        *,
+        user_roles (
+          role,
+          team_id,
+          is_active
+        )
+      `)
+      .single();
+    
+    if (error || !guardian) return undefined;
+    
+    return mapGuardianToUser(guardian);
+  },
+
+  delete: async (id: string): Promise<void> => {
+    // Soft delete by updating approval_status
+    const { error } = await supabase
+      .from('guardians')
+      .update({ approval_status: 'rejected' })
+      .eq('id', id);
+    
+    if (error) throw error;
   },
 };
 

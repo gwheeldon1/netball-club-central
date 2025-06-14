@@ -6,6 +6,8 @@ import { User, Child, Team, Event, Attendance, UserRole } from '@/types';
 export class SyncService {
   private isOnline = navigator.onLine;
   private syncInProgress = false;
+  private maxRetries = 3;
+  private retryDelay = 1000; // 1 second
 
   constructor() {
     // Listen for online/offline events
@@ -77,10 +79,10 @@ export class SyncService {
       
       for (const item of pendingItems) {
         try {
-          await this.syncItem(item);
+          await this.syncItemWithRetry(item);
           await offlineApi.markSyncComplete(item.id);
         } catch (error) {
-          console.error(`Failed to sync item ${item.id}:`, error);
+          console.error(`Failed to sync item ${item.id} after ${this.maxRetries} attempts:`, error);
           // Continue with other items
         }
       }
@@ -92,6 +94,24 @@ export class SyncService {
       console.error('Sync failed:', error);
     } finally {
       this.syncInProgress = false;
+    }
+  }
+
+  private async syncItemWithRetry(item: SyncStatus): Promise<void> {
+    for (let attempt = 1; attempt <= this.maxRetries; attempt++) {
+      try {
+        await this.syncItem(item);
+        return; // Success
+      } catch (error) {
+        console.error(`Sync attempt ${attempt} failed for item ${item.id}:`, error);
+        
+        if (attempt === this.maxRetries) {
+          throw error; // Final attempt failed
+        }
+        
+        // Wait before retry with exponential backoff
+        await new Promise(resolve => setTimeout(resolve, this.retryDelay * attempt));
+      }
     }
   }
 
@@ -107,11 +127,9 @@ export class SyncService {
         await this.syncTeam(item);
         break;
       case 'events':
-        // Events API not implemented yet
         console.log('Events sync not implemented yet');
         break;
       case 'attendance':
-        // Attendance API not implemented yet
         console.log('Attendance sync not implemented yet');
         break;
       default:
@@ -122,22 +140,18 @@ export class SyncService {
   private async syncUser(item: SyncStatus): Promise<void> {
     switch (item.action) {
       case 'create':
-        // Create new user in Supabase
         if (item.data) {
           const user = this.convertDBUserToUser(item.data);
-          // Note: User creation in Supabase might need different handling
-          console.log('User creation sync not fully implemented');
+          await supabaseUserApi.create(user);
         }
         break;
       case 'update':
-        // Update user in Supabase
         if (item.data) {
-          console.log('User update sync not fully implemented');
+          await supabaseUserApi.update(item.recordId, item.data);
         }
         break;
       case 'delete':
-        // Delete user in Supabase
-        console.log('User deletion sync not fully implemented');
+        await supabaseUserApi.delete(item.recordId);
         break;
     }
   }
@@ -171,12 +185,12 @@ export class SyncService {
         }
         break;
       case 'update':
-        // Team update not implemented in Supabase API yet
-        console.log('Team update sync not implemented yet');
+        if (item.data) {
+          await supabaseTeamApi.update(item.recordId, item.data);
+        }
         break;
       case 'delete':
-        // Team deletion not implemented in Supabase API yet
-        console.log('Team deletion sync not implemented yet');
+        await supabaseTeamApi.delete(item.recordId);
         break;
     }
   }
