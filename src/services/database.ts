@@ -29,7 +29,7 @@ export class NetballDatabase extends Dexie {
       teams: 'id, ageGroup, category',
       events: 'id, teamId, date, eventType',
       attendance: '[childId+eventId], childId, eventId',
-      syncQueue: 'id, tableName, recordId, timestamp',
+      syncQueue: 'id, tableName, recordId, timestamp, synced',
     });
   }
 }
