@@ -5,7 +5,8 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { useToast } from '@/components/ui/use-toast';
+import { useToast } from '@/hooks/use-toast';
+import { logger } from '@/utils/logger';
 import { supabase } from '@/integrations/supabase/client';
 import { Search, Download, CreditCard, TrendingUp, Users, AlertCircle } from 'lucide-react';
 import { format } from 'date-fns';
@@ -78,7 +79,7 @@ const AdminBillingDashboard = () => {
       if (paymentsError) throw paymentsError;
 
       // Transform the data to flatten the nested structure
-      const transformedPayments = paymentsData?.map(payment => ({
+      const transformedPayments = paymentsData?.map((payment: any) => ({
         ...payment,
         guardian: payment.subscriptions.guardians,
         player: payment.subscriptions.players
@@ -113,7 +114,7 @@ const AdminBillingDashboard = () => {
         monthly_recurring_revenue: monthlyRevenue
       });
     } catch (error) {
-      console.error('Error loading billing data:', error);
+      logger.error('Error loading billing data:', error);
       toast({
         title: "Error",
         description: "Failed to load billing data",
@@ -128,7 +129,7 @@ const AdminBillingDashboard = () => {
     try {
       const csv = [
         ['Date', 'Guardian', 'Player', 'Amount', 'Currency', 'Status'].join(','),
-        ...payments.map(payment => [
+        ...payments.map((payment: Payment) => [
           format(new Date(payment.created_at), 'yyyy-MM-dd'),
           `"${payment.guardian.first_name} ${payment.guardian.last_name}"`,
           `"${payment.player.first_name} ${payment.player.last_name}"`,
@@ -180,7 +181,7 @@ const AdminBillingDashboard = () => {
       <div className="space-y-6">
         <div className="grid gap-4 md:grid-cols-4">
           {[1, 2, 3, 4].map((i) => (
-            <Card key={i}>
+            <Card key={`loading-${i}`}>
               <CardContent className="p-6">
                 <div className="space-y-2">
                   <div className="h-4 bg-muted rounded w-3/4"></div>
@@ -319,7 +320,7 @@ const AdminBillingDashboard = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredPayments.map((payment) => (
+              {filteredPayments.map((payment: Payment) => (
                 <TableRow key={payment.id}>
                   <TableCell>
                     {format(new Date(payment.created_at), 'PPp')}

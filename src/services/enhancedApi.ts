@@ -104,7 +104,7 @@ export class EnhancedApiService {
     return response.data!;
   }
 
-  async post<T>(url: string, data: any, options: ApiCallOptions = {}): Promise<T> {
+  async post<T>(url: string, data: unknown, options: ApiCallOptions = {}): Promise<T> {
     const sanitizedData = this.sanitizeRequestData(data);
     
     const response = await this.makeRequest<T>(
@@ -120,7 +120,7 @@ export class EnhancedApiService {
     return response.data!;
   }
 
-  async put<T>(url: string, data: any, options: ApiCallOptions = {}): Promise<T> {
+  async put<T>(url: string, data: unknown, options: ApiCallOptions = {}): Promise<T> {
     const sanitizedData = this.sanitizeRequestData(data);
     
     const response = await this.makeRequest<T>(
@@ -142,7 +142,7 @@ export class EnhancedApiService {
     return response.data!;
   }
 
-  private sanitizeRequestData(data: any): any {
+  private sanitizeRequestData(data: unknown): unknown {
     if (typeof data === 'string') {
       return sanitizeInput(data);
     }
@@ -152,7 +152,7 @@ export class EnhancedApiService {
     }
     
     if (data && typeof data === 'object') {
-      const sanitized: any = {};
+      const sanitized: Record<string, unknown> = {};
       for (const [key, value] of Object.entries(data)) {
         sanitized[key] = this.sanitizeRequestData(value);
       }
@@ -206,7 +206,7 @@ export function useEnhancedApi(baseUrl?: string) {
     async <T>(
       method: 'GET' | 'POST' | 'PUT' | 'DELETE',
       url: string,
-      data?: any,
+      data?: unknown,
       options: ApiCallOptions = {}
     ): Promise<T> => {
       try {
@@ -269,9 +269,9 @@ export function useEnhancedApi(baseUrl?: string) {
   return {
     get: <T>(url: string, options?: ApiCallOptions) => 
       makeSecureRequest<T>('GET', url, undefined, options),
-    post: <T>(url: string, data: any, options?: ApiCallOptions) => 
+    post: <T>(url: string, data: unknown, options?: ApiCallOptions) => 
       makeSecureRequest<T>('POST', url, data, options),
-    put: <T>(url: string, data: any, options?: ApiCallOptions) => 
+    put: <T>(url: string, data: unknown, options?: ApiCallOptions) => 
       makeSecureRequest<T>('PUT', url, data, options),
     delete: <T>(url: string, options?: ApiCallOptions) => 
       makeSecureRequest<T>('DELETE', url, undefined, options),

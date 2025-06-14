@@ -4,7 +4,7 @@ import { useCallback, useRef } from 'react';
  * A more optimized version of useCallback that uses deep equality checking
  * and provides better memoization for complex dependency arrays
  */
-export function useOptimizedCallback<T extends (...args: any[]) => any>(
+export function useOptimizedCallback<T extends (...args: unknown[]) => unknown>(
   callback: T,
   deps: React.DependencyList
 ): T {
@@ -36,7 +36,7 @@ function areEqual(a: React.DependencyList, b: React.DependencyList): boolean {
 /**
  * Hook for debounced callbacks - useful for search inputs, API calls
  */
-export function useDebouncedCallback<T extends (...args: any[]) => any>(
+export function useDebouncedCallback<T extends (...args: unknown[]) => unknown>(
   callback: T,
   delay: number,
   deps: React.DependencyList
@@ -60,7 +60,7 @@ export function useDebouncedCallback<T extends (...args: any[]) => any>(
 /**
  * Hook for throttled callbacks - useful for scroll handlers, resize events
  */
-export function useThrottledCallback<T extends (...args: any[]) => any>(
+export function useThrottledCallback<T extends (...args: unknown[]) => unknown>(
   callback: T,
   delay: number,
   deps: React.DependencyList

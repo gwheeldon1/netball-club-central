@@ -9,51 +9,14 @@ import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
 import { Check, X, Clock, User, Heart, Shield, Camera, FileText, AlertCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { logger } from "@/utils/logger";
+import type { Player, Guardian } from "@/types/interfaces";
 
-interface Player {
-  id: string;
-  first_name: string;
-  last_name: string;
-  date_of_birth: string;
-  gender: string;
-  email?: string;
-  phone?: string;
-  address: string;
-  city: string;
-  postal_code: string;
-  emergency_contact_name: string;
-  emergency_contact_phone: string;
-  emergency_contact_relationship: string;
-  medical_conditions?: string;
-  medications?: string;
-  allergies?: string;
-  dietary_requirements?: string;
-  additional_medical_notes?: string;
-  team_preference?: string;
-  terms_accepted: boolean;
-  code_of_conduct_accepted: boolean;
-  photo_consent: boolean;
-  data_processing_consent: boolean;
-  profile_image?: string;
-  approval_status: string;
-  sign_up_date: string;
-}
-
-interface Guardian {
-  id: string;
-  first_name: string;
-  last_name: string;
-  email: string;
-  phone: string;
-  relationship: string;
-  player_id: string;
-  approval_status: string;
-  registration_date: string;
-}
+// Interfaces moved to @/types/interfaces
 
 interface PendingRegistration {
-  player: Player;
-  guardian: Guardian;
+  player: any; // Database player object
+  guardian: any; // Database guardian object  
   teamName?: string;
 }
 
@@ -94,7 +57,7 @@ const ApprovalWorkflow = () => {
       if (guardiansError) throw guardiansError;
 
       // Combine player and guardian data
-      const registrations: PendingRegistration[] = playersData?.map(player => {
+      const registrations: PendingRegistration[] = playersData?.map((player: any) => {
         const guardian = guardiansData?.find(g => g.player_id === player.id);
         return {
           player,
@@ -105,7 +68,7 @@ const ApprovalWorkflow = () => {
 
       setPendingRegistrations(registrations);
     } catch (error) {
-      console.error('Error loading pending registrations:', error);
+      logger.error('Error loading pending registrations:', error);
       toast.error("Failed to load pending registrations");
     } finally {
       setLoading(false);
@@ -128,7 +91,7 @@ const ApprovalWorkflow = () => {
       const currentUser = await supabase.auth.getUser();
       
       // Update player status
-      const playerUpdate: any = {
+      const playerUpdate: Record<string, any> = {
         approval_status: status,
         approved_at: approvalAction === 'approve' ? new Date().toISOString() : null,
         approved_by: currentUser.data.user?.id,
@@ -146,7 +109,7 @@ const ApprovalWorkflow = () => {
       if (playerError) throw playerError;
 
       // Update guardian status
-      const guardianUpdate: any = {
+      const guardianUpdate: Record<string, any> = {
         approval_status: status,
         approved_at: approvalAction === 'approve' ? new Date().toISOString() : null,
         approved_by: currentUser.data.user?.id,
@@ -174,7 +137,7 @@ const ApprovalWorkflow = () => {
           }]);
 
         if (teamError) {
-          console.error('Error assigning team:', teamError);
+          logger.error('Error assigning team:', teamError);
           // Don't throw here as the approval was successful
         }
       }
@@ -187,7 +150,7 @@ const ApprovalWorkflow = () => {
       setShowApprovalDialog(false);
       setSelectedRegistration(null);
     } catch (error) {
-      console.error('Error processing approval:', error);
+      logger.error('Error processing approval:', error);
       toast.error(`Failed to ${approvalAction} registration`);
     } finally {
       setIsProcessing(false);
@@ -211,7 +174,7 @@ const ApprovalWorkflow = () => {
     return (
       <div className="space-y-4">
         {[1, 2, 3].map((i) => (
-          <Card key={i} className="animate-pulse">
+          <Card key={`skeleton-${i}`} className="animate-pulse">
             <CardContent className="p-6">
               <div className="flex items-center space-x-4">
                 <div className="rounded-full bg-muted h-12 w-12"></div>
