@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/dialog";
 
 import { Team } from "@/types";
-import { api } from '@/services/unifiedApi';
+import { api } from '@/services/api';
 import { useAuth } from "@/context/AuthContext";
 import { Trash } from "lucide-react";
 import { logger } from "@/utils/logger";

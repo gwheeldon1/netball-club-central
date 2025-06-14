@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Calendar, Award, Users, User, MapPin, Clock, ChevronRight, Plus } from "lucide-react";
 import { Link } from "react-router-dom";
-import { api } from '@/services/unifiedApi';
+import { api } from '@/services/api';
 import { Team, Event, Child } from "@/types";
 
 const Dashboard = () => {

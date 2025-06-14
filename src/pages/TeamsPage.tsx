@@ -9,7 +9,7 @@ import { Plus, Users } from "lucide-react";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
 import { Team } from "@/types";
-import { api } from "@/services/unifiedApi";
+import { api } from "@/services/api";
 
 const TeamsPage = () => {
   const { currentUser } = useAuth();

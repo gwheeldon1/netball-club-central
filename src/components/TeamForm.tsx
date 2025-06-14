@@ -27,7 +27,7 @@ import {
 } from "@/components/ui/select";
 
 import { Team } from "@/types";
-import { api } from "@/services/unifiedApi";
+import { api } from "@/services/api";
 import { logger } from "@/utils/logger";
 
 const teamSchema = z.object({
