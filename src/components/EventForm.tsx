@@ -28,6 +28,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Event, Team } from "@/types";
 import { api } from "@/services/unifiedApi";
 import { logger } from "@/utils/logger";
+import { RecurringEventForm } from "@/components/events/RecurringEventForm";
+import { RecurringEventService } from "@/services/recurringEventService";
 
 const eventSchema = z.object({
   name: z.string().min(2, { message: "Event name must be at least 2 characters" }),
@@ -56,6 +58,7 @@ const EventForm = ({ event, mode }: EventFormProps) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [teams, setTeams] = useState<Team[]>([]);
   const [loadingTeams, setLoadingTeams] = useState(true);
+  const [recurrencePattern, setRecurrencePattern] = useState<any>(null);
 
   // Initialize form with existing event data or defaults
   const form = useForm<EventFormValues>({
@@ -109,21 +112,40 @@ const EventForm = ({ event, mode }: EventFormProps) => {
     setIsSubmitting(true);
 
     try {
+      const eventDateTime = `${data.date}T${data.time}:00`;
+      
       if (mode === "create") {
-        const newEvent = await api.createEvent({
-          name: data.name,
-          eventType: data.eventType,
-          date: data.date,
-          time: data.time,
-          location: data.location,
-          teamId: data.teamId,
-          description: data.description,
-          opponent: data.opponent,
-          isHome: data.isHome,
-          requiresRSVP: data.requiresRSVP,
-        });
-        toast.success("Event created successfully");
-        navigate(`/events/${newEvent.id}`);
+        if (recurrencePattern) {
+          // Create recurring event
+          const result = await RecurringEventService.createRecurringEvent({
+            title: data.name,
+            event_date: eventDateTime,
+            location: data.location,
+            description: data.description,
+            event_type: data.eventType,
+            team_id: data.teamId,
+            is_home: data.isHome,
+          }, recurrencePattern);
+          
+          toast.success(`Recurring event created with ${result.occurrenceCount} occurrences`);
+          navigate(`/events/${result.parentEvent.id}`);
+        } else {
+          // Create single event
+          const newEvent = await api.createEvent({
+            name: data.name,
+            eventType: data.eventType,
+            date: data.date,
+            time: data.time,
+            location: data.location,
+            teamId: data.teamId,
+            description: data.description,
+            opponent: data.opponent,
+            isHome: data.isHome,
+            requiresRSVP: data.requiresRSVP,
+          });
+          toast.success("Event created successfully");
+          navigate(`/events/${newEvent.id}`);
+        }
       } else if (event) {
         const updatedEvent = await api.updateEvent(event.id, {
           name: data.name,
@@ -350,6 +372,13 @@ const EventForm = ({ event, mode }: EventFormProps) => {
             </FormItem>
           )}
         />
+
+        {mode === "create" && (
+          <RecurringEventForm
+            onRecurrenceChange={setRecurrencePattern}
+            eventDate={form.watch("date") ? new Date(form.watch("date")) : new Date()}
+          />
+        )}
 
         <div className="flex justify-end gap-4">
           <Button
