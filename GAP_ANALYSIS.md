@@ -126,17 +126,17 @@
 
 #### **Phase 4: Registration & Profile Enhancements** (Week 7)
 **Priority:** High
-- [ ] Enhanced registration form with all consent fields
-- [ ] File upload system for profile images
-- [ ] Medical information management
-- [ ] Improved approval workflow
-- [ ] Profile management improvements
+- [x] Enhanced registration form with all consent fields
+- [x] File upload system for profile images
+- [x] Medical information management
+- [x] Improved approval workflow
+- [x] Profile management improvements
 
 **Deliverables:**
-- Complete registration flow
-- Image upload functionality
-- Medical data management
-- Enhanced approval interface
+- [x] Complete registration flow with medical info and consent fields
+- [x] Image upload functionality with profile-images bucket
+- [x] Medical data management for players and guardians
+- [x] Enhanced approval interface with detailed review capabilities
 
 #### **Phase 5: Advanced Analytics & Reporting** (Week 8)
 **Priority:** Medium
