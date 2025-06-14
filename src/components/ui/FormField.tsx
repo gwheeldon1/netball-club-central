@@ -1,4 +1,4 @@
-import React, { forwardRef } from 'react';
+import { forwardRef, ReactNode } from 'react';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -42,7 +42,7 @@ interface SelectFieldProps extends BaseFieldProps {
 interface CheckboxFieldProps extends BaseFieldProps {
   checked: boolean;
   onChange: (checked: boolean) => void;
-  children: React.ReactNode;
+  children: ReactNode;
 }
 
 export const FormField = forwardRef<HTMLInputElement, InputFieldProps>(
@@ -88,7 +88,7 @@ export const FormField = forwardRef<HTMLInputElement, InputFieldProps>(
 
 FormField.displayName = 'FormField';
 
-export const TextareaField: React.FC<TextareaFieldProps> = ({
+export const TextareaField = ({
   label,
   error,
   required,
@@ -140,7 +140,7 @@ export const TextareaField: React.FC<TextareaFieldProps> = ({
   );
 };
 
-export const SelectField: React.FC<SelectFieldProps> = ({
+export const SelectField = ({
   label,
   error,
   required,
@@ -184,7 +184,7 @@ export const SelectField: React.FC<SelectFieldProps> = ({
   );
 };
 
-export const CheckboxField: React.FC<CheckboxFieldProps> = ({
+export const CheckboxField = ({
   label,
   error,
   required,
