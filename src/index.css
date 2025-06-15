@@ -5,7 +5,7 @@
 
 @layer base {
   :root {
-    /* Modern light theme with clean whites and subtle tints */
+    /* Premium color system with cohesive teal palette */
     --background: 0 0% 100%;
     --foreground: 240 10% 3.9%;
 
@@ -15,92 +15,107 @@
     --popover: 0 0% 100%;
     --popover-foreground: 240 10% 3.9%;
 
-    --primary: 171 75% 41%; /* Vibrant teal */
+    /* Enhanced teal primary system */
+    --primary: 171 75% 41%;
     --primary-foreground: 0 0% 100%;
+    --primary-light: 171 75% 55%;
+    --primary-dark: 171 75% 32%;
 
-    --secondary: 240 4.8% 95.9%;
-    --secondary-foreground: 240 5.9% 10%;
+    /* Teal-based secondary palette */
+    --secondary: 171 15% 96%;
+    --secondary-foreground: 171 20% 20%;
 
-    --muted: 240 4.8% 95.9%;
-    --muted-foreground: 240 3.8% 46.1%;
+    --muted: 171 10% 96%;
+    --muted-foreground: 171 8% 46%;
 
-    --accent: 171 75% 97%;
-    --accent-foreground: 240 5.9% 10%;
+    --accent: 171 40% 94%;
+    --accent-foreground: 171 30% 15%;
 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
 
-    --border: 240 5.9% 90%;
-    --input: 240 5.9% 90%;
+    --border: 171 20% 88%;
+    --input: 171 20% 88%;
     --ring: 171 75% 41%;
 
     --radius: 0.75rem;
 
-    /* Premium sidebar styling */
-    --sidebar-background: 240 5.9% 98%;
-    --sidebar-foreground: 240 5.3% 26.1%;
+    /* Premium gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(171, 75%, 41%) 0%, hsl(171, 85%, 35%) 50%, hsl(171, 90%, 28%) 100%);
+    --gradient-secondary: linear-gradient(135deg, hsl(171, 15%, 98%) 0%, hsl(171, 10%, 94%) 100%);
+    --gradient-accent: linear-gradient(135deg, hsl(171, 40%, 96%) 0%, hsl(171, 30%, 92%) 100%);
+    --gradient-card: linear-gradient(145deg, hsl(0, 0%, 100%) 0%, hsl(171, 15%, 98%) 100%);
+    --gradient-glass: linear-gradient(145deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.7) 100%);
+
+    /* Premium shadows */
+    --shadow-elevation-low: 0 1px 3px 0 rgba(0, 0, 0, 0.06), 0 1px 2px 0 rgba(0, 0, 0, 0.04);
+    --shadow-elevation-medium: 0 4px 6px -1px rgba(0, 0, 0, 0.08), 0 2px 4px -1px rgba(0, 0, 0, 0.04);
+    --shadow-elevation-high: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.04);
+    --shadow-glow: 0 0 0 1px rgba(171, 75%, 41%, 0.05), 0 1px 3px 0 rgba(171, 75%, 41%, 0.1);
+
+    /* Sidebar premium styling */
+    --sidebar-background: 171 20% 98%;
+    --sidebar-foreground: 171 30% 15%;
     --sidebar-primary: 171 75% 41%;
     --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 240 4.8% 95.9%;
-    --sidebar-accent-foreground: 240 5.9% 10%;
-    --sidebar-border: 240 5.9% 90%;
+    --sidebar-accent: 171 15% 94%;
+    --sidebar-accent-foreground: 171 30% 15%;
+    --sidebar-border: 171 20% 88%;
     --sidebar-ring: 171 75% 41%;
-
-    /* Premium gradients and effects */
-    --gradient-primary: linear-gradient(135deg, hsl(171, 75%, 41%) 0%, hsl(171, 85%, 35%) 100%);
-    --gradient-secondary: linear-gradient(135deg, hsl(240, 4.8%, 95.9%) 0%, hsl(240, 5.9%, 90%) 100%);
-    --gradient-accent: linear-gradient(135deg, hsl(171, 75%, 97%) 0%, hsl(171, 50%, 95%) 100%);
-    --shadow-elevation-low: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
-    --shadow-elevation-medium: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-    --shadow-elevation-high: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
   }
 
   .dark {
-    /* Modern dark theme with rich blacks and subtle highlights */
-    --background: 240 10% 3.9%;
-    --foreground: 0 0% 98%;
+    /* Enhanced dark theme with sophisticated colors */
+    --background: 171 15% 4%;
+    --foreground: 171 10% 95%;
 
-    --card: 240 10% 3.9%;
-    --card-foreground: 0 0% 98%;
+    --card: 171 12% 6%;
+    --card-foreground: 171 10% 95%;
 
-    --popover: 240 10% 3.9%;
-    --popover-foreground: 0 0% 98%;
+    --popover: 171 12% 6%;
+    --popover-foreground: 171 10% 95%;
 
     --primary: 171 70% 45%;
-    --primary-foreground: 240 10% 3.9%;
+    --primary-foreground: 171 15% 4%;
+    --primary-light: 171 70% 60%;
+    --primary-dark: 171 70% 35%;
 
-    --secondary: 240 3.7% 15.9%;
-    --secondary-foreground: 0 0% 98%;
+    --secondary: 171 15% 12%;
+    --secondary-foreground: 171 10% 85%;
 
-    --muted: 240 3.7% 15.9%;
-    --muted-foreground: 240 5% 64.9%;
+    --muted: 171 15% 12%;
+    --muted-foreground: 171 8% 55%;
 
-    --accent: 171 70% 15%;
-    --accent-foreground: 0 0% 98%;
+    --accent: 171 20% 15%;
+    --accent-foreground: 171 10% 85%;
 
-    --destructive: 0 62.8% 30.6%;
+    --destructive: 0 62.8% 50%;
     --destructive-foreground: 0 0% 98%;
 
-    --border: 240 3.7% 15.9%;
-    --input: 240 3.7% 15.9%;
+    --border: 171 20% 18%;
+    --input: 171 20% 18%;
     --ring: 171 70% 45%;
 
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 171 70% 45%;
-    --sidebar-primary-foreground: 240 10% 3.9%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 171 70% 45%;
-
     /* Dark theme gradients */
-    --gradient-primary: linear-gradient(135deg, hsl(171, 70%, 45%) 0%, hsl(171, 80%, 40%) 100%);
-    --gradient-secondary: linear-gradient(135deg, hsl(240, 3.7%, 15.9%) 0%, hsl(240, 5%, 12%) 100%);
-    --gradient-accent: linear-gradient(135deg, hsl(171, 70%, 15%) 0%, hsl(171, 50%, 12%) 100%);
-    --shadow-elevation-low: 0 1px 3px 0 rgb(0 0 0 / 0.3), 0 1px 2px -1px rgb(0 0 0 / 0.3);
-    --shadow-elevation-medium: 0 4px 6px -1px rgb(0 0 0 / 0.3), 0 2px 4px -2px rgb(0 0 0 / 0.3);
-    --shadow-elevation-high: 0 10px 15px -3px rgb(0 0 0 / 0.3), 0 4px 6px -4px rgb(0 0 0 / 0.3);
+    --gradient-primary: linear-gradient(135deg, hsl(171, 70%, 45%) 0%, hsl(171, 80%, 40%) 50%, hsl(171, 85%, 35%) 100%);
+    --gradient-secondary: linear-gradient(135deg, hsl(171, 15%, 8%) 0%, hsl(171, 12%, 12%) 100%);
+    --gradient-accent: linear-gradient(135deg, hsl(171, 20%, 12%) 0%, hsl(171, 15%, 18%) 100%);
+    --gradient-card: linear-gradient(145deg, hsl(171, 12%, 8%) 0%, hsl(171, 15%, 6%) 100%);
+    --gradient-glass: linear-gradient(145deg, rgba(171, 75%, 41%, 0.1) 0%, rgba(171, 75%, 41%, 0.05) 100%);
+
+    --shadow-elevation-low: 0 1px 3px 0 rgba(0, 0, 0, 0.3), 0 1px 2px 0 rgba(0, 0, 0, 0.2);
+    --shadow-elevation-medium: 0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -1px rgba(0, 0, 0, 0.3);
+    --shadow-elevation-high: 0 10px 15px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -2px rgba(0, 0, 0, 0.3);
+    --shadow-glow: 0 0 0 1px rgba(171, 70%, 45%, 0.2), 0 1px 3px 0 rgba(171, 70%, 45%, 0.3);
+
+    --sidebar-background: 171 15% 6%;
+    --sidebar-foreground: 171 10% 90%;
+    --sidebar-primary: 171 70% 45%;
+    --sidebar-primary-foreground: 171 15% 4%;
+    --sidebar-accent: 171 15% 12%;
+    --sidebar-accent-foreground: 171 10% 85%;
+    --sidebar-border: 171 20% 18%;
+    --sidebar-ring: 171 70% 45%;
   }
 }
 
@@ -111,36 +126,42 @@
 
   body {
     @apply bg-background text-foreground antialiased;
-    font-family: 'Inter', 'Poppins', system-ui, -apple-system, sans-serif;
+    font-family: 'Poppins', 'Inter', system-ui, -apple-system, sans-serif;
     font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
     line-height: 1.6;
+    font-smooth: always;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
   
   h1 {
     @apply text-3xl md:text-4xl font-bold tracking-tight;
     line-height: 1.1;
+    background: var(--gradient-primary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
   }
   
   h2 {
-    @apply text-2xl md:text-3xl font-semibold tracking-tight;
+    @apply text-2xl md:text-3xl font-semibold tracking-tight text-foreground;
     line-height: 1.2;
   }
   
   h3 {
-    @apply text-xl md:text-2xl font-semibold tracking-tight;
+    @apply text-xl md:text-2xl font-semibold tracking-tight text-foreground;
     line-height: 1.3;
   }
   
   h4 {
-    @apply text-lg md:text-xl font-medium tracking-tight;
+    @apply text-lg md:text-xl font-medium tracking-tight text-foreground;
     line-height: 1.4;
   }
   
   p {
-    @apply text-base leading-relaxed;
+    @apply text-base leading-relaxed text-foreground/90;
   }
   
-  /* Enhanced form elements */
   button, input, select, textarea {
     @apply text-base;
   }
@@ -160,6 +181,16 @@
     background: var(--gradient-accent);
   }
   
+  .gradient-card {
+    background: var(--gradient-card);
+  }
+  
+  .gradient-glass {
+    background: var(--gradient-glass);
+    backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+  }
+  
   .shadow-elevation-low {
     box-shadow: var(--shadow-elevation-low);
   }
@@ -172,19 +203,12 @@
     box-shadow: var(--shadow-elevation-high);
   }
   
-  .glass-effect {
-    backdrop-filter: blur(16px) saturate(180%);
-    background-color: rgba(255, 255, 255, 0.8);
-    border: 1px solid rgba(255, 255, 255, 0.125);
-  }
-  
-  .dark .glass-effect {
-    background-color: rgba(15, 23, 42, 0.8);
-    border: 1px solid rgba(255, 255, 255, 0.125);
+  .shadow-glow {
+    box-shadow: var(--shadow-glow);
   }
   
   .text-gradient {
-    background: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--primary)) 100%);
+    background: var(--gradient-primary);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -196,23 +220,76 @@
                 var(--gradient-primary) border-box;
     border: 1px solid transparent;
   }
+
+  .card-hover {
+    @apply transition-all duration-300 hover:shadow-elevation-medium hover:-translate-y-1;
+  }
+
+  .glass-card {
+    background: var(--gradient-glass);
+    backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+  }
+
+  .metric-card {
+    background: var(--gradient-card);
+    border: 1px solid hsl(var(--border));
+    box-shadow: var(--shadow-elevation-low);
+    @apply transition-all duration-300 hover:shadow-elevation-medium hover:-translate-y-0.5;
+  }
 }
 
-/* Chart colors */
+/* Enhanced chart colors with teal variations */
 :root {
-  --color-percentage: hsl(171, 75%, 41%);
-  --chart-1: 171 75% 41%;
-  --chart-2: 200 95% 50%;
-  --chart-3: 52 100% 50%;
-  --chart-4: 310 100% 50%;
-  --chart-5: 230 100% 50%;
+  --chart-1: 171 75% 41%;    /* Primary teal */
+  --chart-2: 171 75% 55%;    /* Light teal */
+  --chart-3: 171 75% 32%;    /* Dark teal */
+  --chart-4: 171 50% 45%;    /* Muted teal */
+  --chart-5: 171 35% 50%;    /* Subtle teal */
+  --chart-6: 171 85% 35%;    /* Vibrant teal */
+  --chart-success: 142 76% 36%;
+  --chart-warning: 38 92% 50%;
+  --chart-error: 0 84% 60%;
+  --chart-info: 200 95% 50%;
 }
 
 .dark {
-  --color-percentage: hsl(171, 70%, 40%);
   --chart-1: 171 70% 40%;
-  --chart-2: 200 95% 45%;
-  --chart-3: 52 100% 45%;
-  --chart-4: 310 100% 45%;
-  --chart-5: 230 100% 45%;
+  --chart-2: 171 70% 55%;
+  --chart-3: 171 70% 30%;
+  --chart-4: 171 50% 40%;
+  --chart-5: 171 35% 45%;
+  --chart-6: 171 80% 32%;
+  --chart-success: 142 71% 45%;
+  --chart-warning: 38 92% 50%;
+  --chart-error: 0 73% 41%;
+  --chart-info: 200 95% 45%;
+}
+
+/* Smooth animations */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateX(-20px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.6s ease-out;
+}
+
+.animate-slide-in {
+  animation: slideIn 0.5s ease-out;
+}
+
+.animate-scale-in {
+  animation: scaleIn 0.4s ease-out;
 }

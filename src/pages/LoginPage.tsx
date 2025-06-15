@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
@@ -26,30 +27,34 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-background to-muted/50 px-4 py-8 sm:py-12">
-      <div className="w-full max-w-md space-y-6 sm:space-y-8">
+    <div className="min-h-screen flex flex-col items-center justify-center gradient-secondary px-4 py-8 sm:py-12">
+      <div className="w-full max-w-md space-y-8 animate-fade-in">
         <div className="text-center">
-          <div className="flex justify-center mb-4 sm:mb-6">
-            <img 
-              src="/shot-tracker-main-logo.png" 
-              alt="Club Manager Logo" 
-              className="w-14 h-14 sm:w-16 sm:h-16 lg:w-20 lg:h-20"
-            />
+          <div className="flex justify-center mb-6">
+            <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl gradient-primary shadow-elevation-high flex items-center justify-center">
+              <img 
+                src="/shot-tracker-main-logo.png" 
+                alt="Club Manager Logo" 
+                className="w-10 h-10 sm:w-12 sm:h-12"
+              />
+            </div>
           </div>
-          <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold tracking-tight text-foreground">Club Manager</h1>
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gradient mb-2">Club Manager</h1>
+          <p className="text-muted-foreground">Your premier netball club management platform</p>
         </div>
 
-        <Card className="shadow-lg">
-          <CardHeader className="space-y-1 pb-3 sm:pb-4 px-4 sm:px-6">
-            <CardTitle className="text-lg sm:text-xl lg:text-2xl text-center">Sign In</CardTitle>
+        <Card className="glass-card shadow-elevation-high animate-scale-in" style={{ animationDelay: '200ms' }}>
+          <CardHeader className="space-y-2 pb-4 px-6">
+            <CardTitle className="text-xl lg:text-2xl text-center font-semibold">Welcome Back</CardTitle>
+            <p className="text-sm text-muted-foreground text-center">Sign in to your account</p>
           </CardHeader>
           <form onSubmit={handleSubmit} autoComplete="on">
-            <CardContent className="space-y-4 pt-1 px-4 sm:px-6">
+            <CardContent className="space-y-6 pt-2 px-6">
               <div className="space-y-2">
                 <Label htmlFor="email" className="text-sm font-medium">Email Address</Label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                    <MailIcon className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground" />
+                    <MailIcon className="h-5 w-5 text-muted-foreground" />
                   </div>
                    <Input 
                      id="email" 
@@ -58,7 +63,7 @@ const LoginPage = () => {
                      value={email} 
                      onChange={e => setEmail(e.target.value)} 
                      required 
-                     className="pl-9 sm:pl-10 h-10 sm:h-11 text-base"
+                     className="pl-10 h-11 text-base border-2 focus:border-primary transition-colors"
                      autoComplete="email"
                      name="email"
                    />
@@ -75,7 +80,7 @@ const LoginPage = () => {
                 </div>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                    <LockIcon className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground" />
+                    <LockIcon className="h-5 w-5 text-muted-foreground" />
                   </div>
                    <Input 
                      id="password" 
@@ -84,15 +89,15 @@ const LoginPage = () => {
                      value={password} 
                      onChange={e => setPassword(e.target.value)} 
                      required 
-                     className="pl-9 sm:pl-10 h-10 sm:h-11 text-base"
+                     className="pl-10 h-11 text-base border-2 focus:border-primary transition-colors"
                      autoComplete="current-password"
                      name="password"
                    />
                 </div>
               </div>
             </CardContent>
-            <CardFooter className="flex-col space-y-4 pt-2 px-4 sm:px-6 pb-4 sm:pb-6">
-              <Button type="submit" className="w-full h-10 sm:h-11 text-base" disabled={loading}>
+            <CardFooter className="flex-col space-y-6 pt-4 px-6 pb-6">
+              <Button type="submit" className="w-full h-11 text-base font-semibold shadow-glow" disabled={loading}>
                 {loading ? (
                   <>
                     <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-primary-foreground" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -108,13 +113,12 @@ const LoginPage = () => {
               <p className="text-center text-sm text-muted-foreground">
                 Don't have an account?{" "}
                 <a href="/register" className="font-medium text-primary hover:text-primary/80 transition-colors">
-                  Register
+                  Register here
                 </a>
               </p>
             </CardFooter>
           </form>
         </Card>
-
       </div>
     </div>
   );

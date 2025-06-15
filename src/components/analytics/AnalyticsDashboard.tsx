@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -22,6 +23,16 @@ export const AnalyticsDashboard = () => {
   const [eventDistribution, setEventDistribution] = useState<Array<{name: string; value: number; color: string}>>([]);
   const [recentActivities, setRecentActivities] = useState<any[]>([]);
 
+  // Cohesive teal color palette for charts
+  const chartColors = {
+    primary: "hsl(var(--chart-1))",
+    secondary: "hsl(var(--chart-2))",
+    tertiary: "hsl(var(--chart-3))",
+    accent: "hsl(var(--chart-4))",
+    subtle: "hsl(var(--chart-5))",
+    vibrant: "hsl(var(--chart-6))"
+  };
+
   useEffect(() => {
     loadDashboardData();
   }, [timeRange]);
@@ -40,10 +51,15 @@ export const AnalyticsDashboard = () => {
       setDashboardStats(stats);
       setAttendanceTrends(trends);
       setTeamAttendance(teamData);
-      setEventDistribution(eventTypes);
+      
+      // Update event distribution with cohesive colors
+      const enhancedEventTypes = eventTypes.map((item, index) => ({
+        ...item,
+        color: Object.values(chartColors)[index % Object.values(chartColors).length]
+      }));
+      setEventDistribution(enhancedEventTypes);
       setRecentActivities(activities);
 
-      // Track page view
       analyticsApi.trackEvent({
         event_type: 'page_view',
         event_name: 'analytics_dashboard_viewed',
@@ -93,7 +109,7 @@ export const AnalyticsDashboard = () => {
           <SelectItem value="1y">Last year</SelectItem>
         </SelectContent>
       </Select>
-      <Button onClick={handleRefresh} disabled={loading}>
+      <Button onClick={handleRefresh} disabled={loading} className="shadow-glow">
         <TrendingUp className="mr-2 h-4 w-4" />
         {loading ? "Refreshing..." : "Refresh"}
       </Button>
@@ -101,46 +117,53 @@ export const AnalyticsDashboard = () => {
   );
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8 animate-fade-in">
       <DashboardHeader
         title="Analytics Dashboard"
         description="Track performance, attendance, and engagement across your netball club"
         actions={headerActions}
       />
 
-      {/* Key Metrics */}
+      {/* Key Metrics with enhanced styling */}
       <DashboardGrid cols={4}>
         <MetricCard
           title="Total Players"
           value={getStatValue('total_players')}
           subtitle="Registered players"
           icon={<Users className="h-8 w-8" />}
-          gradient="blue"
+          gradient="primary"
+          className="animate-scale-in"
         />
         <MetricCard
           title="Active Teams"
           value={getStatValue('active_teams')}
           subtitle="Across all age groups"
           icon={<Trophy className="h-8 w-8" />}
-          gradient="green"
+          gradient="secondary"
+          className="animate-scale-in"
+          style={{ animationDelay: '100ms' }}
         />
         <MetricCard
           title="Events This Month"
           value={getStatValue('events_this_month')}
           subtitle="Training & matches"
           icon={<Calendar className="h-8 w-8" />}
-          gradient="purple"
+          gradient="tertiary"
+          className="animate-scale-in"
+          style={{ animationDelay: '200ms' }}
         />
         <MetricCard
           title="Average Attendance"
           value={`${getStatValue('avg_attendance')}%`}
           subtitle="Club-wide attendance"
           icon={<Activity className="h-8 w-8" />}
-          gradient="orange"
+          gradient="accent"
+          className="animate-scale-in"
+          style={{ animationDelay: '300ms' }}
         />
       </DashboardGrid>
 
-      {/* Detailed Stats */}
+      {/* Enhanced detailed stats */}
       <DashboardGrid cols={4}>
         <StatsCard
           title="Weekly Attendance"
@@ -149,6 +172,7 @@ export const AnalyticsDashboard = () => {
           changeLabel="vs last week"
           icon={<Users className="h-4 w-4" />}
           variant="success"
+          className="glass-card"
         />
         <StatsCard
           title="Event Responses"
@@ -157,6 +181,7 @@ export const AnalyticsDashboard = () => {
           changeLabel="response rate"
           icon={<CalendarDays className="h-4 w-4" />}
           variant="warning"
+          className="glass-card"
         />
         <ProgressCard
           title="Season Progress"
@@ -166,6 +191,7 @@ export const AnalyticsDashboard = () => {
           description="16 weeks remaining in current season"
           icon={<Calendar className="h-4 w-4" />}
           variant="default"
+          className="glass-card"
         />
         <ProgressCard
           title="Team Registrations"
@@ -175,40 +201,46 @@ export const AnalyticsDashboard = () => {
           description="Target: 300 players for the season"
           icon={<Users className="h-4 w-4" />}
           variant="success"
+          className="glass-card"
         />
       </DashboardGrid>
 
-      {/* Charts */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      {/* Enhanced charts with cohesive styling */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <ChartCard
           title="Monthly Attendance Trends"
           description="Track attendance patterns over time"
+          className="glass-card animate-slide-in"
         >
           <ResponsiveContainer width="100%" height={300}>
             <LineChart data={attendanceTrends}>
-              <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+              <CartesianGrid strokeDasharray="3 3" className="stroke-muted/30" />
               <XAxis 
                 dataKey="month" 
                 className="text-muted-foreground"
                 fontSize={12}
+                tick={{ fontSize: 12 }}
               />
               <YAxis 
                 className="text-muted-foreground"
                 fontSize={12}
+                tick={{ fontSize: 12 }}
               />
               <Tooltip 
                 contentStyle={{
                   backgroundColor: "hsl(var(--card))",
                   border: "1px solid hsl(var(--border))",
-                  borderRadius: "8px"
+                  borderRadius: "12px",
+                  boxShadow: "var(--shadow-elevation-medium)"
                 }}
               />
               <Line 
                 type="monotone" 
                 dataKey="attendance" 
-                stroke="hsl(var(--primary))" 
+                stroke={chartColors.primary}
                 strokeWidth={3}
-                dot={{ fill: "hsl(var(--primary))", strokeWidth: 2, r: 4 }}
+                dot={{ fill: chartColors.primary, strokeWidth: 2, r: 5 }}
+                activeDot={{ r: 6, stroke: chartColors.primary, strokeWidth: 2 }}
               />
             </LineChart>
           </ResponsiveContainer>
@@ -217,6 +249,8 @@ export const AnalyticsDashboard = () => {
         <ChartCard
           title="Event Distribution"
           description={`Breakdown of event types (${timeRange})`}
+          className="glass-card animate-slide-in"
+          style={{ animationDelay: '200ms' }}
         >
           <ResponsiveContainer width="100%" height={300}>
             <PieChart>
@@ -237,20 +271,21 @@ export const AnalyticsDashboard = () => {
                 contentStyle={{
                   backgroundColor: "hsl(var(--card))",
                   border: "1px solid hsl(var(--border))",
-                  borderRadius: "8px"
+                  borderRadius: "12px",
+                  boxShadow: "var(--shadow-elevation-medium)"
                 }}
               />
             </PieChart>
           </ResponsiveContainer>
           {eventDistribution.length > 0 && (
-            <div className="flex justify-center space-x-4 mt-4">
+            <div className="flex justify-center flex-wrap gap-4 mt-6">
               {eventDistribution.map((item) => (
                 <div key={item.name} className="flex items-center space-x-2">
                   <div 
-                    className="w-3 h-3 rounded-full" 
+                    className="w-3 h-3 rounded-full shadow-sm" 
                     style={{ backgroundColor: item.color }}
                   />
-                  <span className="text-sm text-muted-foreground">
+                  <span className="text-sm text-muted-foreground font-medium">
                     {item.name} ({item.value}%)
                   </span>
                 </div>
@@ -260,36 +295,41 @@ export const AnalyticsDashboard = () => {
         </ChartCard>
       </div>
 
-      {/* Activity Feed and Team Comparison */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      {/* Enhanced activity and comparison section */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2">
           <ChartCard
             title="Team Attendance Comparison"
             description="Compare attendance across different teams"
+            className="glass-card animate-slide-in"
+            style={{ animationDelay: '400ms' }}
           >
             <ResponsiveContainer width="100%" height={300}>
               <BarChart data={teamAttendance}>
-                <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                <CartesianGrid strokeDasharray="3 3" className="stroke-muted/30" />
                 <XAxis 
                   dataKey="team" 
                   className="text-muted-foreground"
                   fontSize={12}
+                  tick={{ fontSize: 12 }}
                 />
                 <YAxis 
                   className="text-muted-foreground"
                   fontSize={12}
+                  tick={{ fontSize: 12 }}
                 />
                 <Tooltip 
                   contentStyle={{
                     backgroundColor: "hsl(var(--card))",
                     border: "1px solid hsl(var(--border))",
-                    borderRadius: "8px"
+                    borderRadius: "12px",
+                    boxShadow: "var(--shadow-elevation-medium)"
                   }}
                 />
                 <Bar 
                   dataKey="attendance" 
-                  fill="hsl(var(--primary))" 
-                  radius={[4, 4, 0, 0]}
+                  fill={chartColors.primary}
+                  radius={[6, 6, 0, 0]}
                 />
               </BarChart>
             </ResponsiveContainer>
@@ -299,7 +339,8 @@ export const AnalyticsDashboard = () => {
         <ActivityCard
           title="Recent Activity"
           activities={recentActivities}
-          className="lg:col-span-1"
+          className="lg:col-span-1 glass-card animate-slide-in"
+          style={{ animationDelay: '600ms' }}
         />
       </div>
     </div>
