@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
@@ -44,7 +43,7 @@ const LoginPage = () => {
         </div>
 
         <Card className="glass-card shadow-elevation-high animate-scale-in" style={{ animationDelay: '200ms' }}>
-          <CardHeader className="space-y-2 pb-4 px-6">
+          <CardHeader className="px-6">
             <CardTitle className="text-xl lg:text-2xl text-center font-semibold">Welcome Back</CardTitle>
             <p className="text-sm text-muted-foreground text-center">Sign in to your account</p>
           </CardHeader>
