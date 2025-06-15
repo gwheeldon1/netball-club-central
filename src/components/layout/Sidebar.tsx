@@ -1,3 +1,4 @@
+
 import { ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
@@ -9,7 +10,8 @@ import {
   Settings, 
   LogOut, 
   X, 
-  Calendar 
+  Calendar,
+  BarChart3
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -84,6 +86,17 @@ export const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
               >
                 <Home className="h-4 w-4" />
                 <span>Dashboard</span>
+              </Link>
+            </li>
+
+            <li>
+              <Link 
+                to="/analytics" 
+                className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-foreground hover:bg-muted transition-colors" 
+                onClick={onClose}
+              >
+                <BarChart3 className="h-4 w-4" />
+                <span>Analytics</span>
               </Link>
             </li>
 

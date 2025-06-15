@@ -30,6 +30,7 @@ import LoginPage from '@/pages/LoginPage';
 import NotFound from '@/pages/NotFound';
 import UnauthorizedPage from '@/pages/UnauthorizedPage';
 import DesignSystemPage from '@/pages/DesignSystemPage';
+import AnalyticsPage from '@/pages/AnalyticsPage';
 
 // Lazy load heavy components that aren't immediately needed
 import { lazy } from 'react';
@@ -54,6 +55,12 @@ function App() {
                 <Suspense fallback={<PageLoadingFallback />}>
                   <Dashboard />
                 </Suspense>
+              </ProtectedRoute>
+            } />
+            
+            <Route path="/analytics" element={
+              <ProtectedRoute>
+                <AnalyticsPage />
               </ProtectedRoute>
             } />
             
