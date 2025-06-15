@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Layout from "@/components/Layout";
@@ -122,8 +121,8 @@ const NewChildPage = () => {
                 <FileUpload 
                   onUpload={handleImageUpload}
                   currentImage={formData.profileImage}
-                  className="mb-4"
                   aspectRatio={1}
+                  bucket="avatars"
                 />
                 
                 <div className="space-y-4 flex-1">

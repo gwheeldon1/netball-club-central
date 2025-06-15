@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Child, Event, Attendance } from "@/types/unified";
@@ -188,6 +187,7 @@ const ChildDetailPage = () => {
                 currentImage={child.profileImage}
                 onUpload={handleImageUpload}
                 aspectRatio={1}
+                bucket="avatars"
               />
             </div>
             <CardContent className="p-6">

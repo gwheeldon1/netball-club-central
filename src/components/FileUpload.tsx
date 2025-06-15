@@ -9,18 +9,20 @@ interface FileUploadProps {
   onUpload: (imageUrl: string) => void;
   currentImage?: string | null;
   aspectRatio?: number;
-  bucket: string;
+  bucket?: string;
   accept?: string;
   maxSize?: number; // in MB
+  className?: string;
 }
 
 export default function FileUpload({
   onUpload,
   currentImage,
   aspectRatio = 1,
-  bucket,
+  bucket = "avatars", // Default bucket
   accept = "image/*",
-  maxSize = 5
+  maxSize = 5,
+  className = ""
 }: FileUploadProps) {
   const [uploading, setUploading] = useState(false);
   const [preview, setPreview] = useState<string | null>(currentImage || null);
@@ -90,7 +92,7 @@ export default function FileUpload({
   };
 
   return (
-    <div className="space-y-4">
+    <div className={`space-y-4 ${className}`}>
       <input
         ref={fileInputRef}
         type="file"

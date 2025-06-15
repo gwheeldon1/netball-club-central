@@ -184,6 +184,7 @@ const UserProfilePage = () => {
                     currentImage={formData.profileImage}
                     onUpload={handleImageUpload}
                     aspectRatio={1}
+                    bucket="avatars"
                   />
                 ) : (
                   <Avatar className="w-32 h-32">
