@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
 import Layout from "@/components/Layout";
@@ -8,10 +9,11 @@ import { Link } from "react-router-dom";
 import { api } from '@/services/api';
 import { Team, Event } from "@/types";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Suspense, lazy } from "react";
 
-// Import analytics and role management components directly to avoid circular dependencies
-import { AnalyticsDashboard } from "@/components/analytics/AnalyticsDashboard";
-import { RoleManagement } from "@/components/RoleManagement";
+// Lazy load heavy components to avoid circular dependencies
+const LazyAnalyticsDashboard = lazy(() => import("@/components/analytics/AnalyticsDashboard").then(module => ({ default: module.AnalyticsDashboard })));
+const LazyRoleManagement = lazy(() => import("@/components/RoleManagement").then(module => ({ default: module.RoleManagement })));
 
 const Dashboard = () => {
   const {
@@ -24,6 +26,7 @@ const Dashboard = () => {
   const [teamCount, setTeamCount] = useState(0);
   const [teams, setTeams] = useState<Team[]>([]);
   const [loading, setLoading] = useState(true);
+
   useEffect(() => {
     const loadDashboardData = async () => {
       try {
@@ -46,6 +49,7 @@ const Dashboard = () => {
     };
     loadDashboardData();
   }, []);
+
   if (loading) {
     return <Layout>
         <div className="flex items-center justify-center h-64">
@@ -53,15 +57,19 @@ const Dashboard = () => {
         </div>
       </Layout>;
   }
+
   return <Layout>
       <div className="space-y-8 animate-fade-in">
         <div className="text-center space-y-2">
           <h1 className="text-4xl font-bold text-gradient">Welcome to Club Manager</h1>
-          
         </div>
 
         <Tabs defaultValue="overview" className="w-full">
-          
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="overview">Overview</TabsTrigger>
+            <TabsTrigger value="analytics">Analytics</TabsTrigger>
+            {hasRole("admin") && <TabsTrigger value="management">Management</TabsTrigger>}
+          </TabsList>
           
           <TabsContent value="overview" className="space-y-8 mt-8">
             <div className="grid gap-8 lg:grid-cols-2">
@@ -252,11 +260,15 @@ const Dashboard = () => {
           </TabsContent>
           
           <TabsContent value="analytics" className="mt-8">
-            <AnalyticsDashboard />
+            <Suspense fallback={<div className="flex items-center justify-center h-64"><p className="text-muted-foreground">Loading analytics...</p></div>}>
+              <LazyAnalyticsDashboard />
+            </Suspense>
           </TabsContent>
           
           {hasRole("admin") && <TabsContent value="management" className="mt-8">
-              <RoleManagement />
+              <Suspense fallback={<div className="flex items-center justify-center h-64"><p className="text-muted-foreground">Loading management...</p></div>}>
+                <LazyRoleManagement />
+              </Suspense>
             </TabsContent>}
         </Tabs>
       </div>
