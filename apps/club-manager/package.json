@@ -1,0 +1,34 @@
+{
+  "name": "@netball/club-manager",
+  "version": "1.0.0",
+  "description": "Netball club management application",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "type-check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@netball/shared-ui": "workspace:*",
+    "@netball/shared-types": "workspace:*",
+    "@netball/shared-utils": "workspace:*",
+    "@netball/auth-lib": "workspace:*",
+    "@netball/design-system": "workspace:*",
+    
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-router-dom": "^6.26.2",
+    "@supabase/supabase-js": "^2.50.0",
+    "@tanstack/react-query": "^5.56.2",
+    "date-fns": "^3.6.0",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.3",
+    "@types/react-dom": "^18.3.0",
+    "@vitejs/plugin-react-swc": "^3.5.0",
+    "typescript": "^5.2.2",
+    "vite": "^5.3.4"
+  }
+}

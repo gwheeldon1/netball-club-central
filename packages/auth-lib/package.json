@@ -1,0 +1,26 @@
+{
+  "name": "@netball/auth-lib",
+  "version": "1.0.0",
+  "description": "Authentication and authorization library for the Netball ecosystem",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest"
+  },
+  "peerDependencies": {
+    "react": "^18.0.0"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.50.0",
+    "@netball/shared-types": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/react": "^18.0.0",
+    "typescript": "^5.0.0"
+  },
+  "publishConfig": {
+    "access": "restricted"
+  }
+}
