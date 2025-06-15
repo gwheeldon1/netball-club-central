@@ -7,7 +7,6 @@ import { ErrorBoundary } from '@/utils/errorBoundary';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import { Suspense } from 'react';
 import {
-  LazyDashboard as Dashboard,
   LazyTeamsPage as TeamsPage,
   LazyEventsPage as EventsPage,
   LazyChildrenPage as ChildrenPage,
@@ -25,12 +24,13 @@ import {
   PageLoadingFallback,
 } from '@/components/LazyLoadedComponents';
 
-// Critical pages loaded immediately (no lazy loading for login/auth)
+// Critical pages loaded immediately (no lazy loading for login/auth/index)
 import LoginPage from '@/pages/LoginPage';
 import NotFound from '@/pages/NotFound';
 import UnauthorizedPage from '@/pages/UnauthorizedPage';
 import DesignSystemPage from '@/pages/DesignSystemPage';
 import AnalyticsPage from '@/pages/AnalyticsPage';
+import Index from '@/pages/Index';
 
 // Lazy load heavy components that aren't immediately needed
 import { lazy } from 'react';
@@ -52,9 +52,7 @@ function App() {
             
             <Route path="/" element={
               <ProtectedRoute>
-                <Suspense fallback={<PageLoadingFallback />}>
-                  <Dashboard />
-                </Suspense>
+                <Index />
               </ProtectedRoute>
             } />
             
