@@ -30,18 +30,11 @@ const LoginPage = () => {
       <div className="w-full max-w-md space-y-6 sm:space-y-8">
         <div className="text-center">
           <div className="flex justify-center mb-4 sm:mb-6">
-            <svg 
-              width="80" 
-              height="80" 
-              viewBox="0 0 80 80" 
-              fill="none" 
+            <img 
+              src="/shot-tracker-main-logo.png" 
+              alt="Club Manager Logo" 
               className="w-14 h-14 sm:w-16 sm:h-16 lg:w-20 lg:h-20"
-            >
-              <circle cx="40" cy="40" r="40" fill="#1EBEA5"/>
-              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" x="16" y="16">
-                <path d="M12 2L13.09 8.26L20 9L13.09 15.74L12 22L10.91 15.74L4 9L10.91 8.26L12 2Z" fill="white"/>
-              </svg>
-            </svg>
+            />
           </div>
           <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold tracking-tight text-foreground">Club Manager</h1>
         </div>

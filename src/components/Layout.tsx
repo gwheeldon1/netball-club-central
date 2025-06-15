@@ -78,18 +78,11 @@ const Layout = ({
           </Button>
           
           <div className="flex items-center gap-2">
-            <svg 
-              width="32" 
-              height="32" 
-              viewBox="0 0 32 32" 
-              fill="none" 
+            <img 
+              src="/shot-tracker-main-logo.png" 
+              alt="Club Manager Logo" 
               className="w-8 h-8"
-            >
-              <circle cx="16" cy="16" r="16" fill="#1EBEA5"/>
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" x="6" y="6">
-                <path d="M12 2L13.09 8.26L20 9L13.09 15.74L12 22L10.91 15.74L4 9L10.91 8.26L12 2Z" fill="white"/>
-              </svg>
-            </svg>
+            />
             <span className="text-lg font-semibold">Club Manager</span>
           </div>
           
@@ -116,18 +109,11 @@ const Layout = ({
 
           {/* Logo and app name */}
           <div className="flex items-center gap-3 px-6 py-5 border-b border-border">
-            <svg 
-              width="40" 
-              height="40" 
-              viewBox="0 0 40 40" 
-              fill="none" 
+            <img 
+              src="/shot-tracker-main-logo.png" 
+              alt="Club Manager Logo" 
               className="w-10 h-10"
-            >
-              <circle cx="20" cy="20" r="20" fill="#1EBEA5"/>
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" x="8" y="8">
-                <path d="M12 2L13.09 8.26L20 9L13.09 15.74L12 22L10.91 15.74L4 9L10.91 8.26L12 2Z" fill="white"/>
-              </svg>
-            </svg>
+            />
             <span className="text-xl font-bold">Club Manager</span>
           </div>
 
