@@ -11,6 +11,7 @@ import { Award, LockIcon, MailIcon } from "lucide-react";
 import { toast } from "sonner";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { ForgotPasswordDialog } from "@/components/ForgotPasswordDialog";
+
 const LoginPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -31,11 +32,13 @@ const LoginPage = () => {
       <div className="w-full max-w-md space-y-8 animate-fade-in">
         <div className="text-center">
           <div className="flex justify-center mb-6">
-            <img 
-              src="/shot-tracker-main-logo.png" 
-              alt="Club Manager Logo" 
-              className="w-32 h-32 sm:w-40 sm:h-40 animate-scale-in drop-shadow-lg" 
-            />
+            <div className="w-32 h-32 sm:w-40 sm:h-40 rounded-xl gradient-secondary flex items-center justify-center p-4">
+              <img 
+                src="/shot-tracker-main-logo.png" 
+                alt="Club Manager Logo" 
+                className="w-full h-full object-contain animate-scale-in" 
+              />
+            </div>
           </div>
           
           <p className="text-muted-foreground">Your premier netball club management platform</p>
