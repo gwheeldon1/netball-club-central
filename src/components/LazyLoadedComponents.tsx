@@ -1,9 +1,11 @@
+
 import { lazy, Suspense } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { FormSkeleton } from '@/components/ui/FormSkeleton';
 import { CardSkeleton } from '@/components/ui/loading-skeleton';
 
-// Lazy loaded page components (Dashboard removed - now imported directly)
+// Lazy loaded page components
+export const LazyDashboard = lazy(() => import('@/pages/Dashboard'));
 export const LazyTeamsPage = lazy(() => import('@/pages/TeamsPage'));
 export const LazyEventsPage = lazy(() => import('@/pages/EventsPage'));
 export const LazyChildrenPage = lazy(() => import('@/pages/ChildrenPage'));

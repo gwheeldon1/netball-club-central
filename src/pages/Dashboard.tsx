@@ -6,10 +6,13 @@ import { Button } from "@/components/ui/button";
 import { Calendar, Award, Users, User, MapPin, Clock, ChevronRight, Plus } from "lucide-react";
 import { Link } from "react-router-dom";
 import { api } from '@/services/api';
-import { Team, Event, Child } from "@/types";
+import { Team, Event } from "@/types";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+
+// Import analytics and role management components directly to avoid circular dependencies
 import { AnalyticsDashboard } from "@/components/analytics/AnalyticsDashboard";
 import { RoleManagement } from "@/components/RoleManagement";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+
 const Dashboard = () => {
   const {
     currentUser,
@@ -259,4 +262,6 @@ const Dashboard = () => {
       </div>
     </Layout>;
 };
+
+// Ensure proper default export for lazy loading
 export default Dashboard;

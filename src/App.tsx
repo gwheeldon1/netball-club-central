@@ -1,4 +1,3 @@
-
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Toaster } from 'sonner';
 import { ThemeProvider } from '@/components/theme-provider';
@@ -24,7 +23,7 @@ import {
   PageLoadingFallback,
 } from '@/components/LazyLoadedComponents';
 
-// Critical pages loaded immediately (no lazy loading for login/auth/index)
+// Critical pages loaded immediately (no lazy loading for login/auth)
 import LoginPage from '@/pages/LoginPage';
 import NotFound from '@/pages/NotFound';
 import UnauthorizedPage from '@/pages/UnauthorizedPage';

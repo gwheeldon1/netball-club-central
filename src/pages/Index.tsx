@@ -2,7 +2,8 @@
 import { useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import Dashboard from './Dashboard';
+import { Suspense } from 'react';
+import { LazyDashboard, DashboardLoadingFallback } from '@/components/LazyLoadedComponents';
 
 const Index = () => {
   const { currentUser } = useAuth();
@@ -15,8 +16,12 @@ const Index = () => {
     }
   }, [currentUser, navigate]);
 
-  // If user is logged in, show dashboard
-  return currentUser ? <Dashboard /> : null;
+  // If user is logged in, show dashboard with proper lazy loading
+  return currentUser ? (
+    <Suspense fallback={<DashboardLoadingFallback />}>
+      <LazyDashboard />
+    </Suspense>
+  ) : null;
 };
 
 export default Index;
