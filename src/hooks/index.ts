@@ -10,7 +10,7 @@ export { useCache } from './useCache';
 export { useConflictResolution } from './useConflictResolution';
 export { useErrorHandler } from './useErrorHandler';
 export { useFormValidation } from './useFormValidation';
-// export { useImageOptimization } from './useImageOptimization'; // File not found
+export { useOptimizedImage, OptimizedImage, useImagePreloader } from './useImageOptimization';
 export { useIntersectionObserver } from './useIntersectionObserver';
 export { useOptimizedCallback } from './useOptimizedCallback';
 export { useOptimizedQuery } from './useOptimizedQuery';
