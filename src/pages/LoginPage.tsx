@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
@@ -29,8 +30,8 @@ const LoginPage = () => {
       <div className="w-full max-w-md space-y-8 animate-fade-in">
         <div className="text-center">
           <div className="flex justify-center mb-6">
-            <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl gradient-primary shadow-elevation-high flex items-center justify-center">
-              <img src="/shot-tracker-main-logo.png" alt="Club Manager Logo" className="w-10 h-10 sm:w-12 sm:h-12" />
+            <div className="w-48 h-48 sm:w-60 sm:h-60 rounded-lg gradient-primary shadow-elevation-high flex items-center justify-center">
+              <img src="/shot-tracker-main-logo.png" alt="Club Manager Logo" className="w-32 h-32 sm:w-40 sm:h-40" />
             </div>
           </div>
           
@@ -40,12 +41,8 @@ const LoginPage = () => {
         <Card className="glass-card shadow-elevation-high animate-scale-in" style={{
         animationDelay: '200ms'
       }}>
-          <CardHeader className="space-y-2 pb-4 px-6">
-            <CardTitle className="text-xl lg:text-2xl text-center font-semibold">Welcome Back</CardTitle>
-            <p className="text-sm text-muted-foreground text-center">Sign in to your account</p>
-          </CardHeader>
           <form onSubmit={handleSubmit} autoComplete="on">
-            <CardContent className="space-y-6 pt-2 px-6">
+            <CardContent className="space-y-6 pt-6 px-6">
               <div className="space-y-2">
                 <Label htmlFor="email" className="text-sm font-medium">Email Address</Label>
                 <div className="relative">
