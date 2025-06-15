@@ -115,54 +115,6 @@ const LoginPage = () => {
           </form>
         </Card>
 
-        <Card className="shadow-sm">
-          <CardHeader className="pb-2 sm:pb-3 px-4 sm:px-6">
-            <CardTitle className="text-center text-sm font-medium">Demo Accounts</CardTitle>
-          </CardHeader>
-          <CardContent className="px-4 sm:px-6">
-            <div className="grid grid-cols-1 gap-2 text-sm">
-              <div className="flex items-center p-3 bg-accent rounded-lg border">
-                <div className="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center mr-3 flex-shrink-0">
-                  <span className="text-xs font-medium text-blue-600 dark:text-blue-400">P</span>
-                </div>
-                <div className="text-left min-w-0 flex-1">
-                  <p className="font-medium text-foreground">Parent</p>
-                  <p className="text-xs text-muted-foreground truncate">sarah.johnson@example.com</p>
-                </div>
-              </div>
-              <div className="flex items-center p-3 bg-accent rounded-lg border">
-                <div className="w-8 h-8 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center mr-3 flex-shrink-0">
-                  <span className="text-xs font-medium text-green-600 dark:text-green-400">C</span>
-                </div>
-                <div className="text-left min-w-0 flex-1">
-                  <p className="font-medium text-foreground">Coach</p>
-                  <p className="text-xs text-muted-foreground truncate">james.williams@example.com</p>
-                </div>
-              </div>
-              <div className="flex items-center p-3 bg-accent rounded-lg border">
-                <div className="w-8 h-8 rounded-full bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center mr-3 flex-shrink-0">
-                  <span className="text-xs font-medium text-purple-600 dark:text-purple-400">M</span>
-                </div>
-                <div className="text-left min-w-0 flex-1">
-                  <p className="font-medium text-foreground">Manager</p>
-                  <p className="text-xs text-muted-foreground truncate">emma.davis@example.com</p>
-                </div>
-              </div>
-              <div className="flex items-center p-3 bg-accent rounded-lg border">
-                <div className="w-8 h-8 rounded-full bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center mr-3 flex-shrink-0">
-                  <span className="text-xs font-medium text-amber-600 dark:text-amber-400">A</span>
-                </div>
-                <div className="text-left min-w-0 flex-1">
-                  <p className="font-medium text-foreground">Admin</p>
-                  <p className="text-xs text-muted-foreground truncate">michael.brown@example.com</p>
-                </div>
-              </div>
-            </div>
-            <p className="mt-3 text-center text-xs text-muted-foreground italic">
-              Use any password to login for demo purposes
-            </p>
-          </CardContent>
-        </Card>
       </div>
     </div>
   );
