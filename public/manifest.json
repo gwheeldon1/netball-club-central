@@ -1,7 +1,7 @@
 {
-  "name": "Netball Club Central",
-  "short_name": "Netball Club",
-  "description": "A comprehensive netball club management application",
+  "name": "Club Manager",
+  "short_name": "Club Manager",
+  "description": "A comprehensive sports club management application",
   "theme_color": "#1EBEA5",
   "background_color": "#FFFFFF",
   "display": "standalone",

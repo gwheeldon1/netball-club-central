@@ -78,10 +78,12 @@ const Layout = ({
           </Button>
           
           <div className="flex items-center gap-2">
-            <div className="flex items-center justify-center w-8 h-8 bg-primary rounded-full">
-              <Award className="h-4 w-4 text-primary-foreground" />
-            </div>
-            <span className="text-lg font-semibold">Netball Club</span>
+            <img 
+              src="/lovable-uploads/e6754ad1-0a60-46b4-89e8-a3398e86eacb" 
+              alt="Club Manager Logo" 
+              className="w-8 h-8 object-contain"
+            />
+            <span className="text-lg font-semibold">Club Manager</span>
           </div>
           
           <div className="flex items-center gap-2">
@@ -107,10 +109,12 @@ const Layout = ({
 
           {/* Logo and app name */}
           <div className="flex items-center gap-3 px-6 py-5 border-b border-border">
-            <div className="flex items-center justify-center w-10 h-10 bg-primary rounded-full">
-              <Award className="h-6 w-6 text-primary-foreground" />
-            </div>
-            <span className="text-xl font-bold">Netball Club</span>
+            <img 
+              src="/lovable-uploads/e6754ad1-0a60-46b4-89e8-a3398e86eacb" 
+              alt="Club Manager Logo" 
+              className="w-10 h-10 object-contain"
+            />
+            <span className="text-xl font-bold">Club Manager</span>
           </div>
 
           {/* User info */}

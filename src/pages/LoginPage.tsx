@@ -30,16 +30,13 @@ const LoginPage = () => {
       <div className="w-full max-w-md space-y-6 sm:space-y-8">
         <div className="text-center">
           <div className="flex justify-center mb-4 sm:mb-6">
-            <div className="relative">
-              <div className="w-14 h-14 sm:w-16 sm:h-16 lg:w-20 lg:h-20 bg-primary rounded-full flex items-center justify-center shadow-lg">
-                <Award className="h-7 w-7 sm:h-9 sm:w-9 lg:h-11 lg:w-11 text-primary-foreground" />
-              </div>
-              <div className="absolute -bottom-1 -right-1 w-5 h-5 sm:w-6 sm:h-6 bg-background rounded-full flex items-center justify-center shadow-md border border-border">
-                <div className="w-3 h-3 sm:w-4 sm:h-4 bg-primary rounded-full"></div>
-              </div>
-            </div>
+            <img 
+              src="/lovable-uploads/e6754ad1-0a60-46b4-89e8-a3398e86eacb" 
+              alt="Club Manager Logo" 
+              className="w-14 h-14 sm:w-16 sm:h-16 lg:w-20 lg:h-20 object-contain"
+            />
           </div>
-          <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold tracking-tight text-foreground">Club Management</h1>
+          <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold tracking-tight text-foreground">Club Manager</h1>
         </div>
 
         <Card className="shadow-lg">
