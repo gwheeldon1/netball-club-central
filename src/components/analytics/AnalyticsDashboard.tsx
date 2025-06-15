@@ -131,7 +131,7 @@ export const AnalyticsDashboard = () => {
           value={getStatValue('total_players')}
           subtitle="Registered players"
           icon={<Users className="h-8 w-8" />}
-          gradient="primary"
+          variant="blue"
           className="animate-scale-in"
         />
         <MetricCard
@@ -139,27 +139,24 @@ export const AnalyticsDashboard = () => {
           value={getStatValue('active_teams')}
           subtitle="Across all age groups"
           icon={<Trophy className="h-8 w-8" />}
-          gradient="secondary"
+          variant="green"
           className="animate-scale-in"
-          style={{ animationDelay: '100ms' }}
         />
         <MetricCard
           title="Events This Month"
           value={getStatValue('events_this_month')}
           subtitle="Training & matches"
           icon={<Calendar className="h-8 w-8" />}
-          gradient="tertiary"
+          variant="purple"
           className="animate-scale-in"
-          style={{ animationDelay: '200ms' }}
         />
         <MetricCard
           title="Average Attendance"
           value={`${getStatValue('avg_attendance')}%`}
           subtitle="Club-wide attendance"
           icon={<Activity className="h-8 w-8" />}
-          gradient="accent"
+          variant="orange"
           className="animate-scale-in"
-          style={{ animationDelay: '300ms' }}
         />
       </DashboardGrid>
 
@@ -207,102 +204,104 @@ export const AnalyticsDashboard = () => {
 
       {/* Enhanced charts with cohesive styling */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <ChartCard
-          title="Monthly Attendance Trends"
-          description="Track attendance patterns over time"
-          className="glass-card animate-slide-in"
-        >
-          <ResponsiveContainer width="100%" height={300}>
-            <LineChart data={attendanceTrends}>
-              <CartesianGrid strokeDasharray="3 3" className="stroke-muted/30" />
-              <XAxis 
-                dataKey="month" 
-                className="text-muted-foreground"
-                fontSize={12}
-                tick={{ fontSize: 12 }}
-              />
-              <YAxis 
-                className="text-muted-foreground"
-                fontSize={12}
-                tick={{ fontSize: 12 }}
-              />
-              <Tooltip 
-                contentStyle={{
-                  backgroundColor: "hsl(var(--card))",
-                  border: "1px solid hsl(var(--border))",
-                  borderRadius: "12px",
-                  boxShadow: "var(--shadow-elevation-medium)"
-                }}
-              />
-              <Line 
-                type="monotone" 
-                dataKey="attendance" 
-                stroke={chartColors.primary}
-                strokeWidth={3}
-                dot={{ fill: chartColors.primary, strokeWidth: 2, r: 5 }}
-                activeDot={{ r: 6, stroke: chartColors.primary, strokeWidth: 2 }}
-              />
-            </LineChart>
-          </ResponsiveContainer>
-        </ChartCard>
+        <div className="animate-slide-in">
+          <ChartCard
+            title="Monthly Attendance Trends"
+            description="Track attendance patterns over time"
+            className="glass-card"
+          >
+            <ResponsiveContainer width="100%" height={300}>
+              <LineChart data={attendanceTrends}>
+                <CartesianGrid strokeDasharray="3 3" className="stroke-muted/30" />
+                <XAxis 
+                  dataKey="month" 
+                  className="text-muted-foreground"
+                  fontSize={12}
+                  tick={{ fontSize: 12 }}
+                />
+                <YAxis 
+                  className="text-muted-foreground"
+                  fontSize={12}
+                  tick={{ fontSize: 12 }}
+                />
+                <Tooltip 
+                  contentStyle={{
+                    backgroundColor: "hsl(var(--card))",
+                    border: "1px solid hsl(var(--border))",
+                    borderRadius: "12px",
+                    boxShadow: "var(--shadow-elevation-medium)"
+                  }}
+                />
+                <Line 
+                  type="monotone" 
+                  dataKey="attendance" 
+                  stroke={chartColors.primary}
+                  strokeWidth={3}
+                  dot={{ fill: chartColors.primary, strokeWidth: 2, r: 5 }}
+                  activeDot={{ r: 6, stroke: chartColors.primary, strokeWidth: 2 }}
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          </ChartCard>
+        </div>
 
-        <ChartCard
-          title="Event Distribution"
-          description={`Breakdown of event types (${timeRange})`}
-          className="glass-card animate-slide-in"
-          style={{ animationDelay: '200ms' }}
-        >
-          <ResponsiveContainer width="100%" height={300}>
-            <PieChart>
-              <Pie
-                data={eventDistribution}
-                cx="50%"
-                cy="50%"
-                innerRadius={60}
-                outerRadius={120}
-                paddingAngle={5}
-                dataKey="value"
-              >
-                {eventDistribution.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={entry.color} />
+        <div className="animate-slide-in" style={{ animationDelay: '200ms' }}>
+          <ChartCard
+            title="Event Distribution"
+            description={`Breakdown of event types (${timeRange})`}
+            className="glass-card"
+          >
+            <ResponsiveContainer width="100%" height={300}>
+              <PieChart>
+                <Pie
+                  data={eventDistribution}
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={60}
+                  outerRadius={120}
+                  paddingAngle={5}
+                  dataKey="value"
+                >
+                  {eventDistribution.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.color} />
+                  ))}
+                </Pie>
+                <Tooltip 
+                  contentStyle={{
+                    backgroundColor: "hsl(var(--card))",
+                    border: "1px solid hsl(var(--border))",
+                    borderRadius: "12px",
+                    boxShadow: "var(--shadow-elevation-medium)"
+                  }}
+                />
+              </PieChart>
+            </ResponsiveContainer>
+            {eventDistribution.length > 0 && (
+              <div className="flex justify-center flex-wrap gap-4 mt-6">
+                {eventDistribution.map((item) => (
+                  <div key={item.name} className="flex items-center space-x-2">
+                    <div 
+                      className="w-3 h-3 rounded-full shadow-sm" 
+                      style={{ backgroundColor: item.color }}
+                    />
+                    <span className="text-sm text-muted-foreground font-medium">
+                      {item.name} ({item.value}%)
+                    </span>
+                  </div>
                 ))}
-              </Pie>
-              <Tooltip 
-                contentStyle={{
-                  backgroundColor: "hsl(var(--card))",
-                  border: "1px solid hsl(var(--border))",
-                  borderRadius: "12px",
-                  boxShadow: "var(--shadow-elevation-medium)"
-                }}
-              />
-            </PieChart>
-          </ResponsiveContainer>
-          {eventDistribution.length > 0 && (
-            <div className="flex justify-center flex-wrap gap-4 mt-6">
-              {eventDistribution.map((item) => (
-                <div key={item.name} className="flex items-center space-x-2">
-                  <div 
-                    className="w-3 h-3 rounded-full shadow-sm" 
-                    style={{ backgroundColor: item.color }}
-                  />
-                  <span className="text-sm text-muted-foreground font-medium">
-                    {item.name} ({item.value}%)
-                  </span>
-                </div>
-              ))}
-            </div>
-          )}
-        </ChartCard>
+              </div>
+            )}
+          </ChartCard>
+        </div>
       </div>
 
       {/* Enhanced activity and comparison section */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-2">
+        <div className="lg:col-span-2 animate-slide-in" style={{ animationDelay: '400ms' }}>
           <ChartCard
             title="Team Attendance Comparison"
             description="Compare attendance across different teams"
-            className="glass-card animate-slide-in"
-            style={{ animationDelay: '400ms' }}
+            className="glass-card"
           >
             <ResponsiveContainer width="100%" height={300}>
               <BarChart data={teamAttendance}>
@@ -336,12 +335,13 @@ export const AnalyticsDashboard = () => {
           </ChartCard>
         </div>
 
-        <ActivityCard
-          title="Recent Activity"
-          activities={recentActivities}
-          className="lg:col-span-1 glass-card animate-slide-in"
-          style={{ animationDelay: '600ms' }}
-        />
+        <div className="lg:col-span-1 animate-slide-in" style={{ animationDelay: '600ms' }}>
+          <ActivityCard
+            title="Recent Activity"
+            activities={recentActivities}
+            className="glass-card"
+          />
+        </div>
       </div>
     </div>
   );
