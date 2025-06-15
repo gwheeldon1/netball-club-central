@@ -18,12 +18,12 @@ export const ChartCard = ({
   actions
 }: ChartCardProps) => {
   return (
-    <Card className={cn("transition-all duration-200 hover:shadow-md", className)}>
-      <CardHeader className="flex flex-row items-center justify-between space-y-0">
-        <div className="space-y-1.5">
-          <CardTitle className="text-lg font-semibold">{title}</CardTitle>
+    <Card className={cn("hover:shadow-elevation-medium transition-all duration-300", className)}>
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
+        <div className="space-y-2">
+          <CardTitle className="text-lg font-semibold tracking-tight">{title}</CardTitle>
           {description && (
-            <CardDescription className="text-sm">
+            <CardDescription className="text-sm leading-relaxed">
               {description}
             </CardDescription>
           )}
@@ -34,7 +34,7 @@ export const ChartCard = ({
           </div>
         )}
       </CardHeader>
-      <CardContent className="pt-2">
+      <CardContent className="pt-0">
         {children}
       </CardContent>
     </Card>

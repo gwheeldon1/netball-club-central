@@ -24,7 +24,7 @@ export const MetricCard = ({
       case "blue":
         return "bg-gradient-to-br from-blue-500 to-blue-600";
       case "green":
-        return "bg-gradient-to-br from-green-500 to-green-600";
+        return "bg-gradient-to-br from-emerald-500 to-emerald-600";
       case "purple":
         return "bg-gradient-to-br from-purple-500 to-purple-600";
       case "orange":
@@ -32,23 +32,23 @@ export const MetricCard = ({
       case "red":
         return "bg-gradient-to-br from-red-500 to-red-600";
       default:
-        return "bg-gradient-to-br from-primary to-primary/80";
+        return "gradient-primary";
     }
   };
 
   return (
-    <Card className={cn("border-0 text-white overflow-hidden", getGradientClass(), className)}>
+    <Card className={cn("border-0 text-white overflow-hidden shadow-elevation-medium hover:shadow-elevation-high hover:scale-[1.02] transition-all duration-300", getGradientClass(), className)}>
       <CardContent className="p-6">
         <div className="flex items-center justify-between">
-          <div className="space-y-2">
-            <p className="text-sm font-medium text-white/80">{title}</p>
-            <p className="text-3xl font-bold">{value}</p>
+          <div className="space-y-3">
+            <p className="text-sm font-medium text-white/80 uppercase tracking-wide">{title}</p>
+            <p className="text-3xl font-bold tracking-tight">{value}</p>
             {subtitle && (
-              <p className="text-xs text-white/70">{subtitle}</p>
+              <p className="text-sm text-white/75 font-medium">{subtitle}</p>
             )}
           </div>
           {icon && (
-            <div className="h-12 w-12 text-white/80">
+            <div className="h-12 w-12 text-white/80 p-3 bg-white/10 rounded-2xl backdrop-blur-sm">
               {icon}
             </div>
           )}

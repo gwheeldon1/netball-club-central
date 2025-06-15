@@ -26,60 +26,67 @@ export const ProgressCard = ({
 }: ProgressCardProps) => {
   const percentage = Math.round((value / maxValue) * 100);
 
-  const getProgressColor = () => {
-    switch (variant) {
-      case "success":
-        return "bg-green-500";
-      case "warning":
-        return "bg-yellow-500";
-      case "destructive":
-        return "bg-red-500";
-      default:
-        return "bg-primary";
-    }
-  };
-
   const getVariantStyles = () => {
     switch (variant) {
       case "success":
-        return "border-green-200 dark:border-green-800";
+        return {
+          cardStyle: "border-emerald-200/50 bg-emerald-50/50 dark:border-emerald-800/50 dark:bg-emerald-950/20",
+          iconBg: "bg-emerald-100 dark:bg-emerald-950/50",
+          iconColor: "text-emerald-600 dark:text-emerald-400"
+        };
       case "warning":
-        return "border-yellow-200 dark:border-yellow-800";
+        return {
+          cardStyle: "border-amber-200/50 bg-amber-50/50 dark:border-amber-800/50 dark:bg-amber-950/20",
+          iconBg: "bg-amber-100 dark:bg-amber-950/50",
+          iconColor: "text-amber-600 dark:text-amber-400"
+        };
       case "destructive":
-        return "border-red-200 dark:border-red-800";
+        return {
+          cardStyle: "border-red-200/50 bg-red-50/50 dark:border-red-800/50 dark:bg-red-950/20",
+          iconBg: "bg-red-100 dark:bg-red-950/50",
+          iconColor: "text-red-600 dark:text-red-400"
+        };
       default:
-        return "";
+        return {
+          cardStyle: "",
+          iconBg: "bg-primary/10",
+          iconColor: "text-primary"
+        };
     }
   };
 
+  const styles = getVariantStyles();
+
   return (
-    <Card className={cn("transition-all duration-200 hover:shadow-md", getVariantStyles(), className)}>
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-sm font-medium text-muted-foreground">
+    <Card className={cn("hover:scale-[1.02] hover:shadow-elevation-medium transition-all duration-300", styles.cardStyle, className)}>
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
+        <CardTitle className="text-sm font-medium text-muted-foreground uppercase tracking-wide">
           {title}
         </CardTitle>
         {icon && (
-          <div className="h-4 w-4 text-muted-foreground">
-            {icon}
+          <div className={cn("p-2.5 rounded-xl", styles.iconBg)}>
+            <div className={cn("h-4 w-4", styles.iconColor)}>
+              {icon}
+            </div>
           </div>
         )}
       </CardHeader>
-      <CardContent className="space-y-3">
-        <div className="flex items-center justify-between">
-          <span className="text-2xl font-bold">{value}</span>
-          <span className="text-sm text-muted-foreground">of {maxValue}</span>
+      <CardContent className="space-y-4">
+        <div className="flex items-baseline gap-2">
+          <span className="text-2xl font-bold tracking-tight">{value}</span>
+          <span className="text-sm text-muted-foreground font-medium">of {maxValue}</span>
         </div>
         
-        <div className="space-y-2">
-          <Progress value={percentage} className="h-2" />
-          <div className="flex items-center justify-between text-xs">
-            <span className="text-muted-foreground">{percentage}% complete</span>
-            {label && <span className="font-medium">{label}</span>}
+        <div className="space-y-3">
+          <Progress value={percentage} className="h-2.5" />
+          <div className="flex items-center justify-between text-sm">
+            <span className="text-muted-foreground font-medium">{percentage}% complete</span>
+            {label && <span className="font-semibold">{label}</span>}
           </div>
         </div>
         
         {description && (
-          <p className="text-xs text-muted-foreground">{description}</p>
+          <p className="text-sm text-muted-foreground leading-relaxed">{description}</p>
         )}
       </CardContent>
     </Card>
