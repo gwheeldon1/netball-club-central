@@ -8,6 +8,7 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "
 import { Slider } from "@/components/ui/slider";
 import { supabase } from "@/integrations/supabase/client";
 import { logger } from "@/utils/logger";
+import { CropArea, CropAreaPixels } from '@/types/component-props';
 
 interface FileUploadProps {
   onUpload: (url: string) => void;
@@ -28,7 +29,7 @@ const FileUpload = ({ onUpload, currentImage, className, aspectRatio = 1, bucket
   // Cropper state
   const [crop, setCrop] = useState({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
-  const [croppedAreaPixels, setCroppedAreaPixels] = useState(null);
+  const [croppedAreaPixels, setCroppedAreaPixels] = useState<CropAreaPixels | null>(null);
   
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -53,7 +54,7 @@ const FileUpload = ({ onUpload, currentImage, className, aspectRatio = 1, bucket
     setShowCropDialog(true);
   };
   
-  const handleCropComplete = (croppedArea: any, croppedAreaPixels: any) => {
+  const handleCropComplete = (croppedArea: CropArea, croppedAreaPixels: CropAreaPixels) => {
     setCroppedAreaPixels(croppedAreaPixels);
   };
 

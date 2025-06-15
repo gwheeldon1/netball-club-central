@@ -67,7 +67,7 @@ const EditTeamPage = () => {
     
     try {
       // Check if team has players - not yet implemented in unified API
-      const players: any[] = [];
+      const players: Array<{ id: string }> = [];
       
       if (players.length > 0) {
         toast.error(`Cannot delete team. There are ${players.length} players assigned to this team.`);
