@@ -31,7 +31,7 @@ const LoginPage = () => {
         <div className="text-center">
           <div className="flex justify-center mb-4 sm:mb-6">
             <img 
-              src="/lovable-uploads/e6754ad1-0a60-46b4-89e8-a3398e86eacb" 
+              src="https://images.unsplash.com/photo-1588160702438-9b02ab6515c9?w=80&h=80&fit=crop&crop=center" 
               alt="Club Manager Logo" 
               className="w-14 h-14 sm:w-16 sm:h-16 lg:w-20 lg:h-20 object-contain"
             />

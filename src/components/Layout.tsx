@@ -79,7 +79,7 @@ const Layout = ({
           
           <div className="flex items-center gap-2">
             <img 
-              src="/lovable-uploads/e6754ad1-0a60-46b4-89e8-a3398e86eacb" 
+              src="https://images.unsplash.com/photo-1588160702438-9b02ab6515c9?w=32&h=32&fit=crop&crop=center" 
               alt="Club Manager Logo" 
               className="w-8 h-8 object-contain"
             />
@@ -110,7 +110,7 @@ const Layout = ({
           {/* Logo and app name */}
           <div className="flex items-center gap-3 px-6 py-5 border-b border-border">
             <img 
-              src="/lovable-uploads/e6754ad1-0a60-46b4-89e8-a3398e86eacb" 
+              src="https://images.unsplash.com/photo-1588160702438-9b02ab6515c9?w=40&h=40&fit=crop&crop=center" 
               alt="Club Manager Logo" 
               className="w-10 h-10 object-contain"
             />
