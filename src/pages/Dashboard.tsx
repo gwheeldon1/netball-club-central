@@ -10,7 +10,6 @@ import { Team, Event, Child } from "@/types";
 import { AnalyticsDashboard } from "@/components/analytics/AnalyticsDashboard";
 import { RoleManagement } from "@/components/RoleManagement";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-
 const Dashboard = () => {
   const {
     currentUser,
@@ -61,11 +60,7 @@ const Dashboard = () => {
   return <Layout>
       <div className="space-y-6 sm:space-y-8">
         <Tabs defaultValue="overview" className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="analytics">Analytics</TabsTrigger>
-            {hasRole("admin") && <TabsTrigger value="management">Management</TabsTrigger>}
-          </TabsList>
+          
           
           <TabsContent value="overview" className="space-y-6 mt-6">
             <div className="grid gap-6 sm:gap-8 lg:grid-cols-2">
@@ -101,12 +96,12 @@ const Dashboard = () => {
                               <Clock className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
                               <span className="truncate">
                                 {new Date(`${event.date}T${event.time}`).toLocaleString('en-GB', {
-                            weekday: 'short',
-                            month: 'short',
-                            day: 'numeric',
-                            hour: '2-digit',
-                            minute: '2-digit'
-                          })}
+                                weekday: 'short',
+                                month: 'short',
+                                day: 'numeric',
+                                hour: '2-digit',
+                                minute: '2-digit'
+                              })}
                               </span>
                             </div>
                             <div className="flex items-center gap-2 text-xs sm:text-sm text-muted-foreground">
@@ -248,14 +243,11 @@ const Dashboard = () => {
             <AnalyticsDashboard />
           </TabsContent>
           
-          {hasRole("admin") && (
-            <TabsContent value="management" className="mt-6">
+          {hasRole("admin") && <TabsContent value="management" className="mt-6">
               <RoleManagement />
-            </TabsContent>
-          )}
+            </TabsContent>}
         </Tabs>
       </div>
     </Layout>;
 };
-
 export default Dashboard;
