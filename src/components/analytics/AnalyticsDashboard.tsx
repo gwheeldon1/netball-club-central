@@ -131,7 +131,7 @@ export const AnalyticsDashboard = () => {
           value={getStatValue('total_players')}
           subtitle="Registered players"
           icon={<Users className="h-8 w-8" />}
-          variant="blue"
+          gradient="blue"
           className="animate-scale-in"
         />
         <MetricCard
@@ -139,7 +139,7 @@ export const AnalyticsDashboard = () => {
           value={getStatValue('active_teams')}
           subtitle="Across all age groups"
           icon={<Trophy className="h-8 w-8" />}
-          variant="green"
+          gradient="green"
           className="animate-scale-in"
         />
         <MetricCard
@@ -147,7 +147,7 @@ export const AnalyticsDashboard = () => {
           value={getStatValue('events_this_month')}
           subtitle="Training & matches"
           icon={<Calendar className="h-8 w-8" />}
-          variant="purple"
+          gradient="purple"
           className="animate-scale-in"
         />
         <MetricCard
@@ -155,7 +155,7 @@ export const AnalyticsDashboard = () => {
           value={`${getStatValue('avg_attendance')}%`}
           subtitle="Club-wide attendance"
           icon={<Activity className="h-8 w-8" />}
-          variant="orange"
+          gradient="orange"
           className="animate-scale-in"
         />
       </DashboardGrid>
