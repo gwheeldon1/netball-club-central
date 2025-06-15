@@ -25,8 +25,10 @@ const Dashboard = () => {
     const loadDashboardData = async () => {
       try {
         const teamsData = await api.getTeams();
-        setTeams(teamsData);
-        setTeamCount(teamsData.length);
+        // Filter to only show active teams on dashboard
+        const activeTeams = teamsData.filter(team => team.active !== false);
+        setTeams(activeTeams);
+        setTeamCount(activeTeams.length);
         setUpcomingEvents([]);
         const allChildren = await api.getChildren();
         const pending = allChildren.filter(child => child.status === 'pending').length;
@@ -123,8 +125,8 @@ const Dashboard = () => {
                 <CardHeader className="pb-4 px-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <CardTitle className="text-xl">Your Teams</CardTitle>
-                      <CardDescription>Teams you're involved with</CardDescription>
+                      <CardTitle className="text-xl">Active Teams</CardTitle>
+                      <CardDescription>Teams currently in operation</CardDescription>
                     </div>
                     <Link to="/teams" className="flex items-center gap-1 text-sm text-primary hover:text-primary/80 font-medium transition-colors">
                       View all <ChevronRight className="h-4 w-4" />
@@ -132,24 +134,28 @@ const Dashboard = () => {
                   </div>
                 </CardHeader>
                 <CardContent className="px-6">
-                  {teams.length > 0 ? <div className="space-y-4">
+                  {teams.length > 0 ? <div className="space-y-3">
                       {teams.slice(0, 4).map(team => <div key={team.id} className="flex items-start gap-4 p-4 rounded-xl border hover:border-primary/30 hover:bg-accent/30 transition-all duration-300 card-hover">
-                          <div className="w-10 h-10 rounded-xl overflow-hidden flex-shrink-0 bg-primary/10 border border-border shadow-glow">
+                          <div className="w-12 h-12 rounded-xl overflow-hidden flex-shrink-0 bg-primary/10 border border-border shadow-glow">
                             {team.icon || team.profileImage ? <img src={team.icon || team.profileImage} alt={team.name} className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center">
                                 <Users className="h-5 w-5 text-primary" />
                               </div>}
                           </div>
                           <div className="flex-1 min-w-0">
                             <h4 className="font-semibold text-base leading-tight truncate mb-1">{team.name}</h4>
-                            <p className="text-sm text-muted-foreground">
-                              {team.ageGroup} • {team.category}
-                            </p>
+                            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                              <span>{team.ageGroup}</span>
+                              <span>•</span>
+                              <span>{team.category}</span>
+                              <span>•</span>
+                              <span>{team.players?.length || 0} players</span>
+                            </div>
                           </div>
                         </div>)}
                     </div> : <div className="text-center py-8">
                       <Users className="h-12 w-12 text-muted-foreground/50 mx-auto mb-4" />
-                      <p className="text-muted-foreground text-base font-medium">No teams yet</p>
-                      <p className="text-sm text-muted-foreground/70">Join or create teams to get started</p>
+                      <p className="text-muted-foreground text-base font-medium">No active teams</p>
+                      <p className="text-sm text-muted-foreground/70">Create or activate teams to get started</p>
                     </div>}
                 </CardContent>
               </Card>

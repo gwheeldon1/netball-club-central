@@ -36,6 +36,7 @@ export interface Team {
   players?: Child[];
   coaches?: User[];
   managers?: User[];
+  active?: boolean; // Add active status
 }
 
 export interface Event {
