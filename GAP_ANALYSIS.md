@@ -1,5 +1,5 @@
-# Gap Analysis & Implementation Plan
-## Netball Club Management System
+# Gap Analysis - Monorepo Migration
+## What We Have vs What We Need
 
 ### Current System Status ✅
 
