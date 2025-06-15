@@ -1104,18 +1104,21 @@ export type Database = {
       teams: {
         Row: {
           age_group: string
+          archived: boolean
           id: string
           name: string
           season_year: number | null
         }
         Insert: {
           age_group: string
+          archived?: boolean
           id?: string
           name: string
           season_year?: number | null
         }
         Update: {
           age_group?: string
+          archived?: boolean
           id?: string
           name?: string
           season_year?: number | null

@@ -9,7 +9,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Calendar, User as UserIcon, Award, Edit, Camera } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
+import { Calendar, User as UserIcon, Award, Edit, Camera, Archive } from "lucide-react";
 import { toast } from "sonner";
 import { TeamImageManager } from "@/components/TeamImageManager";
 
@@ -23,6 +25,7 @@ const TeamDetailPage = () => {
   const [managers, setManagers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [showImageManager, setShowImageManager] = useState(false);
+  const [updatingArchived, setUpdatingArchived] = useState(false);
   
   useEffect(() => {
     const loadTeamData = async () => {
@@ -77,6 +80,24 @@ const TeamDetailPage = () => {
     }
   };
 
+  const handleArchivedToggle = async (archived: boolean) => {
+    if (!team || !hasRole('admin')) return;
+    
+    setUpdatingArchived(true);
+    try {
+      const updatedTeam = await api.updateTeam(team.id, { archived });
+      if (updatedTeam) {
+        setTeam(updatedTeam);
+        toast.success(`Team ${archived ? 'archived' : 'unarchived'} successfully`);
+      }
+    } catch (error) {
+      console.error("Error updating team archived status:", error);
+      toast.error("Failed to update team status");
+    } finally {
+      setUpdatingArchived(false);
+    }
+  };
+
   if (loading) {
     return (
       <Layout>
@@ -126,10 +147,17 @@ const TeamDetailPage = () => {
                 className="w-full h-full object-cover"
               />
             </div>
-            <div>
-              <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
-                {team.name}
-              </h1>
+            <div className="flex-1">
+              <div className="flex items-center gap-3">
+                <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
+                  {team.name}
+                </h1>
+                {team.archived && (
+                  <div className="bg-orange-500/20 text-orange-300 px-2 py-1 rounded text-sm font-medium">
+                    Archived
+                  </div>
+                )}
+              </div>
               <p className="text-sm sm:text-base opacity-90">
                 {team.ageGroup} • {team.category}
               </p>
@@ -149,6 +177,37 @@ const TeamDetailPage = () => {
             </Button>
           )}
         </div>
+
+        {/* Admin Controls */}
+        {hasRole("admin") && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Archive className="h-5 w-5" />
+                Admin Controls
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center space-x-2">
+                <Switch
+                  id="archived"
+                  checked={team.archived || false}
+                  onCheckedChange={handleArchivedToggle}
+                  disabled={updatingArchived}
+                />
+                <Label htmlFor="archived">
+                  {team.archived ? 'Unarchive team' : 'Archive team'}
+                </Label>
+              </div>
+              <p className="text-sm text-muted-foreground mt-2">
+                {team.archived 
+                  ? 'This team is currently archived and hidden from normal views.'
+                  : 'Archive this team to hide it from normal views while preserving data.'
+                }
+              </p>
+            </CardContent>
+          </Card>
+        )}
         
         {/* Admin/Coach/Manager actions */}
         <div className="flex flex-wrap gap-3">

@@ -20,10 +20,11 @@ class TeamAPI extends BaseAPI {
           name: team.name,
           ageGroup: team.age_group,
           category: 'Junior' as Team['category'],
-          description: '',
-          profileImage: '',
-          bannerImage: '',
-          icon: ''
+          description: team.description || '',
+          profileImage: team.profile_image || '',
+          bannerImage: team.banner_image || '',
+          icon: team.icon || '',
+          archived: team.archived || false
         } as Team)) || [];
       },
       () => offlineApi.getTeams(),
@@ -47,10 +48,11 @@ class TeamAPI extends BaseAPI {
           name: data.name,
           ageGroup: data.age_group,
           category: 'Junior' as Team['category'],
-          description: '',
-          profileImage: '',
-          bannerImage: '',
-          icon: ''
+          description: data.description || '',
+          profileImage: data.profile_image || '',
+          bannerImage: data.banner_image || '',
+          icon: data.icon || '',
+          archived: data.archived || false
         } as Team;
       },
       () => offlineApi.getTeamById(id),
@@ -99,6 +101,11 @@ class TeamAPI extends BaseAPI {
           .update({
             name: updates.name,
             age_group: updates.ageGroup,
+            description: updates.description,
+            profile_image: updates.profileImage,
+            banner_image: updates.bannerImage,
+            icon: updates.icon,
+            archived: updates.archived,
           })
           .eq('id', id)
           .select()
@@ -111,10 +118,11 @@ class TeamAPI extends BaseAPI {
           name: data.name,
           ageGroup: data.age_group,
           category: 'Junior' as Team['category'],
-          description: '',
-          profileImage: '',
-          bannerImage: '',
-          icon: ''
+          description: data.description || '',
+          profileImage: data.profile_image || '',
+          bannerImage: data.banner_image || '',
+          icon: data.icon || '',
+          archived: data.archived || false
         };
       } catch (error) {
         logger.warn('Update team failed online, saving offline:', error);

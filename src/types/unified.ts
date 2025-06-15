@@ -37,6 +37,7 @@ export interface Team {
   coaches?: User[];
   managers?: User[];
   active?: boolean; // Add active status
+  archived?: boolean; // Add archived status
 }
 
 export interface Event {
