@@ -1,4 +1,5 @@
 
+
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
@@ -30,9 +31,11 @@ const LoginPage = () => {
       <div className="w-full max-w-md space-y-8 animate-fade-in">
         <div className="text-center">
           <div className="flex justify-center mb-6">
-            <div className="w-48 h-48 sm:w-60 sm:h-60 rounded-lg gradient-primary shadow-elevation-high flex items-center justify-center">
-              <img src="/shot-tracker-main-logo.png" alt="Club Manager Logo" className="w-32 h-32 sm:w-40 sm:h-40" />
-            </div>
+            <img 
+              src="/shot-tracker-main-logo.png" 
+              alt="Club Manager Logo" 
+              className="w-32 h-32 sm:w-40 sm:h-40 animate-scale-in drop-shadow-lg" 
+            />
           </div>
           
           <p className="text-muted-foreground">Your premier netball club management platform</p>
@@ -92,3 +95,4 @@ const LoginPage = () => {
     </div>;
 };
 export default LoginPage;
+
