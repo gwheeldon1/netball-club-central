@@ -21,10 +21,10 @@ class TeamAPI extends BaseAPI {
           name: team.name,
           ageGroup: team.age_group,
           category: 'Junior' as Team['category'],
-          description: (team as any).description || '',
-          profileImage: (team as any).profile_image || '',
-          bannerImage: (team as any).banner_image || '',
-          icon: (team as any).icon || '',
+          description: team.description || '',
+          profileImage: team.profile_image || '',
+          bannerImage: team.banner_image || '',
+          icon: team.icon || '',
           archived: team.archived || false
         } as Team)) || [];
       },
@@ -49,10 +49,10 @@ class TeamAPI extends BaseAPI {
           name: data.name,
           ageGroup: data.age_group,
           category: 'Junior' as Team['category'],
-          description: (data as any).description || '',
-          profileImage: (data as any).profile_image || '',
-          bannerImage: (data as any).banner_image || '',
-          icon: (data as any).icon || '',
+          description: data.description || '',
+          profileImage: data.profile_image || '',
+          bannerImage: data.banner_image || '',
+          icon: data.icon || '',
           archived: data.archived || false
         } as Team;
       },
