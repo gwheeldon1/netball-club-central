@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
@@ -8,8 +9,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Calendar, User as UserIcon, Award, Edit } from "lucide-react";
+import { Calendar, User as UserIcon, Award, Edit, Camera } from "lucide-react";
 import { toast } from "sonner";
+import { TeamImageManager } from "@/components/TeamImageManager";
 
 const TeamDetailPage = () => {
   const { id } = useParams<{ id: string }>();
@@ -20,6 +22,7 @@ const TeamDetailPage = () => {
   const [coaches, setCoaches] = useState<User[]>([]);
   const [managers, setManagers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showImageManager, setShowImageManager] = useState(false);
   
   useEffect(() => {
     const loadTeamData = async () => {
@@ -63,6 +66,16 @@ const TeamDetailPage = () => {
     
     loadTeamData();
   }, [id, navigate]);
+
+  const handleImagesUpdated = (bannerImage?: string, profileImage?: string) => {
+    if (team) {
+      setTeam({
+        ...team,
+        bannerImage: bannerImage || team.bannerImage,
+        profileImage: profileImage || team.profileImage
+      });
+    }
+  };
 
   if (loading) {
     return (
@@ -122,6 +135,19 @@ const TeamDetailPage = () => {
               </p>
             </div>
           </div>
+
+          {/* Image Management Button */}
+          {(hasRole("admin") || hasRole("coach") || hasRole("manager")) && (
+            <Button
+              variant="outline"
+              size="sm"
+              className="absolute top-4 right-4 bg-background/80 backdrop-blur-sm"
+              onClick={() => setShowImageManager(true)}
+            >
+              <Camera className="mr-2 h-4 w-4" />
+              Manage Images
+            </Button>
+          )}
         </div>
         
         {/* Admin/Coach/Manager actions */}
@@ -266,6 +292,17 @@ const TeamDetailPage = () => {
             </TabsContent>
           </Tabs>
         </div>
+
+        {/* Image Manager Dialog */}
+        <TeamImageManager
+          isOpen={showImageManager}
+          onClose={() => setShowImageManager(false)}
+          teamId={team.id}
+          teamName={team.name}
+          currentBannerImage={team.bannerImage}
+          currentProfileImage={team.profileImage}
+          onImagesUpdated={handleImagesUpdated}
+        />
       </div>
     </Layout>
   );
