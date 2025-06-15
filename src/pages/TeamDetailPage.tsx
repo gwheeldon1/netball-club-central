@@ -4,7 +4,9 @@ import { useParams, Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import Layout from "@/components/Layout";
 import { teamApi } from '@/services/api';
-import { Team, Child, User } from "@/types";
+import { Team } from "@/types/unified";
+import { TeamPlayer, TeamStaff } from "@/services/api/teams/types";
+import { Child, User, UserRole } from "@/types/unified";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -27,6 +29,27 @@ const TeamDetailPage = () => {
   const [showImageManager, setShowImageManager] = useState(false);
   const [updatingArchived, setUpdatingArchived] = useState(false);
   
+  // Helper function to convert TeamPlayer to Child
+  const convertTeamPlayerToChild = (teamPlayer: TeamPlayer): Child => ({
+    id: teamPlayer.id,
+    name: teamPlayer.name,
+    dateOfBirth: teamPlayer.dateOfBirth || '', // Provide default empty string
+    profileImage: teamPlayer.profileImage,
+    ageGroup: teamPlayer.ageGroup,
+    teamId: teamPlayer.teamId,
+    parentId: teamPlayer.parentId,
+    status: teamPlayer.status
+  });
+
+  // Helper function to convert TeamStaff to User
+  const convertTeamStaffToUser = (teamStaff: TeamStaff): User => ({
+    id: teamStaff.id,
+    name: teamStaff.name,
+    email: teamStaff.email,
+    profileImage: teamStaff.profileImage,
+    roles: teamStaff.roles as UserRole[] // Type assertion since we know these are valid roles
+  });
+  
   useEffect(() => {
     const loadTeamData = async () => {
       if (!id) return;
@@ -44,12 +67,12 @@ const TeamDetailPage = () => {
         
         // Get players in this team
         const teamPlayers = await teamApi.getTeamPlayers(id);
-        setPlayers(teamPlayers);
+        setPlayers(teamPlayers.map(convertTeamPlayerToChild));
         
         // Get team staff
         const { coaches: teamCoaches, managers: teamManagers } = await teamApi.getTeamStaff(id);
-        setCoaches(teamCoaches);
-        setManagers(teamManagers);
+        setCoaches(teamCoaches.map(convertTeamStaffToUser));
+        setManagers(teamManagers.map(convertTeamStaffToUser));
       } catch (error) {
         console.error("Error loading team data:", error);
         toast.error("Failed to load team data");
