@@ -1,3 +1,4 @@
+
 // Team API operations
 import { supabase } from '@/integrations/supabase/client';
 import { offlineApi } from '../database';
@@ -20,10 +21,10 @@ class TeamAPI extends BaseAPI {
           name: team.name,
           ageGroup: team.age_group,
           category: 'Junior' as Team['category'],
-          description: team.description || '',
-          profileImage: team.profile_image || '',
-          bannerImage: team.banner_image || '',
-          icon: team.icon || '',
+          description: (team as any).description || '',
+          profileImage: (team as any).profile_image || '',
+          bannerImage: (team as any).banner_image || '',
+          icon: (team as any).icon || '',
           archived: team.archived || false
         } as Team)) || [];
       },
@@ -48,10 +49,10 @@ class TeamAPI extends BaseAPI {
           name: data.name,
           ageGroup: data.age_group,
           category: 'Junior' as Team['category'],
-          description: data.description || '',
-          profileImage: data.profile_image || '',
-          bannerImage: data.banner_image || '',
-          icon: data.icon || '',
+          description: (data as any).description || '',
+          profileImage: (data as any).profile_image || '',
+          bannerImage: (data as any).banner_image || '',
+          icon: (data as any).icon || '',
           archived: data.archived || false
         } as Team;
       },
@@ -68,7 +69,12 @@ class TeamAPI extends BaseAPI {
           .insert({
             name: team.name,
             age_group: team.ageGroup,
-            season_year: new Date().getFullYear()
+            season_year: new Date().getFullYear(),
+            description: team.description,
+            profile_image: team.profileImage,
+            banner_image: team.bannerImage,
+            icon: team.icon,
+            archived: team.archived || false
           })
           .select()
           .single();
@@ -80,10 +86,11 @@ class TeamAPI extends BaseAPI {
           name: data.name,
           ageGroup: data.age_group,
           category: 'Junior' as Team['category'],
-          description: '',
-          profileImage: '',
-          bannerImage: '',
-          icon: ''
+          description: (data as any).description || '',
+          profileImage: (data as any).profile_image || '',
+          bannerImage: (data as any).banner_image || '',
+          icon: (data as any).icon || '',
+          archived: data.archived || false
         };
       } catch (error) {
         logger.warn('Create team failed online, saving offline:', error);
@@ -96,17 +103,19 @@ class TeamAPI extends BaseAPI {
   async updateTeam(id: string, updates: Partial<Omit<Team, 'id'>>): Promise<Team | undefined> {
     if (this.isOnline) {
       try {
+        const updateData: any = {};
+        
+        if (updates.name) updateData.name = updates.name;
+        if (updates.ageGroup) updateData.age_group = updates.ageGroup;
+        if (updates.description !== undefined) updateData.description = updates.description;
+        if (updates.profileImage !== undefined) updateData.profile_image = updates.profileImage;
+        if (updates.bannerImage !== undefined) updateData.banner_image = updates.bannerImage;
+        if (updates.icon !== undefined) updateData.icon = updates.icon;
+        if (updates.archived !== undefined) updateData.archived = updates.archived;
+        
         const { data, error } = await supabase
           .from('teams')
-          .update({
-            name: updates.name,
-            age_group: updates.ageGroup,
-            description: updates.description,
-            profile_image: updates.profileImage,
-            banner_image: updates.bannerImage,
-            icon: updates.icon,
-            archived: updates.archived,
-          })
+          .update(updateData)
           .eq('id', id)
           .select()
           .single();
@@ -118,10 +127,10 @@ class TeamAPI extends BaseAPI {
           name: data.name,
           ageGroup: data.age_group,
           category: 'Junior' as Team['category'],
-          description: data.description || '',
-          profileImage: data.profile_image || '',
-          bannerImage: data.banner_image || '',
-          icon: data.icon || '',
+          description: (data as any).description || '',
+          profileImage: (data as any).profile_image || '',
+          bannerImage: (data as any).banner_image || '',
+          icon: (data as any).icon || '',
           archived: data.archived || false
         };
       } catch (error) {
@@ -165,6 +174,85 @@ class TeamAPI extends BaseAPI {
       return true;
     } catch {
       return false;
+    }
+  }
+
+  async getTeamPlayers(teamId: string) {
+    try {
+      const { data, error } = await supabase
+        .from('player_teams')
+        .select(`
+          player:players (
+            id,
+            first_name,
+            last_name,
+            profile_image,
+            date_of_birth
+          )
+        `)
+        .eq('team_id', teamId);
+      
+      if (error) throw error;
+      
+      return data?.map(pt => ({
+        id: (pt.player as any).id,
+        name: `${(pt.player as any).first_name} ${(pt.player as any).last_name}`,
+        profileImage: (pt.player as any).profile_image,
+        ageGroup: '', // We'll calculate this from date_of_birth if needed
+        dateOfBirth: (pt.player as any).date_of_birth,
+        teamId: teamId,
+        parentId: '',
+        status: 'approved' as const
+      })) || [];
+    } catch (error) {
+      logger.warn('Failed to get team players:', error);
+      return [];
+    }
+  }
+
+  async getTeamStaff(teamId: string) {
+    try {
+      const { data, error } = await supabase
+        .from('user_roles')
+        .select(`
+          role,
+          guardian:guardians (
+            id,
+            first_name,
+            last_name,
+            email,
+            profile_image
+          )
+        `)
+        .eq('team_id', teamId)
+        .eq('is_active', true)
+        .in('role', ['coach', 'manager']);
+      
+      if (error) throw error;
+      
+      const coaches = [];
+      const managers = [];
+      
+      data?.forEach(ur => {
+        const user = {
+          id: (ur.guardian as any).id,
+          name: `${(ur.guardian as any).first_name} ${(ur.guardian as any).last_name}`,
+          email: (ur.guardian as any).email,
+          profileImage: (ur.guardian as any).profile_image,
+          roles: [ur.role]
+        };
+        
+        if (ur.role === 'coach') {
+          coaches.push(user);
+        } else if (ur.role === 'manager') {
+          managers.push(user);
+        }
+      });
+      
+      return { coaches, managers };
+    } catch (error) {
+      logger.warn('Failed to get team staff:', error);
+      return { coaches: [], managers: [] };
     }
   }
 }

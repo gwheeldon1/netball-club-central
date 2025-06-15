@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import Layout from "@/components/Layout";
-import { api } from '@/services/api';
+import { teamApi } from '@/services/api';
 import { Team, Child, User } from "@/types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -33,7 +33,7 @@ const TeamDetailPage = () => {
       
       try {
         // Get team details
-        const teamData = await api.getTeamById(id);
+        const teamData = await teamApi.getTeamById(id);
         if (!teamData) {
           toast.error("Team not found");
           navigate("/teams");
@@ -42,23 +42,14 @@ const TeamDetailPage = () => {
         
         setTeam(teamData);
         
-        // Get players in this team - not yet implemented in unified API
-        const teamPlayers: any[] = [];
+        // Get players in this team
+        const teamPlayers = await teamApi.getTeamPlayers(id);
         setPlayers(teamPlayers);
         
-        // In a real app, we'd have proper team membership records
-        // For now, we'll simulate coaches and managers - not yet implemented in unified API
-        const allUsers: any[] = [];
-        
-        const teamCoaches = allUsers.filter(user => 
-          user.roles.includes('coach')
-        );
-        setCoaches(teamCoaches.slice(0, 2)); // Just take a couple for demo
-        
-        const teamManagers = allUsers.filter(user => 
-          user.roles.includes('manager')
-        );
-        setManagers(teamManagers.slice(0, 1)); // Just take one for demo
+        // Get team staff
+        const { coaches: teamCoaches, managers: teamManagers } = await teamApi.getTeamStaff(id);
+        setCoaches(teamCoaches);
+        setManagers(teamManagers);
       } catch (error) {
         console.error("Error loading team data:", error);
         toast.error("Failed to load team data");
@@ -85,7 +76,7 @@ const TeamDetailPage = () => {
     
     setUpdatingArchived(true);
     try {
-      const updatedTeam = await api.updateTeam(team.id, { archived });
+      const updatedTeam = await teamApi.updateTeam(team.id, { archived });
       if (updatedTeam) {
         setTeam(updatedTeam);
         toast.success(`Team ${archived ? 'archived' : 'unarchived'} successfully`);

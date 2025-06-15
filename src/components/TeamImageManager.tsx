@@ -91,9 +91,9 @@ export const TeamImageManager = ({
       let updateData: any = {};
       
       if (activeTab === 'banner') {
-        updateData.bannerImage = imageToSave;
+        updateData.banner_image = imageToSave;
       } else {
-        updateData.profileImage = imageToSave;
+        updateData.profile_image = imageToSave;
       }
 
       const { error } = await supabase
