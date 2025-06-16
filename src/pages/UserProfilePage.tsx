@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, startTransition } from "react";
 import { useAuth } from "@/context/AuthContext";
 import Layout from "@/components/Layout";
 import { Button } from "@/components/ui/button";
@@ -14,6 +14,7 @@ import { Team } from "@/types";
 import { supabase } from "@/integrations/supabase/client";
 import FileUpload from "@/components/FileUpload";
 import { Link } from "react-router-dom";
+import { useAsyncTransition } from "@/hooks/useAsyncTransition";
 
 const UserProfilePage = () => {
   const { currentUser, user } = useAuth();
@@ -27,17 +28,20 @@ const UserProfilePage = () => {
     phone: "",
     profileImage: "",
   });
+  const { executeWithTransition } = useAsyncTransition();
 
   // Use the user from auth context, with fallback to currentUser for backward compatibility
   const authUser = user || currentUser;
 
   useEffect(() => {
     if (authUser) {
-      setFormData({
-        name: `${authUser.user_metadata?.first_name || ''} ${authUser.user_metadata?.last_name || ''}`.trim() || authUser.email?.split('@')[0] || '',
-        email: authUser.email || "",
-        phone: authUser.user_metadata?.phone || "",
-        profileImage: authUser.user_metadata?.profile_image || "",
+      startTransition(() => {
+        setFormData({
+          name: `${authUser.user_metadata?.first_name || ''} ${authUser.user_metadata?.last_name || ''}`.trim() || authUser.email?.split('@')[0] || '',
+          email: authUser.email || "",
+          phone: authUser.user_metadata?.phone || "",
+          profileImage: authUser.user_metadata?.profile_image || "",
+        });
       });
       
       loadUserRoles();
@@ -51,8 +55,10 @@ const UserProfilePage = () => {
       // TODO: Implement actual role loading from API
       const roles: { role: string; teamId?: string; isActive: boolean }[] = [];
       
-      setUserRoles(roles);
-      setUserTeams([]);
+      startTransition(() => {
+        setUserRoles(roles);
+        setUserTeams([]);
+      });
     } catch (error) {
       console.error("Error loading user roles:", error);
       toast.error("Failed to load user roles");
@@ -60,54 +66,62 @@ const UserProfilePage = () => {
   };
 
   const handleInputChange = (field: string, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    startTransition(() => {
+      setFormData(prev => ({ ...prev, [field]: value }));
+    });
   };
 
   const handleImageUpload = (url: string) => {
-    setFormData(prev => ({ ...prev, profileImage: url }));
+    startTransition(() => {
+      setFormData(prev => ({ ...prev, profileImage: url }));
+    });
   };
 
   const handleSave = async () => {
     if (!authUser) return;
     
-    setLoading(true);
-    try {
-      const [firstName, ...lastNameParts] = formData.name.split(' ');
-      const lastName = lastNameParts.join(' ');
+    executeWithTransition(async () => {
+      setLoading(true);
+      try {
+        const [firstName, ...lastNameParts] = formData.name.split(' ');
+        const lastName = lastNameParts.join(' ');
 
-      const { error } = await supabase
-        .from('profiles')
-        .upsert({
-          user_id: authUser.id,
-          first_name: firstName,
-          last_name: lastName,
-          email: formData.email,
-          phone: formData.phone,
-          profile_image: formData.profileImage,
-        });
+        const { error } = await supabase
+          .from('profiles')
+          .upsert({
+            user_id: authUser.id,
+            first_name: firstName,
+            last_name: lastName,
+            email: formData.email,
+            phone: formData.phone,
+            profile_image: formData.profileImage,
+          });
 
-      if (error) throw error;
+        if (error) throw error;
 
-      toast.success("Profile updated successfully");
-      setIsEditing(false);
-    } catch (error) {
-      console.error("Error updating profile:", error);
-      toast.error("Failed to update profile");
-    } finally {
-      setLoading(false);
-    }
+        toast.success("Profile updated successfully");
+        setIsEditing(false);
+      } catch (error) {
+        console.error("Error updating profile:", error);
+        toast.error("Failed to update profile");
+      } finally {
+        setLoading(false);
+      }
+    });
   };
 
   const handleCancel = () => {
-    if (authUser) {
-      setFormData({
-        name: `${authUser.user_metadata?.first_name || ''} ${authUser.user_metadata?.last_name || ''}`.trim() || authUser.email?.split('@')[0] || '',
-        email: authUser.email || "",
-        phone: authUser.user_metadata?.phone || "",
-        profileImage: authUser.user_metadata?.profile_image || "",
-      });
-    }
-    setIsEditing(false);
+    executeWithTransition(() => {
+      if (authUser) {
+        setFormData({
+          name: `${authUser.user_metadata?.first_name || ''} ${authUser.user_metadata?.last_name || ''}`.trim() || authUser.email?.split('@')[0] || '',
+          email: authUser.email || "",
+          phone: authUser.user_metadata?.phone || "",
+          profileImage: authUser.user_metadata?.profile_image || "",
+        });
+      }
+      setIsEditing(false);
+    });
   };
 
   const getRoleBadgeVariant = (role: string) => {
@@ -158,7 +172,12 @@ const UserProfilePage = () => {
           </div>
           
           {!isEditing ? (
-            <Button size="lg" onClick={() => setIsEditing(true)} className="w-full sm:w-auto" aria-label="Edit profile">
+            <Button 
+              size="lg" 
+              onClick={() => executeWithTransition(() => setIsEditing(true))} 
+              className="w-full sm:w-auto" 
+              aria-label="Edit profile"
+            >
               <Edit className="mr-2 h-5 w-5" />
               Edit Profile
             </Button>

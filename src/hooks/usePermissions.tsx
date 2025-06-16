@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+
+import { useState, useEffect, startTransition } from 'react';
 import { useAuth } from '@/context/AuthContext';
 // Role checking now handled through auth context
 import { logger } from '@/utils/logger';
@@ -24,18 +25,26 @@ export const usePermissions = (): UserPermissions => {
   useEffect(() => {
     const loadUserTeams = async () => {
       if (!currentUser) {
-        setLoading(false);
+        startTransition(() => {
+          setLoading(false);
+        });
         return;
       }
 
       try {
         // Role loading will be handled through auth context for now
-        setUserTeams([]);
+        startTransition(() => {
+          setUserTeams([]);
+        });
       } catch (error) {
         logger.error('Error loading user teams:', error);
-        setUserTeams([]);
+        startTransition(() => {
+          setUserTeams([]);
+        });
       } finally {
-        setLoading(false);
+        startTransition(() => {
+          setLoading(false);
+        });
       }
     };
 

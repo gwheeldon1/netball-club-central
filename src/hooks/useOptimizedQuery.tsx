@@ -1,5 +1,6 @@
+
 import { useQuery, UseQueryOptions } from '@tanstack/react-query';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, startTransition } from 'react';
 import { logger } from '@/utils/logger';
 
 interface OptimizedQueryOptions<T> extends Omit<UseQueryOptions<T>, 'queryKey' | 'queryFn'> {
@@ -25,11 +26,15 @@ export function useOptimizedQuery<T>({
   useEffect(() => {
     if (debounceMs > 0) {
       const timeout = setTimeout(() => {
-        setDebouncedEnabled(options.enabled !== false);
+        startTransition(() => {
+          setDebouncedEnabled(options.enabled !== false);
+        });
       }, debounceMs);
       return () => clearTimeout(timeout);
     } else {
-      setDebouncedEnabled(options.enabled !== false);
+      startTransition(() => {
+        setDebouncedEnabled(options.enabled !== false);
+      });
     }
   }, [options.enabled, debounceMs]);
 

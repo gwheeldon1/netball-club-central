@@ -1,44 +1,37 @@
 
-import { ReactNode, startTransition } from "react";
-import { Navigate } from "react-router-dom";
-import { useAuth } from "@/context/AuthContext";
-import { UserRole } from "@/types/unified";
+import React, { Suspense } from 'react';
+import { useAuth } from '@/context/AuthContext';
+import { Navigate } from 'react-router-dom';
+import { LoadingSkeleton } from '@/components/ui/loading-skeleton';
 
 interface ProtectedRouteProps {
-  children: ReactNode;
-  allowedRoles?: UserRole[];
+  children: React.ReactNode;
+  requireAuth?: boolean;
 }
 
-const ProtectedRoute = ({ 
+const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ 
   children, 
-  allowedRoles 
-}: ProtectedRouteProps) => {
-  const { currentUser, hasRole, loading } = useAuth();
+  requireAuth = true 
+}) => {
+  const { currentUser, loading } = useAuth();
 
-  // Show loading while auth state is being determined
   if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-      </div>
-    );
+    return <LoadingSkeleton />;
   }
 
-  // Check if user is authenticated
-  if (!currentUser) {
+  if (requireAuth && !currentUser) {
     return <Navigate to="/login" replace />;
   }
 
-  // If roles are specified, check if user has the required role
-  if (allowedRoles && allowedRoles.length > 0) {
-    const hasAllowedRole = allowedRoles.some(role => hasRole(role));
-    
-    if (!hasAllowedRole) {
-      return <Navigate to="/unauthorized" replace />;
-    }
+  if (!requireAuth && currentUser) {
+    return <Navigate to="/dashboard" replace />;
   }
 
-  return <>{children}</>;
+  return (
+    <Suspense fallback={<LoadingSkeleton />}>
+      {children}
+    </Suspense>
+  );
 };
 
 export default ProtectedRoute;
