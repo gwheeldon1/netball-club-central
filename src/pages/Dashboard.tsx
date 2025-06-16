@@ -60,7 +60,7 @@ const Dashboard = () => {
   return <Layout>
       <div className="space-y-8 animate-fade-in">
         <div className="text-center space-y-2">
-          <h1 className="text-4xl font-bold text-gradient">Welcome to Club Manager</h1>
+          
         </div>
 
         <Tabs defaultValue="overview" className="w-full">
