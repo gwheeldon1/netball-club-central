@@ -20,10 +20,7 @@ const LazyRoleManagement = lazy(() => import("@/components/RoleManagement").then
 })));
 
 const Dashboard = () => {
-  const {
-    currentUser,
-    hasRole
-  } = useAuth();
+  const { hasRole } = useAuth();
   const navigate = useNavigate();
   const [upcomingEvents, setUpcomingEvents] = useState<Event[]>([]);
   const [playerCount, setPlayerCount] = useState(0);
@@ -42,7 +39,6 @@ const Dashboard = () => {
     const loadDashboardData = async () => {
       try {
         const teamsData = await api.getTeams();
-        // Filter to only show active teams on dashboard
         const activeTeams = teamsData.filter(team => team.active !== false);
         setTeams(activeTeams);
         setTeamCount(activeTeams.length);
@@ -62,21 +58,24 @@ const Dashboard = () => {
   }, []);
 
   if (loading) {
-    return <Layout>
+    return (
+      <Layout>
         <div className="flex items-center justify-center h-64">
           <p className="text-muted-foreground">Loading dashboard...</p>
         </div>
-      </Layout>;
+      </Layout>
+    );
   }
 
-  return <Layout>
+  return (
+    <Layout>
       <div className="space-y-8 animate-fade-in">
-        <div className="text-center space-y-2">
-          
-        </div>
-
         <Tabs defaultValue="overview" className="w-full">
-          
+          <TabsList className="grid w-full grid-cols-2 lg:grid-cols-3">
+            <TabsTrigger value="overview">Overview</TabsTrigger>
+            <TabsTrigger value="analytics">Analytics</TabsTrigger>
+            {hasRole("admin") && <TabsTrigger value="management">Management</TabsTrigger>}
+          </TabsList>
           
           <TabsContent value="overview" className="space-y-8 mt-8">
             <div className="grid gap-8 lg:grid-cols-2">
@@ -94,8 +93,10 @@ const Dashboard = () => {
                   </div>
                 </CardHeader>
                 <CardContent className="px-6">
-                  {upcomingEvents.length > 0 ? <div className="space-y-4">
-                      {upcomingEvents.map(event => <div key={event.id} className="group p-4 rounded-xl border hover:border-primary/30 hover:bg-accent/30 transition-all duration-300 card-hover">
+                  {upcomingEvents.length > 0 ? (
+                    <div className="space-y-4">
+                      {upcomingEvents.map(event => (
+                        <div key={event.id} className="group p-4 rounded-xl border hover:border-primary/30 hover:bg-accent/30 transition-all duration-300 card-hover">
                           <div className="flex items-start gap-4">
                             <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0 shadow-glow">
                               <Calendar className="h-5 w-5 text-primary" />
@@ -112,12 +113,12 @@ const Dashboard = () => {
                                   <Clock className="h-4 w-4 flex-shrink-0" />
                                   <span className="truncate">
                                     {new Date(`${event.date}T${event.time}`).toLocaleString('en-GB', {
-                                weekday: 'short',
-                                month: 'short',
-                                day: 'numeric',
-                                hour: '2-digit',
-                                minute: '2-digit'
-                              })}
+                                      weekday: 'short',
+                                      month: 'short',
+                                      day: 'numeric',
+                                      hour: '2-digit',
+                                      minute: '2-digit'
+                                    })}
                                   </span>
                                 </div>
                                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
@@ -127,19 +128,21 @@ const Dashboard = () => {
                               </div>
                             </div>
                           </div>
-                        </div>)}
-                    </div> : <div className="text-center py-8">
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-8">
                       <Calendar className="h-12 w-12 text-muted-foreground/50 mx-auto mb-4" />
                       <p className="text-muted-foreground text-base font-medium">No upcoming events</p>
                       <p className="text-sm text-muted-foreground/70">Events will appear here when scheduled</p>
-                    </div>}
+                    </div>
+                  )}
                 </CardContent>
               </Card>
 
               {/* Enhanced teams card */}
-              <Card className="glass-card card-hover animate-scale-in" style={{
-              animationDelay: '200ms'
-            }}>
+              <Card className="glass-card card-hover animate-scale-in" style={{ animationDelay: '200ms' }}>
                 <CardHeader className="pb-4 px-6">
                   <div className="flex items-center justify-between">
                     <div>
@@ -152,17 +155,23 @@ const Dashboard = () => {
                   </div>
                 </CardHeader>
                 <CardContent className="px-6">
-                  {teams.length > 0 ? <div className="space-y-3">
-                      {teams.slice(0, 4).map(team => <button 
+                  {teams.length > 0 ? (
+                    <div className="space-y-3">
+                      {teams.slice(0, 4).map(team => (
+                        <button 
                           key={team.id} 
                           onClick={() => handleTeamNavigation(team.id)}
                           className="group w-full text-left p-4 rounded-xl border-2 border-border/50 hover:border-primary/40 hover:bg-accent/30 transition-all duration-300 card-hover shadow-sm hover:shadow-elevation-medium"
                         >
                           <div className="flex items-start gap-4">
                             <div className="w-12 h-12 rounded-xl overflow-hidden flex-shrink-0 bg-gradient-to-br from-primary/20 to-primary/10 border-2 border-primary/20 shadow-glow group-hover:shadow-primary/20">
-                              {team.icon || team.profileImage ? <img src={team.icon || team.profileImage} alt={team.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" /> : <div className="w-full h-full flex items-center justify-center">
+                              {team.icon || team.profileImage ? (
+                                <img src={team.icon || team.profileImage} alt={team.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                              ) : (
+                                <div className="w-full h-full flex items-center justify-center">
                                   <Award className="h-6 w-6 text-primary group-hover:scale-110 transition-transform duration-300" />
-                                </div>}
+                                </div>
+                              )}
                             </div>
                             <div className="flex-1 min-w-0">
                               <div className="flex items-start justify-between gap-2 mb-2">
@@ -180,20 +189,23 @@ const Dashboard = () => {
                               </div>
                             </div>
                           </div>
-                        </button>)}
-                    </div> : <div className="text-center py-8">
+                        </button>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-8">
                       <Users className="h-12 w-12 text-muted-foreground/50 mx-auto mb-4" />
                       <p className="text-muted-foreground text-base font-medium">No active teams</p>
                       <p className="text-sm text-muted-foreground/70">Create or activate teams to get started</p>
-                    </div>}
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             </div>
 
             {/* Enhanced quick actions */}
-            {(hasRole("admin") || hasRole("coach") || hasRole("manager")) && <Card className="glass-card animate-slide-in" style={{
-            animationDelay: '400ms'
-          }}>
+            {(hasRole("admin") || hasRole("coach") || hasRole("manager")) && (
+              <Card className="glass-card animate-slide-in" style={{ animationDelay: '400ms' }}>
                 <CardHeader className="px-6">
                   <CardTitle className="text-xl">Quick Actions</CardTitle>
                   <CardDescription>Common tasks and management</CardDescription>
@@ -224,7 +236,8 @@ const Dashboard = () => {
                       </Link>
                     </Button>
 
-                    {hasRole("admin") && <Button variant="outline" className="h-auto p-4 flex-col items-start gap-2 card-hover" asChild>
+                    {hasRole("admin") && (
+                      <Button variant="outline" className="h-auto p-4 flex-col items-start gap-2 card-hover" asChild>
                         <Link to="/teams/new">
                           <div className="flex items-center gap-3 w-full">
                             <Award className="h-5 w-5 flex-shrink-0" />
@@ -234,15 +247,16 @@ const Dashboard = () => {
                             </div>
                           </div>
                         </Link>
-                      </Button>}
+                      </Button>
+                    )}
                   </div>
                 </CardContent>
-              </Card>}
+              </Card>
+            )}
 
             {/* Enhanced parent dashboard */}
-            {hasRole("parent") && <Card className="glass-card animate-slide-in" style={{
-            animationDelay: '600ms'
-          }}>
+            {hasRole("parent") && (
+              <Card className="glass-card animate-slide-in" style={{ animationDelay: '600ms' }}>
                 <CardHeader className="px-6">
                   <CardTitle className="text-xl">Parent Dashboard</CardTitle>
                   <CardDescription>Manage your children's registrations</CardDescription>
@@ -274,7 +288,8 @@ const Dashboard = () => {
                     </Button>
                   </div>
                 </CardContent>
-              </Card>}
+              </Card>
+            )}
           </TabsContent>
           
           <TabsContent value="analytics" className="mt-8">
@@ -283,14 +298,17 @@ const Dashboard = () => {
             </Suspense>
           </TabsContent>
           
-          {hasRole("admin") && <TabsContent value="management" className="mt-8">
+          {hasRole("admin") && (
+            <TabsContent value="management" className="mt-8">
               <Suspense fallback={<div className="flex items-center justify-center h-64"><p className="text-muted-foreground">Loading management...</p></div>}>
                 <LazyRoleManagement />
               </Suspense>
-            </TabsContent>}
+            </TabsContent>
+          )}
         </Tabs>
       </div>
-    </Layout>;
+    </Layout>
+  );
 };
 
 // Ensure proper default export for lazy loading

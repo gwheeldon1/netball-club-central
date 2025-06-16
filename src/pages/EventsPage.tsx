@@ -4,7 +4,7 @@ import Layout from "@/components/Layout";
 import { Event, Team } from "@/types";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Calendar, Search, Filter, AlertTriangle, Plus, MapPin, Clock, RotateCcw } from "lucide-react";
+import { Calendar, Search, Filter, Plus, MapPin, Clock } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
@@ -20,14 +20,11 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import { api } from '@/services/api';
-import { useIsMobile } from "@/hooks/use-mobile";
 import { logger } from '@/utils/logger';
 
 const EventsPage = () => {
   const { hasRole } = useAuth();
-  const isMobile = useIsMobile();
   const [events, setEvents] = useState<Event[]>([]);
   const [teams, setTeams] = useState<Team[]>([]);
   const [filteredEvents, setFilteredEvents] = useState<Event[]>([]);
@@ -269,10 +266,10 @@ const EventsPage = () => {
           </Collapsible>
         </div>
         
-        {/* Events List - improved for mobile/tablet with varied layouts */}
+        {/* Events List */}
         <div className="space-y-3">
           {filteredEvents.length > 0 ? (
-            filteredEvents.map((event, index) => {
+            filteredEvents.map((event) => {
               const eventStyle = getEventTypeStyle(event.eventType);
               const IconComponent = eventStyle.icon;
               
@@ -280,9 +277,7 @@ const EventsPage = () => {
                 <Link key={event.id} to={`/events/${event.id}`} className="block">
                   <Card className="transition-all duration-200 hover:shadow-md border-border hover:border-primary/20">
                     <CardContent className="p-4">
-                      {/* Mobile/Tablet optimized layout */}
                       <div className="flex flex-col space-y-3 md:flex-row md:items-center md:space-y-0 md:space-x-4">
-                        {/* Left side - Event type and icon */}
                         <div className="flex items-center space-x-3 md:flex-col md:items-center md:space-x-0 md:space-y-2 md:w-20 md:flex-shrink-0">
                           <div className="w-10 h-10 rounded-full flex items-center justify-center bg-primary/10 text-primary">
                             <IconComponent className="h-5 w-5" />
@@ -292,7 +287,6 @@ const EventsPage = () => {
                           </span>
                         </div>
                         
-                        {/* Main content */}
                         <div className="flex-1 space-y-2">
                           <div className="flex flex-col space-y-1 md:flex-row md:items-start md:justify-between md:space-y-0">
                             <div className="space-y-1">
@@ -313,7 +307,6 @@ const EventsPage = () => {
                             </div>
                           </div>
                           
-                          {/* Event details */}
                           <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 text-sm text-muted-foreground">
                             <div className="flex items-center gap-2">
                               <Calendar className="h-4 w-4 flex-shrink-0" />
