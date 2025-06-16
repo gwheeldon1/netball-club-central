@@ -16,7 +16,7 @@ import FileUpload from "@/components/FileUpload";
 import { Link } from "react-router-dom";
 
 const UserProfilePage = () => {
-  const { currentUser } = useAuth();
+  const { currentUser, user } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(false);
   const [userTeams, setUserTeams] = useState<Team[]>([]);
@@ -28,23 +28,26 @@ const UserProfilePage = () => {
     profileImage: "",
   });
 
+  // Use the user from auth context, with fallback to currentUser for backward compatibility
+  const authUser = user || currentUser;
+
   useEffect(() => {
-    if (currentUser) {
+    if (authUser) {
       startTransition(() => {
         setFormData({
-          name: `${currentUser.user_metadata?.first_name || ''} ${currentUser.user_metadata?.last_name || ''}`.trim(),
-          email: currentUser.email || "",
-          phone: currentUser.user_metadata?.phone || "",
-          profileImage: currentUser.user_metadata?.profile_image || "",
+          name: `${authUser.user_metadata?.first_name || ''} ${authUser.user_metadata?.last_name || ''}`.trim() || authUser.email?.split('@')[0] || '',
+          email: authUser.email || "",
+          phone: authUser.user_metadata?.phone || "",
+          profileImage: authUser.user_metadata?.profile_image || "",
         });
       });
       
       loadUserRoles();
     }
-  }, [currentUser]);
+  }, [authUser]);
 
   const loadUserRoles = async () => {
-    if (!currentUser) return;
+    if (!authUser) return;
     
     try {
       // TODO: Implement actual role loading from API
@@ -52,11 +55,6 @@ const UserProfilePage = () => {
       
       startTransition(() => {
         setUserRoles(roles);
-      });
-      
-      const teamIds = [...new Set(roles.filter(r => r.teamId).map(r => r.teamId))];
-      
-      startTransition(() => {
         setUserTeams([]);
       });
     } catch (error) {
@@ -78,7 +76,7 @@ const UserProfilePage = () => {
   };
 
   const handleSave = async () => {
-    if (!currentUser) return;
+    if (!authUser) return;
     
     setLoading(true);
     try {
@@ -94,7 +92,7 @@ const UserProfilePage = () => {
           phone: formData.phone,
           profile_image: formData.profileImage,
         })
-        .eq('id', currentUser.id);
+        .eq('id', authUser.id);
 
       if (error) throw error;
 
@@ -109,13 +107,13 @@ const UserProfilePage = () => {
   };
 
   const handleCancel = () => {
-    if (currentUser) {
+    if (authUser) {
       startTransition(() => {
         setFormData({
-          name: `${currentUser.user_metadata?.first_name || ''} ${currentUser.user_metadata?.last_name || ''}`.trim(),
-          email: currentUser.email || "",
-          phone: currentUser.user_metadata?.phone || "",
-          profileImage: currentUser.user_metadata?.profile_image || "",
+          name: `${authUser.user_metadata?.first_name || ''} ${authUser.user_metadata?.last_name || ''}`.trim() || authUser.email?.split('@')[0] || '',
+          email: authUser.email || "",
+          phone: authUser.user_metadata?.phone || "",
+          profileImage: authUser.user_metadata?.profile_image || "",
         });
       });
     }
@@ -138,13 +136,13 @@ const UserProfilePage = () => {
   };
 
   const getInitials = () => {
-    if (currentUser?.user_metadata?.first_name && currentUser?.user_metadata?.last_name) {
-      return currentUser.user_metadata.first_name[0] + currentUser.user_metadata.last_name[0];
+    if (authUser?.user_metadata?.first_name && authUser?.user_metadata?.last_name) {
+      return authUser.user_metadata.first_name[0] + authUser.user_metadata.last_name[0];
     }
-    return currentUser?.email?.[0]?.toUpperCase() || 'U';
+    return authUser?.email?.[0]?.toUpperCase() || 'U';
   };
 
-  if (!currentUser) {
+  if (!authUser) {
     return (
       <Layout>
         <div className="flex items-center justify-center min-h-[50vh]" role="status" aria-label="Loading profile">
@@ -240,7 +238,7 @@ const UserProfilePage = () => {
                       {formData.name || 'User'}
                     </h3>
                     <p className="text-sm text-muted-foreground">
-                      {currentUser.email}
+                      {authUser.email}
                     </p>
                   </div>
                 )}
