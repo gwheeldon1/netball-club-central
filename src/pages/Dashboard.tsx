@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
 import Layout from "@/components/Layout";
@@ -141,23 +142,34 @@ const Dashboard = () => {
                 </CardHeader>
                 <CardContent className="px-6">
                   {teams.length > 0 ? <div className="space-y-3">
-                      {teams.slice(0, 4).map(team => <div key={team.id} className="flex items-start gap-4 p-4 rounded-xl border hover:border-primary/30 hover:bg-accent/30 transition-all duration-300 card-hover">
-                          <div className="w-12 h-12 rounded-xl overflow-hidden flex-shrink-0 bg-primary/10 border border-border shadow-glow">
-                            {team.icon || team.profileImage ? <img src={team.icon || team.profileImage} alt={team.name} className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center">
-                                <Users className="h-5 w-5 text-primary" />
-                              </div>}
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <h4 className="font-semibold text-base leading-tight truncate mb-1">{team.name}</h4>
-                            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                              <span>{team.ageGroup}</span>
-                              <span>•</span>
-                              <span>{team.category}</span>
-                              <span>•</span>
-                              <span>{team.players?.length || 0} players</span>
+                      {teams.slice(0, 4).map(team => <Link 
+                          key={team.id} 
+                          to={`/teams/${team.id}`}
+                          className="group block p-4 rounded-xl border-2 border-border/50 hover:border-primary/40 hover:bg-accent/30 transition-all duration-300 card-hover shadow-sm hover:shadow-elevation-medium"
+                        >
+                          <div className="flex items-start gap-4">
+                            <div className="w-12 h-12 rounded-xl overflow-hidden flex-shrink-0 bg-gradient-to-br from-primary/20 to-primary/10 border-2 border-primary/20 shadow-glow group-hover:shadow-primary/20">
+                              {team.icon || team.profileImage ? <img src={team.icon || team.profileImage} alt={team.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" /> : <div className="w-full h-full flex items-center justify-center">
+                                  <Award className="h-6 w-6 text-primary group-hover:scale-110 transition-transform duration-300" />
+                                </div>}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-start justify-between gap-2 mb-2">
+                                <h4 className="font-semibold text-base leading-tight truncate group-hover:text-primary transition-colors duration-200">{team.name}</h4>
+                                <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all duration-200 flex-shrink-0" />
+                              </div>
+                              <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
+                                <span className="font-medium">{team.ageGroup}</span>
+                                <span className="w-1 h-1 bg-muted-foreground/50 rounded-full"></span>
+                                <span>{team.category}</span>
+                              </div>
+                              <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                                <Users className="h-3 w-3" />
+                                <span>{team.players?.length || 0} players</span>
+                              </div>
                             </div>
                           </div>
-                        </div>)}
+                        </Link>)}
                     </div> : <div className="text-center py-8">
                       <Users className="h-12 w-12 text-muted-foreground/50 mx-auto mb-4" />
                       <p className="text-muted-foreground text-base font-medium">No active teams</p>
