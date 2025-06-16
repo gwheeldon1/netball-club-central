@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, startTransition } from "react";
 import Layout from "@/components/Layout";
 import { Event, Team } from "@/types";
 import { Card, CardContent } from "@/components/ui/card";
@@ -46,13 +46,17 @@ const EventsPage = () => {
         const eventsData = await api.getEvents();
         const teamsData = await api.getTeams();
         
-        setEvents(eventsData);
-        setFilteredEvents(eventsData);
-        setTeams(teamsData);
+        startTransition(() => {
+          setEvents(eventsData);
+          setFilteredEvents(eventsData);
+          setTeams(teamsData);
+          setLoading(false);
+        });
       } catch (error) {
         logger.error("Error loading events data:", error);
-      } finally {
-        setLoading(false);
+        startTransition(() => {
+          setLoading(false);
+        });
       }
     };
     
@@ -82,7 +86,9 @@ const EventsPage = () => {
       filtered = filtered.filter(event => event.eventType === typeFilter);
     }
     
-    setFilteredEvents(filtered);
+    startTransition(() => {
+      setFilteredEvents(filtered);
+    });
   }, [searchTerm, teamFilter, typeFilter, events]);
   
   // Get event team name
@@ -121,6 +127,32 @@ const EventsPage = () => {
           icon: Calendar
         };
     }
+  };
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    startTransition(() => {
+      setSearchTerm(e.target.value);
+    });
+  };
+
+  const handleTeamFilterChange = (value: string) => {
+    startTransition(() => {
+      setTeamFilter(value);
+    });
+  };
+
+  const handleTypeFilterChange = (value: string) => {
+    startTransition(() => {
+      setTypeFilter(value);
+    });
+  };
+
+  const handleClearFilters = () => {
+    startTransition(() => {
+      setSearchTerm("");
+      setTeamFilter("all");
+      setTypeFilter("all");
+    });
   };
 
   if (loading) {
@@ -168,7 +200,7 @@ const EventsPage = () => {
               placeholder="Search events or locations..."
               className="pl-10"
               value={searchTerm}
-              onChange={e => setSearchTerm(e.target.value)}
+              onChange={handleSearchChange}
             />
           </div>
           
@@ -191,7 +223,7 @@ const EventsPage = () => {
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="space-y-2">
                   <label className="text-sm font-medium">Team</label>
-                  <Select value={teamFilter} onValueChange={setTeamFilter}>
+                  <Select value={teamFilter} onValueChange={handleTeamFilterChange}>
                     <SelectTrigger>
                       <SelectValue placeholder="All teams" />
                     </SelectTrigger>
@@ -208,7 +240,7 @@ const EventsPage = () => {
                 
                 <div className="space-y-2">
                   <label className="text-sm font-medium">Type</label>
-                  <Select value={typeFilter} onValueChange={setTypeFilter}>
+                  <Select value={typeFilter} onValueChange={handleTypeFilterChange}>
                     <SelectTrigger>
                       <SelectValue placeholder="All types" />
                     </SelectTrigger>
@@ -227,11 +259,7 @@ const EventsPage = () => {
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => {
-                      setSearchTerm("");
-                      setTeamFilter("all");
-                      setTypeFilter("all");
-                    }}
+                    onClick={handleClearFilters}
                   >
                     Clear Filters
                   </Button>
@@ -322,11 +350,7 @@ const EventsPage = () => {
                   <Button 
                     variant="outline" 
                     size="sm"
-                    onClick={() => {
-                      setSearchTerm("");
-                      setTeamFilter("all");
-                      setTypeFilter("all");
-                    }}
+                    onClick={handleClearFilters}
                   >
                     Clear all filters
                   </Button>
