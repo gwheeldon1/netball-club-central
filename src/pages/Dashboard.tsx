@@ -1,11 +1,11 @@
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, startTransition } from "react";
 import { useAuth } from "@/context/AuthContext";
 import Layout from "@/components/Layout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Calendar, Award, Users, User, MapPin, Clock, ChevronRight, Plus } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { api } from '@/services/api';
 import { Team, Event } from "@/types";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -18,17 +18,26 @@ const LazyAnalyticsDashboard = lazy(() => import("@/components/analytics/Analyti
 const LazyRoleManagement = lazy(() => import("@/components/RoleManagement").then(module => ({
   default: module.RoleManagement
 })));
+
 const Dashboard = () => {
   const {
     currentUser,
     hasRole
   } = useAuth();
+  const navigate = useNavigate();
   const [upcomingEvents, setUpcomingEvents] = useState<Event[]>([]);
   const [playerCount, setPlayerCount] = useState(0);
   const [pendingApprovals, setPendingApprovals] = useState(0);
   const [teamCount, setTeamCount] = useState(0);
   const [teams, setTeams] = useState<Team[]>([]);
   const [loading, setLoading] = useState(true);
+
+  const handleTeamNavigation = (teamId: string) => {
+    startTransition(() => {
+      navigate(`/teams/${teamId}`);
+    });
+  };
+
   useEffect(() => {
     const loadDashboardData = async () => {
       try {
@@ -51,6 +60,7 @@ const Dashboard = () => {
     };
     loadDashboardData();
   }, []);
+
   if (loading) {
     return <Layout>
         <div className="flex items-center justify-center h-64">
@@ -58,6 +68,7 @@ const Dashboard = () => {
         </div>
       </Layout>;
   }
+
   return <Layout>
       <div className="space-y-8 animate-fade-in">
         <div className="text-center space-y-2">
@@ -142,10 +153,10 @@ const Dashboard = () => {
                 </CardHeader>
                 <CardContent className="px-6">
                   {teams.length > 0 ? <div className="space-y-3">
-                      {teams.slice(0, 4).map(team => <Link 
+                      {teams.slice(0, 4).map(team => <button 
                           key={team.id} 
-                          to={`/teams/${team.id}`}
-                          className="group block p-4 rounded-xl border-2 border-border/50 hover:border-primary/40 hover:bg-accent/30 transition-all duration-300 card-hover shadow-sm hover:shadow-elevation-medium"
+                          onClick={() => handleTeamNavigation(team.id)}
+                          className="group w-full text-left p-4 rounded-xl border-2 border-border/50 hover:border-primary/40 hover:bg-accent/30 transition-all duration-300 card-hover shadow-sm hover:shadow-elevation-medium"
                         >
                           <div className="flex items-start gap-4">
                             <div className="w-12 h-12 rounded-xl overflow-hidden flex-shrink-0 bg-gradient-to-br from-primary/20 to-primary/10 border-2 border-primary/20 shadow-glow group-hover:shadow-primary/20">
@@ -169,7 +180,7 @@ const Dashboard = () => {
                               </div>
                             </div>
                           </div>
-                        </Link>)}
+                        </button>)}
                     </div> : <div className="text-center py-8">
                       <Users className="h-12 w-12 text-muted-foreground/50 mx-auto mb-4" />
                       <p className="text-muted-foreground text-base font-medium">No active teams</p>
