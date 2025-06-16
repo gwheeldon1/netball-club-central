@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
 import Layout from "@/components/Layout";
@@ -8,12 +7,13 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Edit, Save, X, Users, Shield, User, Mail, Phone, Camera } from "lucide-react";
+import { Edit, Save, X, Users, Shield, User, Mail, Phone, Camera, ChevronRight } from "lucide-react";
 import { toast } from "sonner";
 import { User as UserType, Team } from "@/types";
 import { api } from '@/services/unifiedApi';
 import { supabase } from "@/integrations/supabase/client";
 import FileUpload from "@/components/FileUpload";
+import { Link } from "react-router-dom";
 
 const UserProfilePage = () => {
   const { currentUser } = useAuth();
