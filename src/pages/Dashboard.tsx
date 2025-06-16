@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
 import Layout from "@/components/Layout";
@@ -12,9 +11,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Suspense, lazy } from "react";
 
 // Lazy load heavy components to avoid circular dependencies
-const LazyAnalyticsDashboard = lazy(() => import("@/components/analytics/AnalyticsDashboard").then(module => ({ default: module.AnalyticsDashboard })));
-const LazyRoleManagement = lazy(() => import("@/components/RoleManagement").then(module => ({ default: module.RoleManagement })));
-
+const LazyAnalyticsDashboard = lazy(() => import("@/components/analytics/AnalyticsDashboard").then(module => ({
+  default: module.AnalyticsDashboard
+})));
+const LazyRoleManagement = lazy(() => import("@/components/RoleManagement").then(module => ({
+  default: module.RoleManagement
+})));
 const Dashboard = () => {
   const {
     currentUser,
@@ -26,7 +28,6 @@ const Dashboard = () => {
   const [teamCount, setTeamCount] = useState(0);
   const [teams, setTeams] = useState<Team[]>([]);
   const [loading, setLoading] = useState(true);
-
   useEffect(() => {
     const loadDashboardData = async () => {
       try {
@@ -49,7 +50,6 @@ const Dashboard = () => {
     };
     loadDashboardData();
   }, []);
-
   if (loading) {
     return <Layout>
         <div className="flex items-center justify-center h-64">
@@ -57,7 +57,6 @@ const Dashboard = () => {
         </div>
       </Layout>;
   }
-
   return <Layout>
       <div className="space-y-8 animate-fade-in">
         <div className="text-center space-y-2">
@@ -65,11 +64,7 @@ const Dashboard = () => {
         </div>
 
         <Tabs defaultValue="overview" className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="analytics">Analytics</TabsTrigger>
-            {hasRole("admin") && <TabsTrigger value="management">Management</TabsTrigger>}
-          </TabsList>
+          
           
           <TabsContent value="overview" className="space-y-8 mt-8">
             <div className="grid gap-8 lg:grid-cols-2">
