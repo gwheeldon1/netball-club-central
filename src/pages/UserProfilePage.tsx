@@ -1,4 +1,5 @@
-import { useState, useEffect } from "react";
+
+import { useState, useEffect, startTransition } from "react";
 import { useAuth } from "@/context/AuthContext";
 import Layout from "@/components/Layout";
 import { Button } from "@/components/ui/button";
@@ -30,11 +31,13 @@ const UserProfilePage = () => {
 
   useEffect(() => {
     if (currentUser) {
-      setFormData({
-        name: currentUser.user_metadata?.first_name || "",
-        email: currentUser.email || "",
-        phone: currentUser.user_metadata?.phone || "",
-        profileImage: "",
+      startTransition(() => {
+        setFormData({
+          name: `${currentUser.user_metadata?.first_name || ''} ${currentUser.user_metadata?.last_name || ''}`.trim(),
+          email: currentUser.email || "",
+          phone: currentUser.user_metadata?.phone || "",
+          profileImage: currentUser.user_metadata?.profile_image || "",
+        });
       });
       
       loadUserRoles();
@@ -45,22 +48,34 @@ const UserProfilePage = () => {
     if (!currentUser) return;
     
     try {
-      const roles: any[] = [];
-      setUserRoles(roles);
+      // TODO: Implement actual role loading from API
+      const roles: { role: string; teamId?: string; isActive: boolean }[] = [];
+      
+      startTransition(() => {
+        setUserRoles(roles);
+      });
       
       const teamIds = [...new Set(roles.filter(r => r.teamId).map(r => r.teamId))];
-      setUserTeams([]);
+      
+      startTransition(() => {
+        setUserTeams([]);
+      });
     } catch (error) {
       console.error("Error loading user roles:", error);
+      toast.error("Failed to load user roles");
     }
   };
 
   const handleInputChange = (field: string, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    startTransition(() => {
+      setFormData(prev => ({ ...prev, [field]: value }));
+    });
   };
 
   const handleImageUpload = (url: string) => {
-    setFormData(prev => ({ ...prev, profileImage: url }));
+    startTransition(() => {
+      setFormData(prev => ({ ...prev, profileImage: url }));
+    });
   };
 
   const handleSave = async () => {
@@ -96,11 +111,13 @@ const UserProfilePage = () => {
 
   const handleCancel = () => {
     if (currentUser) {
-      setFormData({
-        name: currentUser.user_metadata?.first_name || "",
-        email: currentUser.email || "",
-        phone: currentUser.user_metadata?.phone || "",
-        profileImage: "",
+      startTransition(() => {
+        setFormData({
+          name: `${currentUser.user_metadata?.first_name || ''} ${currentUser.user_metadata?.last_name || ''}`.trim(),
+          email: currentUser.email || "",
+          phone: currentUser.user_metadata?.phone || "",
+          profileImage: currentUser.user_metadata?.profile_image || "",
+        });
       });
     }
     setIsEditing(false);
@@ -109,22 +126,29 @@ const UserProfilePage = () => {
   const getRoleBadgeVariant = (role: string) => {
     switch (role) {
       case 'admin':
-        return "destructive";
+        return "destructive" as const;
       case 'coach':
-        return "default";
+        return "default" as const;
       case 'manager':
-        return "secondary";
+        return "secondary" as const;
       case 'parent':
-        return "outline";
+        return "outline" as const;
       default:
-        return "secondary";
+        return "secondary" as const;
     }
+  };
+
+  const getInitials = () => {
+    if (currentUser?.user_metadata?.first_name && currentUser?.user_metadata?.last_name) {
+      return currentUser.user_metadata.first_name[0] + currentUser.user_metadata.last_name[0];
+    }
+    return currentUser?.email?.[0]?.toUpperCase() || 'U';
   };
 
   if (!currentUser) {
     return (
       <Layout>
-        <div className="flex items-center justify-center min-h-[50vh]">
+        <div className="flex items-center justify-center min-h-[50vh]" role="status" aria-label="Loading profile">
           <div className="animate-pulse flex flex-col items-center space-y-4">
             <div className="h-12 w-12 bg-muted rounded-full"></div>
             <div className="h-4 w-32 bg-muted rounded"></div>
@@ -137,7 +161,7 @@ const UserProfilePage = () => {
   return (
     <Layout>
       <div className="space-y-8 max-w-4xl mx-auto">
-        {/* Header Section following design system pattern */}
+        {/* Header Section */}
         <div className="flex flex-col space-y-4 sm:flex-row sm:items-start sm:justify-between sm:space-y-0">
           <div className="space-y-2">
             <h1 className="text-3xl md:text-4xl font-bold tracking-tight">My Profile</h1>
@@ -147,7 +171,7 @@ const UserProfilePage = () => {
           </div>
           
           {!isEditing ? (
-            <Button size="lg" onClick={() => setIsEditing(true)} className="w-full sm:w-auto">
+            <Button size="lg" onClick={() => setIsEditing(true)} className="w-full sm:w-auto" aria-label="Edit profile">
               <Edit className="mr-2 h-5 w-5" />
               Edit Profile
             </Button>
@@ -158,6 +182,7 @@ const UserProfilePage = () => {
                 onClick={handleSave} 
                 disabled={loading}
                 className="w-full sm:w-auto"
+                aria-label="Save profile changes"
               >
                 <Save className="mr-2 h-5 w-5" />
                 {loading ? "Saving..." : "Save Changes"}
@@ -168,6 +193,7 @@ const UserProfilePage = () => {
                 onClick={handleCancel} 
                 disabled={loading}
                 className="w-full sm:w-auto"
+                aria-label="Cancel profile editing"
               >
                 <X className="mr-2 h-5 w-5" />
                 Cancel
@@ -177,7 +203,7 @@ const UserProfilePage = () => {
         </div>
 
         <div className="grid gap-8 lg:grid-cols-3">
-          {/* Profile Overview Card - Left Column */}
+          {/* Profile Overview Card */}
           <Card className="border-0 shadow-lg lg:col-span-1">
             <CardHeader className="pb-6">
               <CardTitle className="text-xl flex items-center gap-2">
@@ -202,9 +228,9 @@ const UserProfilePage = () => {
                   </div>
                 ) : (
                   <Avatar className="w-24 h-24 border-4 border-background shadow-lg">
-                    <AvatarImage src={formData.profileImage} alt="Profile" />
+                    <AvatarImage src={formData.profileImage} alt={`${formData.name || 'User'} profile picture`} />
                     <AvatarFallback className="text-xl font-semibold bg-primary/10 text-primary">
-                      {(currentUser.user_metadata?.first_name?.[0] || '') + (currentUser.user_metadata?.last_name?.[0] || '') || currentUser.email?.[0]?.toUpperCase() || 'U'}
+                      {getInitials()}
                     </AvatarFallback>
                   </Avatar>
                 )}
@@ -241,7 +267,7 @@ const UserProfilePage = () => {
             </CardContent>
           </Card>
 
-          {/* Personal Information Card - Right Column */}
+          {/* Personal Information Card */}
           <Card className="border-0 shadow-lg lg:col-span-2">
             <CardHeader className="pb-6">
               <CardTitle className="text-xl">Personal Information</CardTitle>
@@ -263,6 +289,7 @@ const UserProfilePage = () => {
                       onChange={(e) => handleInputChange('name', e.target.value)}
                       placeholder="Enter your full name"
                       className="h-12"
+                      aria-describedby="name-description"
                     />
                   ) : (
                     <div className="flex items-center gap-3 p-4 rounded-lg bg-accent/30 border border-border">
@@ -285,6 +312,7 @@ const UserProfilePage = () => {
                       onChange={(e) => handleInputChange('email', e.target.value)}
                       placeholder="Enter your email"
                       className="h-12"
+                      aria-describedby="email-description"
                     />
                   ) : (
                     <div className="flex items-center gap-3 p-4 rounded-lg bg-accent/30 border border-border">
@@ -307,6 +335,7 @@ const UserProfilePage = () => {
                       onChange={(e) => handleInputChange('phone', e.target.value)}
                       placeholder="Enter your phone number"
                       className="h-12"
+                      aria-describedby="phone-description"
                     />
                   ) : (
                     <div className="flex items-center gap-3 p-4 rounded-lg bg-accent/30 border border-border">
@@ -319,7 +348,7 @@ const UserProfilePage = () => {
             </CardContent>
           </Card>
 
-          {/* Roles & Teams Card - Full Width */}
+          {/* Roles & Teams Card */}
           <Card className="border-0 shadow-lg lg:col-span-3">
             <CardHeader className="pb-6">
               <div className="flex items-center justify-between">
@@ -332,7 +361,11 @@ const UserProfilePage = () => {
                     Your current roles and team memberships across the organization
                   </CardDescription>
                 </div>
-                <Link to="/teams" className="flex items-center gap-1 text-sm text-primary hover:text-primary/80 font-medium">
+                <Link 
+                  to="/teams" 
+                  className="flex items-center gap-1 text-sm text-primary hover:text-primary/80 font-medium transition-colors"
+                  aria-label="View all teams"
+                >
                   View teams <ChevronRight className="h-4 w-4" />
                 </Link>
               </div>
