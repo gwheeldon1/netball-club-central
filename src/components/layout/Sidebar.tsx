@@ -23,11 +23,31 @@ interface SidebarProps {
 }
 
 export const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
-  const { currentUser, logout, hasRole } = useAuth();
+  const { currentUser, logout, hasRole, userProfile, userRoles } = useAuth();
 
   const handleLogout = () => {
     logout();
     toast.success("Logged out successfully");
+  };
+
+  // Get the primary role to display (prioritize admin, then coach, manager, parent)
+  const getPrimaryRole = () => {
+    if (userRoles.includes('admin')) return 'Admin';
+    if (userRoles.includes('coach')) return 'Coach';
+    if (userRoles.includes('manager')) return 'Manager';
+    if (userRoles.includes('parent')) return 'Parent';
+    return 'Member';
+  };
+
+  // Get display name from profile or fallback to email
+  const getDisplayName = () => {
+    if (userProfile?.firstName && userProfile?.lastName) {
+      return `${userProfile.firstName} ${userProfile.lastName}`;
+    }
+    if (currentUser?.email) {
+      return currentUser.email.split('@')[0]; // Use part before @ as fallback
+    }
+    return 'User';
   };
 
   return (
@@ -70,8 +90,8 @@ export const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
                 <User className="h-5 w-5 text-primary" />
               </div>
               <div className="flex flex-col min-w-0">
-                <span className="font-medium text-sm truncate">{currentUser.email}</span>
-                <span className="text-xs text-muted-foreground">Club Member</span>
+                <span className="font-medium text-sm truncate">{getDisplayName()}</span>
+                <span className="text-xs text-muted-foreground">{getPrimaryRole()}</span>
               </div>
             </Link>
           </div>
