@@ -84,15 +84,15 @@ const UserProfilePage = () => {
       const lastName = lastNameParts.join(' ');
 
       const { error } = await supabase
-        .from('guardians')
-        .update({
+        .from('profiles')
+        .upsert({
+          user_id: authUser.id,
           first_name: firstName,
           last_name: lastName,
           email: formData.email,
           phone: formData.phone,
           profile_image: formData.profileImage,
-        })
-        .eq('id', authUser.id);
+        });
 
       if (error) throw error;
 
@@ -212,16 +212,19 @@ const UserProfilePage = () => {
               {/* Profile Image */}
               <div className="flex flex-col items-center space-y-4">
                 {isEditing ? (
-                  <div className="relative">
+                  <div className="space-y-4 w-full max-w-sm">
                     <FileUpload
                       currentImage={formData.profileImage}
                       onUpload={handleImageUpload}
                       aspectRatio={1}
-                      bucket="avatars"
+                      bucket="profile-images"
+                      accept="image/*"
+                      maxSize={5}
+                      className="w-full"
                     />
-                    <div className="absolute -bottom-2 -right-2 w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center shadow-md">
-                      <Camera className="h-4 w-4" />
-                    </div>
+                    <p className="text-xs text-muted-foreground text-center">
+                      Upload a profile picture (max 5MB)
+                    </p>
                   </div>
                 ) : (
                   <Avatar className="w-24 h-24 border-4 border-background shadow-lg">
