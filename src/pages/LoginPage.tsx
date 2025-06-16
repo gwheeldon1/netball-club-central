@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
@@ -10,7 +9,6 @@ import { Award, LockIcon, MailIcon } from "lucide-react";
 import { toast } from "sonner";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { ForgotPasswordDialog } from "@/components/ForgotPasswordDialog";
-
 const LoginPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -32,19 +30,14 @@ const LoginPage = () => {
         <div className="text-center">
           <div className="flex justify-center mb-6">
             <div className="w-32 h-32 sm:w-40 sm:h-40 flex items-center justify-center">
-              <img 
-                src="/shot-tracker-main-logo.png" 
-                alt="Club Manager Logo" 
-                className="w-full h-full object-contain animate-scale-in"
-                style={{
-                  filter: 'drop-shadow(0 0 0 transparent)',
-                  mixBlendMode: 'multiply'
-                }}
-              />
+              <img src="/shot-tracker-main-logo.png" alt="Club Manager Logo" className="w-full h-full object-contain animate-scale-in" style={{
+              filter: 'drop-shadow(0 0 0 transparent)',
+              mixBlendMode: 'multiply'
+            }} />
             </div>
           </div>
           
-          <p className="text-muted-foreground">Your premier netball club management platform</p>
+          <p className="text-muted-foreground">Your premier club management platform</p>
         </div>
 
         <Card className="glass-card shadow-elevation-high animate-scale-in" style={{
