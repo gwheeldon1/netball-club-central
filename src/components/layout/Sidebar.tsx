@@ -39,13 +39,16 @@ export const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
     return 'Member';
   };
 
-  // Get display name from profile or fallback to email
+  // Get display name from profile or fallback to email, properly capitalized
   const getDisplayName = () => {
     if (userProfile?.firstName && userProfile?.lastName) {
-      return `${userProfile.firstName} ${userProfile.lastName}`;
+      const firstName = userProfile.firstName.charAt(0).toUpperCase() + userProfile.firstName.slice(1).toLowerCase();
+      const lastName = userProfile.lastName.charAt(0).toUpperCase() + userProfile.lastName.slice(1).toLowerCase();
+      return `${firstName} ${lastName}`;
     }
     if (currentUser?.email) {
-      return currentUser.email.split('@')[0]; // Use part before @ as fallback
+      const emailName = currentUser.email.split('@')[0];
+      return emailName.charAt(0).toUpperCase() + emailName.slice(1).toLowerCase();
     }
     return 'User';
   };
@@ -90,7 +93,9 @@ export const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
                 <User className="h-5 w-5 text-primary" />
               </div>
               <div className="flex flex-col min-w-0">
-                <span className="font-medium text-sm truncate">{getDisplayName()}</span>
+                <span className="font-medium text-sm truncate hover:text-primary transition-colors cursor-pointer">
+                  {getDisplayName()}
+                </span>
                 <span className="text-xs text-muted-foreground">{getPrimaryRole()}</span>
               </div>
             </Link>
