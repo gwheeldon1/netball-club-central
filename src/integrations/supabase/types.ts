@@ -345,6 +345,7 @@ export type Database = {
           approved_at: string | null
           approved_by: string | null
           code_of_conduct_accepted: boolean | null
+          created_at: string | null
           dietary_requirements: string | null
           email: string | null
           emergency_contact_name: string | null
@@ -352,6 +353,7 @@ export type Database = {
           emergency_contact_relationship: string | null
           first_name: string
           id: string
+          is_payment_contact: boolean | null
           last_name: string
           medical_conditions: string | null
           medications: string | null
@@ -363,6 +365,7 @@ export type Database = {
           rejection_reason: string | null
           relationship: string | null
           terms_accepted: boolean | null
+          updated_at: string | null
         }
         Insert: {
           additional_notes?: string | null
@@ -371,6 +374,7 @@ export type Database = {
           approved_at?: string | null
           approved_by?: string | null
           code_of_conduct_accepted?: boolean | null
+          created_at?: string | null
           dietary_requirements?: string | null
           email?: string | null
           emergency_contact_name?: string | null
@@ -378,6 +382,7 @@ export type Database = {
           emergency_contact_relationship?: string | null
           first_name: string
           id?: string
+          is_payment_contact?: boolean | null
           last_name: string
           medical_conditions?: string | null
           medications?: string | null
@@ -389,6 +394,7 @@ export type Database = {
           rejection_reason?: string | null
           relationship?: string | null
           terms_accepted?: boolean | null
+          updated_at?: string | null
         }
         Update: {
           additional_notes?: string | null
@@ -397,6 +403,7 @@ export type Database = {
           approved_at?: string | null
           approved_by?: string | null
           code_of_conduct_accepted?: boolean | null
+          created_at?: string | null
           dietary_requirements?: string | null
           email?: string | null
           emergency_contact_name?: string | null
@@ -404,6 +411,7 @@ export type Database = {
           emergency_contact_relationship?: string | null
           first_name?: string
           id?: string
+          is_payment_contact?: boolean | null
           last_name?: string
           medical_conditions?: string | null
           medications?: string | null
@@ -415,6 +423,7 @@ export type Database = {
           rejection_reason?: string | null
           relationship?: string | null
           terms_accepted?: boolean | null
+          updated_at?: string | null
         }
         Relationships: [
           {
@@ -701,6 +710,36 @@ export type Database = {
           },
         ]
       }
+      player_guardians: {
+        Row: {
+          guardian_id: string
+          player_id: string
+        }
+        Insert: {
+          guardian_id: string
+          player_id: string
+        }
+        Update: {
+          guardian_id?: string
+          player_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "player_guardians_guardian_id_fkey"
+            columns: ["guardian_id"]
+            isOneToOne: false
+            referencedRelation: "guardians"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "player_guardians_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       player_teams: {
         Row: {
           id: string
@@ -761,6 +800,7 @@ export type Database = {
           approved_by: string | null
           city: string | null
           code_of_conduct_accepted: boolean | null
+          created_at: string | null
           data_processing_consent: boolean | null
           date_of_birth: string | null
           dietary_requirements: string | null
@@ -774,6 +814,7 @@ export type Database = {
           last_name: string
           medical_conditions: string | null
           medications: string | null
+          payment_contact_id: string | null
           phone: string | null
           photo_consent: boolean | null
           postal_code: string | null
@@ -782,6 +823,7 @@ export type Database = {
           sign_up_date: string | null
           team_preference: string | null
           terms_accepted: boolean | null
+          updated_at: string | null
         }
         Insert: {
           additional_medical_notes?: string | null
@@ -792,6 +834,7 @@ export type Database = {
           approved_by?: string | null
           city?: string | null
           code_of_conduct_accepted?: boolean | null
+          created_at?: string | null
           data_processing_consent?: boolean | null
           date_of_birth?: string | null
           dietary_requirements?: string | null
@@ -805,6 +848,7 @@ export type Database = {
           last_name: string
           medical_conditions?: string | null
           medications?: string | null
+          payment_contact_id?: string | null
           phone?: string | null
           photo_consent?: boolean | null
           postal_code?: string | null
@@ -813,6 +857,7 @@ export type Database = {
           sign_up_date?: string | null
           team_preference?: string | null
           terms_accepted?: boolean | null
+          updated_at?: string | null
         }
         Update: {
           additional_medical_notes?: string | null
@@ -823,6 +868,7 @@ export type Database = {
           approved_by?: string | null
           city?: string | null
           code_of_conduct_accepted?: boolean | null
+          created_at?: string | null
           data_processing_consent?: boolean | null
           date_of_birth?: string | null
           dietary_requirements?: string | null
@@ -836,6 +882,7 @@ export type Database = {
           last_name?: string
           medical_conditions?: string | null
           medications?: string | null
+          payment_contact_id?: string | null
           phone?: string | null
           photo_consent?: boolean | null
           postal_code?: string | null
@@ -844,11 +891,19 @@ export type Database = {
           sign_up_date?: string | null
           team_preference?: string | null
           terms_accepted?: boolean | null
+          updated_at?: string | null
         }
         Relationships: [
           {
             foreignKeyName: "players_approved_by_fkey"
             columns: ["approved_by"]
+            isOneToOne: false
+            referencedRelation: "guardians"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "players_payment_contact_id_fkey"
+            columns: ["payment_contact_id"]
             isOneToOne: false
             referencedRelation: "guardians"
             referencedColumns: ["id"]
@@ -1105,23 +1160,32 @@ export type Database = {
         Row: {
           age_group: string
           archived: boolean
+          created_at: string | null
+          description: string | null
           id: string
           name: string
           season_year: number | null
+          updated_at: string | null
         }
         Insert: {
           age_group: string
           archived?: boolean
+          created_at?: string | null
+          description?: string | null
           id?: string
           name: string
           season_year?: number | null
+          updated_at?: string | null
         }
         Update: {
           age_group?: string
           archived?: boolean
+          created_at?: string | null
+          description?: string | null
           id?: string
           name?: string
           season_year?: number | null
+          updated_at?: string | null
         }
         Relationships: []
       }
@@ -1254,6 +1318,7 @@ export type Database = {
     }
     Enums: {
       user_role: "parent" | "coach" | "manager" | "admin"
+      user_role_enum: "Admin" | "Coach" | "Manager" | "Member" | "Guardian"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1370,6 +1435,7 @@ export const Constants = {
   public: {
     Enums: {
       user_role: ["parent", "coach", "manager", "admin"],
+      user_role_enum: ["Admin", "Coach", "Manager", "Member", "Guardian"],
     },
   },
 } as const

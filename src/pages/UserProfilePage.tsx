@@ -1,5 +1,5 @@
 
-import { useState, useEffect, startTransition } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
 import Layout from "@/components/Layout";
 import { Button } from "@/components/ui/button";
@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Edit, Save, X, Users, Shield, User, Mail, Phone, Camera, ChevronRight } from "lucide-react";
+import { Edit, Save, X, Users, Shield, User, Mail, Phone, ChevronRight } from "lucide-react";
 import { toast } from "sonner";
 import { Team } from "@/types";
 import { supabase } from "@/integrations/supabase/client";
@@ -33,13 +33,11 @@ const UserProfilePage = () => {
 
   useEffect(() => {
     if (authUser) {
-      startTransition(() => {
-        setFormData({
-          name: `${authUser.user_metadata?.first_name || ''} ${authUser.user_metadata?.last_name || ''}`.trim() || authUser.email?.split('@')[0] || '',
-          email: authUser.email || "",
-          phone: authUser.user_metadata?.phone || "",
-          profileImage: authUser.user_metadata?.profile_image || "",
-        });
+      setFormData({
+        name: `${authUser.user_metadata?.first_name || ''} ${authUser.user_metadata?.last_name || ''}`.trim() || authUser.email?.split('@')[0] || '',
+        email: authUser.email || "",
+        phone: authUser.user_metadata?.phone || "",
+        profileImage: authUser.user_metadata?.profile_image || "",
       });
       
       loadUserRoles();
@@ -53,10 +51,8 @@ const UserProfilePage = () => {
       // TODO: Implement actual role loading from API
       const roles: { role: string; teamId?: string; isActive: boolean }[] = [];
       
-      startTransition(() => {
-        setUserRoles(roles);
-        setUserTeams([]);
-      });
+      setUserRoles(roles);
+      setUserTeams([]);
     } catch (error) {
       console.error("Error loading user roles:", error);
       toast.error("Failed to load user roles");
@@ -64,15 +60,11 @@ const UserProfilePage = () => {
   };
 
   const handleInputChange = (field: string, value: string) => {
-    startTransition(() => {
-      setFormData(prev => ({ ...prev, [field]: value }));
-    });
+    setFormData(prev => ({ ...prev, [field]: value }));
   };
 
   const handleImageUpload = (url: string) => {
-    startTransition(() => {
-      setFormData(prev => ({ ...prev, profileImage: url }));
-    });
+    setFormData(prev => ({ ...prev, profileImage: url }));
   };
 
   const handleSave = async () => {
@@ -108,13 +100,11 @@ const UserProfilePage = () => {
 
   const handleCancel = () => {
     if (authUser) {
-      startTransition(() => {
-        setFormData({
-          name: `${authUser.user_metadata?.first_name || ''} ${authUser.user_metadata?.last_name || ''}`.trim() || authUser.email?.split('@')[0] || '',
-          email: authUser.email || "",
-          phone: authUser.user_metadata?.phone || "",
-          profileImage: authUser.user_metadata?.profile_image || "",
-        });
+      setFormData({
+        name: `${authUser.user_metadata?.first_name || ''} ${authUser.user_metadata?.last_name || ''}`.trim() || authUser.email?.split('@')[0] || '',
+        email: authUser.email || "",
+        phone: authUser.user_metadata?.phone || "",
+        profileImage: authUser.user_metadata?.profile_image || "",
       });
     }
     setIsEditing(false);
