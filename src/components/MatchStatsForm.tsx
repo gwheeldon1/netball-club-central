@@ -7,7 +7,7 @@ import { Switch } from '@/components/ui/switch';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
-import { matchStatsApi, MatchStatistics } from '@/services/matchStatsApi';
+import { matchStatsApi } from '@/services/matchStatsApi';
 import { Child } from '@/types';
 import { Trophy, Target, Shield, AlertTriangle, Users } from 'lucide-react';
 import { logger } from '@/utils/logger';

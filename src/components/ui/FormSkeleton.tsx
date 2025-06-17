@@ -1,4 +1,3 @@
-import React from 'react';
 import { Skeleton } from './skeleton';
 
 export function FormSkeleton({ fields = 2 }: { fields?: number }) {

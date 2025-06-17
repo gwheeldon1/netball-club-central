@@ -1,10 +1,9 @@
 
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/context/AuthContext';
 import { UserRole } from '@/types/unified';
 import { logger } from '@/utils/logger';
-import { startTransition } from 'react';
 
 interface UseUserRolesResult {
   roles: UserRole[];
@@ -16,7 +15,6 @@ interface UseUserRolesResult {
 
 export function useUserRoles(): UseUserRolesResult {
   const { user } = useAuth();
-  const queryClient = useQueryClient();
 
   const { data: roles = [], isLoading, error } = useQuery({
     queryKey: ['user-roles', user?.id],

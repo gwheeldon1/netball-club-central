@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
 import Layout from "@/components/Layout";
 import { api } from '@/services/api';
-import { Child, Team, User } from "@/types";
+import { Team } from "@/types";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -383,7 +383,7 @@ const ApprovalsPage = () => {
                 {selectedRegistration.players?.[0] && (
                   <div className="space-y-4">
                     <h3 className="font-semibold text-lg">Child Information</h3>
-                    {selectedRegistration.players.map((child: any, index: number) => (
+                    {selectedRegistration.players.map((child: any, _index: number) => (
                       <div key={child.id} className="border rounded-lg p-4">
                         <div className="flex items-center gap-4 mb-3">
                           <Avatar className="h-12 w-12">

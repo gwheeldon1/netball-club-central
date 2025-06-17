@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { LineChart, Line, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { Activity, Database, Users, Calendar, AlertTriangle, CheckCircle, XCircle, Clock, Zap, HardDrive, Cpu } from "lucide-react";
+import { Activity, Database, Users, Calendar, AlertTriangle, CheckCircle, XCircle, Clock, Zap } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 

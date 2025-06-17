@@ -20,14 +20,11 @@ interface UserPermissions {
 export const usePermissions = (): UserPermissions => {
   const { currentUser, hasRole } = useAuth();
   const [userTeams, setUserTeams] = useState<string[]>([]);
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const loadUserTeams = async () => {
       if (!currentUser) {
-        startTransition(() => {
-          setLoading(false);
-        });
+        // setLoading(false); // setLoading was here, but loading state is removed
         return;
       }
 
@@ -42,9 +39,7 @@ export const usePermissions = (): UserPermissions => {
           setUserTeams([]);
         });
       } finally {
-        startTransition(() => {
-          setLoading(false);
-        });
+        // setLoading(false); // setLoading was here, but loading state is removed
       }
     };
 

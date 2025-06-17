@@ -32,7 +32,7 @@ export function useOptimizedImage(
   const observerRef = useRef<IntersectionObserver>();
 
   const optimizeImage = useCallback(async (imageSrc: string): Promise<string> => {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
       const img = new Image();
       img.crossOrigin = 'anonymous';
       
@@ -155,7 +155,7 @@ export function OptimizedImage({
   className,
   ...props
 }: OptimizedImageProps) {
-  const { src: optimizedSrc, isLoading, error, ref } = useOptimizedImage(src, optimization);
+  const { src: optimizedSrc, isLoading, ref } = useOptimizedImage(src, optimization);
   const [hasError, setHasError] = useState(false);
 
   const handleError = () => {

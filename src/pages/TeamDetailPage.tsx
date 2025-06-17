@@ -20,7 +20,7 @@ import { TeamImageManager } from "@/components/TeamImageManager";
 const TeamDetailPage = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { currentUser, hasRole } = useAuth();
+  const { hasRole } = useAuth();
   const [team, setTeam] = useState<Team | null>(null);
   const [players, setPlayers] = useState<Child[]>([]);
   const [coaches, setCoaches] = useState<User[]>([]);

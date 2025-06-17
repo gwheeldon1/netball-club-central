@@ -1,6 +1,5 @@
 import { offlineApi, SyncStatus } from './database';
 // Sync service functionality needs to be refactored to use unified API
-import { User, Child, Team, Event, Attendance, UserRole } from '@/types/unified';
 import { logger } from '@/utils/logger';
 
 export class SyncService {
@@ -97,17 +96,17 @@ export class SyncService {
     }
   }
 
-  private async syncUser(item: SyncStatus): Promise<void> {
+  private async syncUser(_item: SyncStatus): Promise<void> {
     // Sync functionality temporarily disabled - needs unified API implementation
     logger.info('User sync not implemented with unified API yet');
   }
 
-  private async syncChild(item: SyncStatus): Promise<void> {
+  private async syncChild(_item: SyncStatus): Promise<void> {
     // Sync functionality temporarily disabled - needs unified API implementation
     logger.info('Child sync not implemented with unified API yet');
   }
 
-  private async syncTeam(item: SyncStatus): Promise<void> {
+  private async syncTeam(_item: SyncStatus): Promise<void> {
     // Sync functionality temporarily disabled - needs unified API implementation
     logger.info('Team sync not implemented with unified API yet');
   }

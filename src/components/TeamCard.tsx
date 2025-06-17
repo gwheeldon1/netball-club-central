@@ -1,9 +1,8 @@
-
-import React, { memo, useCallback } from 'react';
+import { memo, useCallback } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Users, Calendar, MapPin, MoreVertical, EyeOff } from 'lucide-react';
+import { Users, Calendar, MoreVertical, EyeOff } from 'lucide-react';
 import { Team } from '@/types';
 import { OptimizedImage } from '@/hooks/useImageOptimization';
 import { cn } from '@/lib/utils';

@@ -1,5 +1,5 @@
 import Dexie, { Table } from 'dexie';
-import { User, Child, Team, Event, Attendance } from '@/types/unified';
+import { Child, Team, Event, Attendance } from '@/types/unified';
 
 // Database types for offline storage
 interface DBUser {

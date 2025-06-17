@@ -159,7 +159,6 @@ export function generateCSPHeader(): string {
  * Secure session storage utility
  */
 export class SecureStorage {
-  private static readonly ENCRYPTION_KEY = 'netball_app_key';
 
   static setItem(key: string, value: any): void {
     try {

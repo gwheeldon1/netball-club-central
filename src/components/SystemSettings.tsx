@@ -77,17 +77,6 @@ export const SystemSettings = () => {
     }
   };
 
-  const formatValue = (setting: SystemSetting) => {
-    if (setting.setting_type === 'number') {
-      const value = parseInt(setting.setting_value);
-      if (setting.setting_key === 'monthly_subscription_price_pence') {
-        return `£${(value / 100).toFixed(2)}`;
-      }
-      return value;
-    }
-    return setting.setting_value;
-  };
-
   const handleValueChange = (setting: SystemSetting, value: string) => {
     if (setting.setting_type === 'number') {
       if (setting.setting_key === 'monthly_subscription_price_pence') {

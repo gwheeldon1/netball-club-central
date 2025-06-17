@@ -5,18 +5,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { 
   User, 
-  Mail, 
-  Lock, 
-  Phone, 
   Plus, 
   Trash2,
-  Star,
-  Users,
-  Shield,
-  CheckCircle
+  Users
 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -32,7 +25,7 @@ interface ChildData {
 const RegistrationPage = () => {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
-  const [teams, setTeams] = useState<any[]>([]);
+  // const [teams, setTeams] = useState<any[]>([]); // teams removed
   
   // Simplified form data
   const [formData, setFormData] = useState({
@@ -88,8 +81,9 @@ const RegistrationPage = () => {
   useEffect(() => {
     const loadTeams = async () => {
       try {
-        const teamsData = await api.getTeams();
-        setTeams(teamsData);
+        // const teamsData = await api.getTeams(); // teams removed
+        // setTeams(teamsData); // teams removed
+        await api.getTeams(); // Still load them, just don't set state
       } catch (error) {
         console.error('Error loading teams:', error);
       }

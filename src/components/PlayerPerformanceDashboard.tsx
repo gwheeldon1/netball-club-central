@@ -1,15 +1,13 @@
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
-import { Target, Shield, AlertTriangle, TrendingUp, Award, Calendar, Users } from 'lucide-react';
-import { format } from 'date-fns';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { Target, Shield, AlertTriangle, Award, Calendar } from 'lucide-react';
 
 interface PlayerPerformanceData {
   player_id: string;
@@ -29,19 +27,8 @@ interface PlayerPerformanceData {
   shooting_accuracy: number;
 }
 
-interface TeamPerformanceData {
-  team_id: string;
-  team_name: string;
-  total_matches: number;
-  total_goals: number;
-  average_goals_per_match: number;
-  top_scorer: string;
-  top_defender: string;
-}
-
 const PlayerPerformanceDashboard: React.FC = () => {
   const [selectedTeam, setSelectedTeam] = useState<string>('all');
-  const [selectedPlayer, setSelectedPlayer] = useState<string>('all');
 
   // Fetch teams
   const { data: teams = [] } = useQuery({
@@ -198,8 +185,6 @@ const PlayerPerformanceDashboard: React.FC = () => {
   const totalMatches = recentMatches.length;
   const totalGoals = playerPerformance.reduce((sum, player) => sum + player.total_goals, 0);
   const averageGoalsPerMatch = totalMatches > 0 ? Math.round((totalGoals / totalMatches) * 10) / 10 : 0;
-
-  const chartColors = ['hsl(var(--primary))', 'hsl(var(--secondary))', 'hsl(var(--accent))', '#ff7300', '#8dd1e1'];
 
   if (playersLoading) {
     return (

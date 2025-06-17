@@ -4,7 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { offlineApi } from '../../database';
 import { BaseAPI } from '../base';
 import { Team } from '@/types/unified';
-import { TeamData, TeamCreateData, TeamUpdateData } from './types';
+import { TeamData } from './types';
 
 export class TeamOperations extends BaseAPI {
   async getTeams(): Promise<Team[]> {

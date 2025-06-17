@@ -1,6 +1,6 @@
 import { supabase } from '@/integrations/supabase/client';
 import { logger } from '@/utils/logger';
-import { addWeeks, addMonths, addDays, format } from 'date-fns';
+import { addWeeks, addMonths, addDays } from 'date-fns';
 
 interface RecurrencePattern {
   type: 'weekly' | 'biweekly' | 'monthly';

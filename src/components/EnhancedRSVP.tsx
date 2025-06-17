@@ -165,7 +165,7 @@ export const EnhancedRSVP: React.FC<EnhancedRSVPProps> = ({
         .maybeSingle();
 
       if (existingResponse) {
-        const { error } = await supabase
+        const { error: _error } = await supabase
           .from('event_responses')
           .update({ 
             rsvp_status: rsvpStatus,
@@ -173,9 +173,9 @@ export const EnhancedRSVP: React.FC<EnhancedRSVPProps> = ({
           })
           .eq('id', existingResponse.id);
         
-        if (error) throw error;
+        if (_error) throw _error;
       } else {
-        const { error } = await supabase
+        const { error: _error2 } = await supabase
           .from('event_responses')
           .insert({
             event_id: eventId,
@@ -184,7 +184,7 @@ export const EnhancedRSVP: React.FC<EnhancedRSVPProps> = ({
             response_date: new Date().toISOString()
           });
         
-        if (error) throw error;
+        if (_error2) throw _error2;
       }
     },
     onSuccess: () => {
@@ -195,7 +195,7 @@ export const EnhancedRSVP: React.FC<EnhancedRSVPProps> = ({
         description: "RSVP updated successfully",
       });
     },
-    onError: (error) => {
+    onError: (_error) => {
       toast({
         title: "Error",
         description: "Failed to update RSVP",

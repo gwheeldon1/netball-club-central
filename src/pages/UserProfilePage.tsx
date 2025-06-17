@@ -10,7 +10,6 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Edit, Save, X, Users, Shield, User, Mail, Phone, ChevronRight } from "lucide-react";
 import { toast } from "sonner";
-import { Team } from "@/types";
 import { supabase } from "@/integrations/supabase/client";
 import FileUpload from "@/components/FileUpload";
 import { Link } from "react-router-dom";
@@ -20,7 +19,7 @@ const UserProfilePage = () => {
   const { currentUser, user } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [userTeams, setUserTeams] = useState<Team[]>([]);
+  // const [userTeams, setUserTeams] = useState<Team[]>([]); // userTeams removed
   const [userRoles, setUserRoles] = useState<{ role: string; teamId?: string; isActive: boolean }[]>([]);
   const [formData, setFormData] = useState({
     name: "",
@@ -57,7 +56,7 @@ const UserProfilePage = () => {
       
       startTransition(() => {
         setUserRoles(roles);
-        setUserTeams([]);
+        // setUserTeams([]); // userTeams removed
       });
     } catch (error) {
       console.error("Error loading user roles:", error);

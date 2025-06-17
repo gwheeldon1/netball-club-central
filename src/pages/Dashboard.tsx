@@ -7,7 +7,7 @@ import { Calendar, Award, Users, User, MapPin, Clock, ChevronRight, Plus } from 
 import { Link, useNavigate } from "react-router-dom";
 import { api } from '@/services/api';
 import { Team, Event } from "@/types";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { Suspense, lazy } from "react";
 
 // Lazy load heavy components to avoid circular dependencies
@@ -23,9 +23,7 @@ const Dashboard = () => {
   } = useAuth();
   const navigate = useNavigate();
   const [upcomingEvents, setUpcomingEvents] = useState<Event[]>([]);
-  const [playerCount, setPlayerCount] = useState(0);
   const [pendingApprovals, setPendingApprovals] = useState(0);
-  const [teamCount, setTeamCount] = useState(0);
   const [teams, setTeams] = useState<Team[]>([]);
   const [loading, setLoading] = useState(true);
   const handleTeamNavigation = (teamId: string) => {
@@ -39,13 +37,13 @@ const Dashboard = () => {
         const teamsData = await api.getTeams();
         const activeTeams = teamsData.filter(team => team.active !== false);
         setTeams(activeTeams);
-        setTeamCount(activeTeams.length);
+        // setTeamCount(activeTeams.length); // teamCount removed
         setUpcomingEvents([]);
         const allChildren = await api.getChildren();
         const pending = allChildren.filter(child => child.status === 'pending').length;
         setPendingApprovals(pending);
-        const approved = allChildren.filter(child => child.status === 'approved').length;
-        setPlayerCount(approved);
+        // const approved = allChildren.filter(child => child.status === 'approved').length; // playerCount removed
+        // setPlayerCount(approved); // playerCount removed
       } catch (error) {
         console.error("Error loading dashboard data:", error);
       } finally {

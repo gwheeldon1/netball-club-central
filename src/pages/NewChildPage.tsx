@@ -11,7 +11,6 @@ import { useAuth } from "@/context/AuthContext";
 import { toast } from "sonner";
 import FileUpload from "@/components/FileUpload";
 import { api } from '@/services/unifiedApi';
-import { Child } from "@/types";
 import { logger } from '@/utils/logger';
 
 const NewChildPage = () => {
@@ -74,7 +73,7 @@ const NewChildPage = () => {
       else ageGroup = 'U18';
       
       // Create the new child record using unified API
-      const newChild = await api.createChild({
+      await api.createChild({
         name: formData.name,
         dateOfBirth: formData.dateOfBirth,
         medicalInfo: formData.medicalInfo,

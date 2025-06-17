@@ -4,11 +4,10 @@ import moment from 'moment';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { format, parseISO } from 'date-fns';
+import { parseISO } from 'date-fns';
 import { CalendarToolbarProps } from '@/types/component-props';
 
 const localizer = momentLocalizer(moment);

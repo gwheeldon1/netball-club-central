@@ -1,30 +1,21 @@
 
 // TODO: Once workspace is set up, use: import { Card, CardHeader, CardTitle, CardContent, CardDescription, CardFooter, Button, Input, Badge } from "@netball/shared-ui";
-import { Card, CardHeader, CardTitle, CardContent, CardDescription, CardFooter } from "@/components/ui/card";
+import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { Separator } from "@/components/ui/separator";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Switch } from "@/components/ui/switch";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { MetricCard } from "@/components/dashboard/MetricCard";
 import { StatsCard } from "@/components/dashboard/StatsCard";
 import { ProgressCard } from "@/components/dashboard/ProgressCard";
 import { ChartCard } from "@/components/dashboard/ChartCard";
 import { DashboardGrid } from "@/components/dashboard/DashboardGrid";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell } from "recharts";
+import { XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell } from "recharts";
 import { 
-  Calendar, CalendarIcon, Info, AlertCircle, CheckCircle, XCircle, Settings, Users, Activity, 
-  Home, Bell, Trophy, TrendingUp, Palette, Layers, Sparkles, Eye, Mouse, Zap, Star 
+  Calendar, Users, Activity,
+  Home, Trophy, TrendingUp, Palette, Layers, Sparkles, Eye, Mouse, Zap, Star
 } from "lucide-react";
 
 const DesignSystemPage = () => {

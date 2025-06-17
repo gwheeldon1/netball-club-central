@@ -3,7 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { Child, Event, Attendance } from "@/types/unified";
 import Layout from "@/components/Layout";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ArrowLeft, Edit, Calendar, Activity, Trophy, Heart } from "lucide-react";
@@ -19,7 +19,6 @@ const ChildDetailPage = () => {
   const { currentUser } = useAuth();
   const [child, setChild] = useState<Child | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
-  const [isEditing, setIsEditing] = useState<boolean>(false);
   const [attendanceHistory, setAttendanceHistory] = useState<{ event: Event; attendance: Attendance }[]>([]);
   const [performanceStats, setPerformanceStats] = useState({
     eventsAttended: 0,
@@ -122,7 +121,7 @@ const ChildDetailPage = () => {
     }
   };
   
-  const handleImageUpload = async (url: string) => {
+  const handleImageUpload = async (_url: string) => {
     if (child && id) {
       try {
         // Profile image update functionality needs to be implemented in unified API
@@ -135,7 +134,7 @@ const ChildDetailPage = () => {
   };
 
   const handleEditProfile = () => {
-    setIsEditing(true);
+    // setIsEditing(true); // isEditing was removed
     toast.info("Edit functionality will be implemented soon.");
     // In a real app, this would open a form to edit the child's details
   };

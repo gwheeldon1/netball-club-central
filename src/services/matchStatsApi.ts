@@ -1,5 +1,4 @@
 import { supabase } from '@/integrations/supabase/client';
-import { MatchStats } from '@/types';
 
 export interface MatchStatistics {
   id: string;

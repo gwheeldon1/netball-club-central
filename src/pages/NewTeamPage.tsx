@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "@/context/AuthContext";
 import Layout from "@/components/Layout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowLeft, Save, Upload } from "lucide-react";
+import { ArrowLeft, Save } from "lucide-react";
 import { toast } from "sonner";
 import { api } from '@/services/unifiedApi';
 import { usePermissions } from "@/hooks/usePermissions";
@@ -17,7 +16,7 @@ import { logger } from '@/utils/logger';
 
 const NewTeamPage = () => {
   const navigate = useNavigate();
-  const { currentUser } = useAuth();
+  // const { currentUser } = useAuth(); // currentUser removed
   const permissions = usePermissions();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({

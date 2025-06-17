@@ -4,11 +4,11 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/ui/card";
+import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { Award, LockIcon, MailIcon } from "lucide-react";
+import { LockIcon, MailIcon } from "lucide-react";
 import { toast } from "sonner";
-import { useIsMobile } from "@/hooks/use-mobile";
+// import { useIsMobile } from "@/hooks/use-mobile"; // isMobile removed
 import { ForgotPasswordDialog } from "@/components/ForgotPasswordDialog";
 
 const LoginPage = () => {
@@ -17,7 +17,7 @@ const LoginPage = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { login, loading } = useAuth();
   const navigate = useNavigate();
-  const isMobile = useIsMobile();
+  // const isMobile = useIsMobile(); // isMobile removed
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

@@ -31,7 +31,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
   const [userRoles, setUserRoles] = useState<UserRole[]>([]);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
-  const [isPending, startAsyncTransition] = useTransition();
+  const [isPending] = useTransition();
 
   useEffect(() => {
     // Get initial session
@@ -58,7 +58,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
+      async (_event, session) => {
         startTransition(() => {
           setCurrentUser(session?.user ?? null);
           setLoading(false);
@@ -144,7 +144,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const login = async (email: string, password: string): Promise<boolean> => {
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({
+      const { data: _data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });

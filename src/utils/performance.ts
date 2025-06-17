@@ -163,7 +163,7 @@ export class FPSMonitor {
  */
 export function createLazyComponent<T>(
   componentImport: () => Promise<{ default: React.ComponentType<T> }>,
-  fallback?: React.ComponentType
+  _fallback?: React.ComponentType
 ) {
   return React.lazy(async () => {
     const start = performance.now();

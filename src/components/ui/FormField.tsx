@@ -1,4 +1,4 @@
-import { forwardRef, ReactNode } from 'react';
+import { forwardRef } from 'react';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -22,27 +22,6 @@ interface InputFieldProps extends BaseFieldProps {
   onChange: (value: string) => void;
   autoComplete?: string;
   maxLength?: number;
-}
-
-interface TextareaFieldProps extends BaseFieldProps {
-  placeholder?: string;
-  value: string;
-  onChange: (value: string) => void;
-  rows?: number;
-  maxLength?: number;
-}
-
-interface SelectFieldProps extends BaseFieldProps {
-  placeholder?: string;
-  value: string;
-  onChange: (value: string) => void;
-  options: Array<{ value: string; label: string }>;
-}
-
-interface CheckboxFieldProps extends BaseFieldProps {
-  checked: boolean;
-  onChange: (checked: boolean) => void;
-  children: ReactNode;
 }
 
 export const FormField = forwardRef<HTMLInputElement, InputFieldProps>(

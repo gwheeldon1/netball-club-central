@@ -1,5 +1,4 @@
 // API layer types for unified service interface
-import { User, Child, Team, Event, Attendance, UserRole } from '@/types';
 
 // Base API response structure
 export interface ApiResponse<T = unknown> {

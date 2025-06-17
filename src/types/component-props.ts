@@ -1,5 +1,4 @@
 // Component prop types to replace 'any' usage
-import { ReactNode } from 'react';
 
 // Crop area types for FileUpload component
 export interface CropArea {

@@ -14,28 +14,6 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 
-interface UserRole {
-  role: string;
-  is_active: boolean;
-}
-
-interface Player {
-  id: string;
-}
-
-interface Guardian {
-  id: string;
-  first_name: string;
-  last_name: string;
-  email: string;
-  phone?: string;
-  approval_status: string;
-  registration_date: string;
-  profile_image?: string;
-  user_roles?: UserRole[];
-  players?: Player[];
-}
-
 interface UserWithMetadata {
   id: string;
   first_name: string;

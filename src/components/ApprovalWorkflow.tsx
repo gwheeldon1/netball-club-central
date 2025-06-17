@@ -7,10 +7,9 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
-import { Check, X, Clock, User, Heart, Shield, Camera, FileText, AlertCircle } from "lucide-react";
+import { Check, X, Clock, User, Heart, Shield, FileText, AlertCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { logger } from "@/utils/logger";
-import type { Player, Guardian } from "@/types/interfaces";
 
 // Interfaces moved to @/types/interfaces
 

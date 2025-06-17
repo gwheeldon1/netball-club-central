@@ -1,7 +1,6 @@
 import { useState, useCallback, useMemo } from 'react';
 import { z } from 'zod';
 import { validateAndSanitize } from '@/utils/validation';
-import { useDebounce } from '@/hooks/useDebounce';
 
 interface FormField {
   value: string | boolean | number;
@@ -22,7 +21,7 @@ export function useFormValidation<T extends Record<string, any>>({
   initialValues,
   validateOnChange = false,
   validateOnBlur = true,
-  debounceMs = 300,
+  // debounceMs = 300, // debounceMs removed
 }: UseFormValidationOptions<T>) {
   const [fields, setFields] = useState<Record<keyof T, FormField>>(() => {
     const initial: Record<string, FormField> = {};
@@ -46,9 +45,6 @@ export function useFormValidation<T extends Record<string, any>>({
     });
     return result as T;
   }, [fields]);
-
-  // Debounced values for validation
-  const debouncedValues = useDebounce(values, debounceMs);
 
   // Validate a single field
   const validateField = useCallback(

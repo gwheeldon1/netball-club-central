@@ -1,6 +1,5 @@
 
 import { useState, useEffect } from "react";
-import { useAuth } from "@/context/AuthContext";
 import { usePermissions } from "@/hooks/usePermissions";
 import Layout from "@/components/Layout";
 import { Button } from "@/components/ui/button";
@@ -12,7 +11,7 @@ import { Team } from "@/types";
 import { api } from "@/services/api";
 
 const TeamsPage = () => {
-  const { currentUser } = useAuth();
+  // const { currentUser } = useAuth(); // currentUser removed
   const permissions = usePermissions();
   const [teams, setTeams] = useState<Team[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
