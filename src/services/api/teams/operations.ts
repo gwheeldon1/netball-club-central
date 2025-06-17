@@ -4,7 +4,24 @@ import { supabase } from '@/integrations/supabase/client';
 import { offlineApi } from '../../database';
 import { BaseAPI } from '../base';
 import { Team } from '@/types/unified';
-import { TeamData } from './types';
+// import { TeamData } from './types'; // TeamData from ./types might be incorrect for raw Supabase data
+
+// Interface for the raw data structure from Supabase 'teams' table
+interface SupabaseTeamData {
+  id: string;
+  name: string | null;
+  age_group: string | null;
+  category?: string | null; // Assuming category might also come from DB and can be null
+  description?: string | null;
+  profile_image?: string | null;
+  banner_image?: string | null;
+  icon?: string | null;
+  archived?: boolean | null;
+  season_year?: number | null; // Supabase returns null for empty number fields
+  created_at?: string | null;
+  updated_at?: string | null;
+  // Add any other fields that come from `select('*')`
+}
 
 export class TeamOperations extends BaseAPI {
   async getTeams(): Promise<Team[]> {
@@ -137,17 +154,18 @@ export class TeamOperations extends BaseAPI {
     }
   }
 
-  private mapTeamData(team: TeamData): Team {
+  private mapTeamData(supabaseTeam: SupabaseTeamData): Team {
     return {
-      id: team.id,
-      name: team.name,
-      ageGroup: team.age_group,
-      category: 'Junior' as Team['category'],
-      description: (team as any).description || '',
-      profileImage: (team as any).profile_image || '',
-      bannerImage: (team as any).banner_image || '',
-      icon: (team as any).icon || '',
-      archived: team.archived || false
+      id: supabaseTeam.id,
+      name: supabaseTeam.name || 'Unnamed Team', // Provide default for null
+      ageGroup: supabaseTeam.age_group || 'N/A',   // Provide default for null
+      category: (supabaseTeam.category as Team['category']) || 'Junior', // Handle null and cast
+      description: supabaseTeam.description || '',
+      profileImage: supabaseTeam.profile_image || '',
+      bannerImage: supabaseTeam.banner_image || '',
+      icon: supabaseTeam.icon || '',
+      archived: supabaseTeam.archived || false,
+      // season_year property removed as it does not exist on type 'Team'
     };
   }
 }

@@ -9,13 +9,20 @@ interface ImageOptimizationOptions {
   placeholder?: string;
 }
 
+interface UseOptimizedImageReturn {
+  src: string;
+  isLoading: boolean;
+  error: string | null;
+  ref: React.MutableRefObject<HTMLImageElement | null>;
+}
+
 /**
  * Hook for optimized image loading with lazy loading and format conversion
  */
 export function useOptimizedImage(
   src: string,
   options: ImageOptimizationOptions = {}
-) {
+): UseOptimizedImageReturn {
   const {
     quality = 0.8,
     maxWidth = 1920,
@@ -28,7 +35,7 @@ export function useOptimizedImage(
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [optimizedSrc, setOptimizedSrc] = useState<string>(placeholder);
-  const imgRef = useRef<HTMLImageElement>();
+  const imgRef = useRef<HTMLImageElement | null>(null);
   const observerRef = useRef<IntersectionObserver>();
 
   const optimizeImage = useCallback(async (imageSrc: string): Promise<string> => {

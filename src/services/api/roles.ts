@@ -2,6 +2,31 @@ import { supabase } from '@/integrations/supabase/client';
 import { UserRole } from '@/types/unified';
 import { logger } from '@/utils/logger';
 
+// Raw types from Supabase
+interface RawGuardianData {
+  first_name: string | null;
+  last_name: string | null;
+  email: string | null;
+}
+
+interface RawTeamData {
+  name: string | null;
+  age_group: string | null;
+}
+
+interface RawUserRoleData {
+  id: string;
+  guardian_id: string | null;
+  role: string | null;
+  team_id?: string | null;
+  is_active: boolean | null;
+  assigned_at: string | null;
+  assigned_by?: string | null;
+  guardians?: RawGuardianData | null;
+  teams?: RawTeamData | null;
+}
+
+// Application-level type (already defined in the file)
 export interface UserRoleData {
   id: string;
   guardian_id: string;
@@ -20,6 +45,49 @@ export interface UserRoleData {
     age_group: string;
   };
 }
+
+function mapRawToUserRoleData(raw: RawUserRoleData): UserRoleData {
+  if (!raw.guardian_id || !raw.role || raw.is_active === null || !raw.assigned_at) {
+    logger.error('mapRawToUserRoleData: Core field missing or null', raw);
+  }
+  return {
+    id: raw.id,
+    guardian_id: raw.guardian_id || 'MISSING_GUARDIAN_ID',
+    role: (raw.role || 'parent') as UserRole,
+    team_id: raw.team_id || undefined,
+    is_active: raw.is_active === null ? false : raw.is_active,
+    assigned_at: raw.assigned_at || new Date().toISOString(),
+    assigned_by: raw.assigned_by || undefined,
+    guardians: raw.guardians ? {
+      first_name: raw.guardians.first_name || '',
+      last_name: raw.guardians.last_name || '',
+      email: raw.guardians.email || '',
+    } : undefined,
+    teams: raw.teams ? {
+      name: raw.teams.name || '',
+      age_group: raw.teams.age_group || '',
+    } : undefined,
+  };
+}
+
+// For getAvailableGuardians
+interface RawAvailableGuardian {
+  id: string;
+  first_name: string | null;
+  last_name: string | null;
+  email: string | null;
+}
+type AppAvailableGuardian = { id: string; first_name: string; last_name: string; email: string; };
+
+function mapRawToAvailableGuardian(raw: RawAvailableGuardian): AppAvailableGuardian {
+  return {
+    id: raw.id,
+    first_name: raw.first_name || '',
+    last_name: raw.last_name || '',
+    email: raw.email || '',
+  };
+}
+
 
 export interface CreateUserRoleData {
   guardian_id: string;
@@ -54,7 +122,8 @@ export const rolesApi = {
         .order('assigned_at', { ascending: false });
 
       if (error) throw error;
-      return data || [];
+      const rawData = data as RawUserRoleData[] || [];
+      return rawData.map(mapRawToUserRoleData);
     } catch (error) {
       logger.error('Error fetching user roles:', error);
       throw error;
@@ -103,7 +172,7 @@ export const rolesApi = {
         .single();
 
       if (error) throw error;
-      return data;
+      return mapRawToUserRoleData(data as RawUserRoleData);
     } catch (error) {
       logger.error('Error creating user role:', error);
       throw error;
@@ -131,7 +200,7 @@ export const rolesApi = {
         .single();
 
       if (error) throw error;
-      return data;
+      return mapRawToUserRoleData(data as RawUserRoleData);
     } catch (error) {
       logger.error('Error updating user role:', error);
       throw error;
@@ -163,7 +232,8 @@ export const rolesApi = {
         .order('first_name');
 
       if (error) throw error;
-      return data || [];
+      const rawData = data as RawAvailableGuardian[] || [];
+      return rawData.map(mapRawToAvailableGuardian);
     } catch (error) {
       logger.error('Error fetching available guardians:', error);
       throw error;

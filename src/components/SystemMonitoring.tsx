@@ -18,13 +18,38 @@ interface SystemMetric {
   trend: 'up' | 'down' | 'stable';
 }
 
+// Raw type from Supabase for audit_log table
+interface RawAuditLogEntry {
+  id: string;
+  table_name: string | null;
+  action: string | null;
+  changed_by: string | null;
+  changed_at: string | null;
+  record_id: string | null;
+  // Supabase might also return new_values: Json | null, old_values: Json | null
+  // but they are not used in AuditLogEntry, so not strictly needed here.
+}
+
+// Application-level type
 interface AuditLogEntry {
   id: string;
   table_name: string;
   action: string;
-  changed_by: string;
+  changed_by: string; // Expects non-nullable string
   changed_at: string;
   record_id: string;
+}
+
+// Mapper function
+function mapRawToAuditLogEntry(rawLog: RawAuditLogEntry): AuditLogEntry {
+  return {
+    id: rawLog.id,
+    table_name: rawLog.table_name || 'N/A',
+    action: rawLog.action || 'Unknown',
+    changed_by: rawLog.changed_by || 'System', // Handle null changed_by
+    changed_at: rawLog.changed_at || new Date().toISOString(),
+    record_id: rawLog.record_id || 'N/A',
+  };
 }
 
 interface DatabaseStats {
@@ -129,7 +154,8 @@ const SystemMonitoring = () => {
 
       if (error) throw error;
 
-      setAuditLogs(data || []);
+      const rawLogs = data as RawAuditLogEntry[] || [];
+      setAuditLogs(rawLogs.map(mapRawToAuditLogEntry));
     } catch (error) {
       // Silently handle error - audit logs are not critical
     }

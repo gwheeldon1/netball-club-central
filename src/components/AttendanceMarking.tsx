@@ -9,8 +9,30 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+// import type { PostgrestError } from '@supabase/supabase-js'; // Removed
 import { CheckCircle, XCircle, AlertTriangle, Clock, User } from 'lucide-react';
 import { logger } from '@/utils/logger';
+
+// PlayerRaw is no longer used directly by the refined mapSupabaseToEventResponse
+// interface PlayerRaw {
+//   id: string;
+//   first_name: string | null;
+//   last_name: string | null;
+//   profile_image?: string | null;
+// }
+
+// SupabaseEventResponseItem is no longer strictly needed as mapper takes 'any'
+// interface SupabaseEventResponseItem {
+//   id: string;
+//   player_id: string;
+//   event_id: string;
+//   rsvp_status: string | null;
+//   attendance_status: string | null;
+//   notes?: string | null;
+//   attendance_marked_at?: string | null;
+//   created_at?: string;
+//   players: unknown;
+// }
 
 interface Player {
   id: string;
@@ -19,13 +41,50 @@ interface Player {
   profile_image?: string;
 }
 
-interface EventResponse {
+interface EventResponse { // This is the desired application-level type
   id: string;
   player_id: string;
   rsvp_status: string;
   attendance_status: string;
   notes?: string;
-  players: Player;
+  players: Player; // Should conform to the Player interface above
+}
+
+// Mapper function
+function mapSupabaseToEventResponse(item: any): EventResponse { // Parameter item is now any
+  let mappedPlayer: Player;
+  const rawPlayers = item.players as any; // item.players is used directly
+
+  // Runtime check for the structure of players
+  if (rawPlayers && typeof rawPlayers === 'object' && 'id' in rawPlayers && 'first_name' in rawPlayers && 'last_name' in rawPlayers) {
+    mappedPlayer = {
+      id: rawPlayers.id,
+      first_name: rawPlayers.first_name || 'Unknown',
+      last_name: rawPlayers.last_name || 'Player',
+      profile_image: rawPlayers.profile_image || undefined,
+    };
+  } else {
+    // Log if it's an error object or unexpected structure
+    if (rawPlayers && (typeof rawPlayers !== 'object' || !('id' in rawPlayers))) {
+       logger.warn(`Unexpected structure for item.players for event_response ${item.id}:`, rawPlayers);
+    }
+    // Fallback for null, error, or unexpected structure
+    mappedPlayer = {
+      id: item.player_id, // Use player_id from the event_response itself
+      first_name: 'Unknown',
+      last_name: 'Player',
+      profile_image: undefined,
+    };
+  }
+
+  return {
+    id: item.id,
+    player_id: item.player_id,
+    rsvp_status: item.rsvp_status || 'unknown',
+    attendance_status: item.attendance_status || 'not_marked',
+    notes: item.notes || undefined,
+    players: mappedPlayer,
+  };
 }
 
 interface AttendanceMarkingProps {
@@ -64,10 +123,8 @@ const AttendanceMarking: React.FC<AttendanceMarkingProps> = ({ eventId, eventTit
         .eq('event_id', eventId);
 
       if (error) throw error;
-      return (data || []).map(item => ({
-        ...item,
-        players: item.players || { id: '', first_name: '', last_name: '', profile_image: null }
-      })) as EventResponse[];
+      const supabaseData = data as any[] || []; // Cast to any[]
+      return supabaseData.map(mapSupabaseToEventResponse);
     }
   });
 

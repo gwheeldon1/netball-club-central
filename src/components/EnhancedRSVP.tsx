@@ -8,7 +8,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { CalendarCheck, UserCheck, UserX, HelpCircle, Clock, Users } from 'lucide-react';
+import { logger } from '@/utils/logger'; // Import logger
 
+// Application-level types (already defined)
 interface Event {
   id: string;
   title: string;
@@ -30,6 +32,83 @@ interface EventResponse {
     last_name: string;
   };
 }
+
+// Raw Supabase types and mappers
+
+// For Events with Teams
+interface SupabaseTeamRaw {
+  name: string | null;
+  age_group: string | null;
+}
+
+function isTeamData(data: any): data is SupabaseTeamRaw {
+  return data && typeof data === 'object' && 'name' in data && 'age_group' in data;
+}
+
+function mapSupabaseEventToAppEvent(item: any): Event {
+  let mappedTeams: Event['teams'] = undefined;
+  if (isTeamData(item.teams)) {
+    mappedTeams = {
+      name: item.teams.name || 'Unknown Team',
+      age_group: item.teams.age_group || 'N/A',
+    };
+  } else if (item.teams != null) {
+    logger.warn(`Unexpected structure for teams relation for event ${item.id}:`, item.teams);
+  }
+
+  return {
+    id: item.id,
+    title: item.title || 'Untitled Event',
+    event_date: item.event_date,
+    event_type: item.event_type || 'other',
+    location: item.location || undefined,
+    teams: mappedTeams,
+    // Ensure all properties of Event are mapped
+  };
+}
+
+// For EventResponses with Players
+interface SupabasePlayerRaw {
+  id: string;
+  first_name: string | null;
+  last_name: string | null;
+}
+
+function isPlayerData(data: any): data is SupabasePlayerRaw {
+  return data && typeof data === 'object' && 'id' in data &&
+         ('first_name' in data || data.first_name === null) &&
+         ('last_name' in data || data.last_name === null);
+}
+
+function mapSupabaseResponseToAppResponse(item: any): EventResponse {
+  let mappedPlayer: EventResponse['players'];
+  if (isPlayerData(item.players)) {
+    mappedPlayer = {
+      id: item.players.id,
+      first_name: item.players.first_name || 'Unknown',
+      last_name: item.players.last_name || 'Player',
+    };
+  } else {
+    if (item.players != null) {
+      logger.warn(`Unexpected structure for players relation for event_response ${item.id}:`, item.players);
+    }
+    mappedPlayer = {
+      id: item.player_id, // Fallback
+      first_name: 'Unknown',
+      last_name: 'Player',
+    };
+  }
+  return {
+    id: item.id,
+    player_id: item.player_id,
+    event_id: item.event_id,
+    rsvp_status: item.rsvp_status || 'maybe',
+    response_date: item.response_date,
+    players: mappedPlayer,
+    // Ensure all properties of EventResponse are mapped
+  };
+}
+
 
 interface EnhancedRSVPProps {
   playerId?: string;
@@ -83,10 +162,8 @@ export const EnhancedRSVP: React.FC<EnhancedRSVPProps> = ({
 
       const { data, error } = await query;
       if (error) throw error;
-      return (data || []).map(item => ({
-        ...item,
-        teams: item.teams || { name: '', age_group: '' }
-      })) as Event[];
+      const supabaseData = data as any[] || [];
+      return supabaseData.map(mapSupabaseEventToAppEvent);
     }
   });
 
@@ -110,10 +187,8 @@ export const EnhancedRSVP: React.FC<EnhancedRSVPProps> = ({
         .eq('player_id', playerId);
 
       if (error) throw error;
-      return (data || []).map(item => ({
-        ...item,
-        players: item.players || { id: '', first_name: '', last_name: '' }
-      })) as EventResponse[];
+      const supabaseData = data as any[] || [];
+      return supabaseData.map(mapSupabaseResponseToAppResponse);
     },
     enabled: !!playerId && events.length > 0
   });

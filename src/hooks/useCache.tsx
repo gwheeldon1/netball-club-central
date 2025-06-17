@@ -21,9 +21,12 @@ export function useCache<T>(options: UseCacheOptions = {}) {
       const newCache = new Map(prev);
       
       // Remove oldest entries if cache is at max size
-      if (newCache.size >= maxSize) {
-        const oldestKey = newCache.keys().next().value;
-        newCache.delete(oldestKey);
+      if (newCache.size >= maxSize && maxSize > 0) {
+        const oldestKeyIteratorResult = newCache.keys().next();
+        if (!oldestKeyIteratorResult.done) { // Check if there is a key
+          const oldestKey = oldestKeyIteratorResult.value;
+          newCache.delete(oldestKey);
+        }
       }
 
       newCache.set(key, {

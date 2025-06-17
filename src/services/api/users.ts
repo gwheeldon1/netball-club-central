@@ -1,6 +1,14 @@
 // User API operations
 import { supabase } from '@/integrations/supabase/client';
 import { offlineApi } from '../database';
+
+// Define the shape of objects within the user_roles array
+interface UserRoleObject {
+  role: UserRole;
+  is_active: boolean;
+  // Potentially other fields like team_id, club_id if they are ever selected and used
+}
+
 import { logger } from '@/utils/logger';
 import { BaseAPI } from './base';
 import { User, UserRole } from '@/types/unified';
@@ -25,9 +33,9 @@ class UserAPI extends BaseAPI {
           id: guardian.id,
           name: `${guardian.first_name} ${guardian.last_name}`,
           email: guardian.email || '',
-          phone: guardian.phone || '',
-          profileImage: guardian.profile_image || '',
-          roles: guardian.user_roles?.filter(ur => ur.is_active).map(ur => ur.role as UserRole) || ['parent' as UserRole]
+          phone: guardian.phone || undefined,
+          profileImage: guardian.profile_image || undefined,
+          roles: guardian.user_roles?.filter((ur: UserRoleObject) => ur.is_active).map((ur: UserRoleObject) => ur.role as UserRole) || ['parent' as UserRole]
         })) || [];
       },
       async () => {
@@ -62,9 +70,9 @@ class UserAPI extends BaseAPI {
           id: data.id,
           name: `${data.first_name} ${data.last_name}`,
           email: data.email || '',
-          phone: data.phone || '',
-          profileImage: data.profile_image || '',
-          roles: data.user_roles?.filter(ur => ur.is_active).map(ur => ur.role as UserRole) || ['parent' as UserRole]
+          phone: data.phone || undefined,
+          profileImage: data.profile_image || undefined,
+          roles: data.user_roles?.filter((ur: UserRoleObject) => ur.is_active).map((ur: UserRoleObject) => ur.role as UserRole) || ['parent' as UserRole]
         };
       },
       async () => {
@@ -110,8 +118,8 @@ class UserAPI extends BaseAPI {
           id: data.id,
           name: `${data.first_name} ${data.last_name}`,
           email: data.email || '',
-          phone: data.phone || '',
-          profileImage: data.profile_image || '',
+          phone: data.phone || undefined,
+          profileImage: data.profile_image || undefined,
           roles: ['parent']
         };
       } catch (error) {

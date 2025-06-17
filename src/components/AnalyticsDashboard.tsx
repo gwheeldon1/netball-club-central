@@ -11,6 +11,27 @@ import { TrendingUp, TrendingDown, Users, Target, Calendar, Download, Trophy } f
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
+// Define a type for the raw match statistic item from Supabase
+interface MatchStatisticItem {
+  player_id: string;
+  goals: number;
+  shot_attempts: number;
+  intercepts: number;
+  tips: number;
+  quarters_played: number;
+  player_of_match_coach: boolean;
+  player_of_match_players: boolean;
+  players: { first_name: string; last_name: string };
+  // events is selected but not directly used in the forEach loop for stat processing
+  // events: { team_id: string; event_date: string };
+}
+
+// Define a type for event response items
+interface EventResponseItem {
+  attendance_status: 'present' | 'absent' | 'injured' | 'late' | string; // string for safety
+  // player_id might also be here if needed for other contexts
+}
+
 interface PlayerStats {
   playerId: string;
   playerName: string;
@@ -123,7 +144,7 @@ const AnalyticsDashboard = () => {
     // Aggregate player statistics
     const playerStatsMap = new Map<string, PlayerStats>();
 
-    data?.forEach((stat: any) => {
+    data?.forEach((stat: MatchStatisticItem) => {
       const playerId = stat.player_id;
       const playerName = `${stat.players.first_name} ${stat.players.last_name}`;
 
@@ -217,7 +238,7 @@ const AnalyticsDashboard = () => {
       }
 
       // Calculate attendance
-      const presentCount = event.event_responses?.filter((r) => r.attendance_status === 'present').length || 0;
+      const presentCount = event.event_responses?.filter((r: EventResponseItem) => r.attendance_status === 'present').length || 0;
       teamStat.averageAttendance += presentCount;
     });
 
@@ -253,12 +274,12 @@ const AnalyticsDashboard = () => {
     if (error) throw error;
 
     const attendanceAnalytics = data?.map((event: any) => {
-      const responses = event.event_responses || [];
+      const responses: EventResponseItem[] = event.event_responses || [];
       const totalPlayers = responses.length;
-      const presentCount = responses.filter((r) => r.attendance_status === 'present').length;
-      const absentCount = responses.filter((r) => r.attendance_status === 'absent').length;
-      const injuredCount = responses.filter((r) => r.attendance_status === 'injured').length;
-      const lateCount = responses.filter((r) => r.attendance_status === 'late').length;
+      const presentCount = responses.filter((r: EventResponseItem) => r.attendance_status === 'present').length;
+      const absentCount = responses.filter((r: EventResponseItem) => r.attendance_status === 'absent').length;
+      const injuredCount = responses.filter((r: EventResponseItem) => r.attendance_status === 'injured').length;
+      const lateCount = responses.filter((r: EventResponseItem) => r.attendance_status === 'late').length;
 
       return {
         eventId: event.id,
@@ -277,32 +298,52 @@ const AnalyticsDashboard = () => {
   };
 
   const exportData = (type: string) => {
-    let data: unknown[] = [];
+    let dataToExport: Array<PlayerStats | TeamPerformance | AttendanceData> = [];
     let filename = "";
 
     switch (type) {
       case 'player-stats':
-        data = playerStats;
+        dataToExport = playerStats;
         filename = `player-statistics-${selectedPeriod}.csv`;
         break;
       case 'team-performance':
-        data = teamPerformance;
+        dataToExport = teamPerformance;
         filename = `team-performance-${selectedPeriod}.csv`;
         break;
       case 'attendance':
-        data = attendanceData;
+        dataToExport = attendanceData;
         filename = `attendance-report-${selectedPeriod}.csv`;
         break;
     }
 
-    if (data.length === 0) {
+    if (dataToExport.length === 0) {
       toast.error("No data to export");
       return;
     }
 
     // Convert to CSV
-    const headers = Object.keys(data[0]).join(',');
-    const rows = data.map(row => Object.values(row).join(','));
+    const firstItem = dataToExport[0];
+    const headers = (typeof firstItem === 'object' && firstItem !== null)
+      ? Object.keys(firstItem).join(',')
+      : '';
+
+    const rows = dataToExport.map(row => {
+      if (typeof row === 'object' && row !== null) {
+        return Object.values(row).map(value => {
+          // Handle potential null/undefined values and ensure they are stringified
+          if (value === null || value === undefined) return "";
+          if (typeof value === 'string' && value.includes(',')) return `"${value}"`; // Quote if contains comma
+          return String(value);
+        }).join(',');
+      }
+      return '';
+    }).filter(rowString => rowString !== '');
+
+    if (!headers && rows.length === 0) {
+        toast.error("Data format error, cannot export.");
+        return;
+    }
+
     const csv = [headers, ...rows].join('\n');
 
     // Download

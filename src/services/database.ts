@@ -1,5 +1,5 @@
 import Dexie, { Table } from 'dexie';
-import { Child, Team, Event, Attendance } from '@/types/unified';
+import { User, UserRole, Child, Team, Event, Attendance } from '@/types/unified'; // Added User, UserRole
 
 // Database types for offline storage
 interface DBUser {
@@ -113,29 +113,70 @@ export class OfflineAPI {
   }
 
   // Users
-  async getUsers(): Promise<DBUser[]> {
-    return await db.users.toArray();
+  async getUsers(): Promise<User[]> { // Return User[]
+    const dbUsers = await db.users.toArray();
+    return dbUsers.map(dbUser => ({
+      id: dbUser.id,
+      name: dbUser.name,
+      email: dbUser.email,
+      phone: dbUser.phone || undefined,
+      profileImage: dbUser.profileImage || undefined,
+      roles: dbUser.roles as UserRole[],
+    }));
   }
 
-  async getUserById(id: string): Promise<DBUser | undefined> {
-    return await db.users.get(id);
+  async getUserById(id: string): Promise<User | undefined> { // Return User | undefined
+    const dbUser = await db.users.get(id);
+    if (!dbUser) return undefined;
+    return {
+      id: dbUser.id,
+      name: dbUser.name,
+      email: dbUser.email,
+      phone: dbUser.phone || undefined,
+      profileImage: dbUser.profileImage || undefined,
+      roles: dbUser.roles as UserRole[],
+    };
   }
 
-  async getUserByEmail(email: string): Promise<DBUser | undefined> {
-    return await db.users.where('email').equals(email).first();
+  async getUserByEmail(email: string): Promise<User | undefined> { // Return User | undefined
+    const dbUser = await db.users.where('email').equals(email).first();
+    if (!dbUser) return undefined;
+    return {
+      id: dbUser.id,
+      name: dbUser.name,
+      email: dbUser.email,
+      phone: dbUser.phone || undefined,
+      profileImage: dbUser.profileImage || undefined,
+      roles: dbUser.roles as UserRole[],
+    };
   }
 
-  async createUser(user: Omit<DBUser, 'id'>): Promise<DBUser> {
-    const newUser = { ...user, id: crypto.randomUUID() };
-    await db.users.add(newUser);
-    await this.addToSyncQueue('users', newUser.id, 'create', newUser);
-    return newUser;
+  async createUser(user: Omit<User, 'id' | 'roles'> & { roles: string[] }): Promise<User> { // Param adjusted for DBUser like structure initially
+    const dbUserToCreate: DBUser = {
+      id: crypto.randomUUID(), // ID generated here
+      name: user.name,
+      email: user.email,
+      phone: user.phone,
+      profileImage: user.profileImage,
+      roles: user.roles,
+    };
+    await db.users.add(dbUserToCreate);
+    await this.addToSyncQueue('users', dbUserToCreate.id, 'create', dbUserToCreate as unknown as Record<string, unknown>);
+    return {
+      ...dbUserToCreate,
+      roles: dbUserToCreate.roles as UserRole[], // Cast roles for return
+    };
   }
 
-  async updateUser(id: string, updates: Partial<DBUser>): Promise<DBUser | undefined> {
-    await db.users.update(id, updates);
-    await this.addToSyncQueue('users', id, 'update', updates);
-    return await this.getUserById(id);
+  async updateUser(id: string, updates: Partial<Omit<User, 'id' | 'roles'> & { roles?: string[] }>): Promise<User | undefined> {
+    // For Dexie, ensure 'roles' is string[] if provided in updates
+    const dbUpdates: Partial<DBUser> = { ...updates };
+    if (updates.roles) {
+      dbUpdates.roles = updates.roles as string[];
+    }
+    await db.users.update(id, dbUpdates);
+    await this.addToSyncQueue('users', id, 'update', dbUpdates as Record<string, unknown>);
+    return await this.getUserById(id); // This will now return a mapped User
   }
 
   // Children

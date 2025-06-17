@@ -67,7 +67,12 @@ export const analyticsApi = {
         .select('*');
 
       if (error) throw error;
-      return data || [];
+      return data?.map(stat => ({
+        metric: stat.metric || '',
+        value: stat.value || '',
+        unit: stat.unit || '',
+        updated_at: stat.updated_at === null ? Date.now() : stat.updated_at,
+      })) || [];
     } catch (error) {
       logger.error('Error fetching dashboard stats:', error);
       // Return fallback data
@@ -96,7 +101,7 @@ export const analyticsApi = {
         
         const { data: attendanceRate } = await supabase
           .rpc('calculate_attendance_rate', {
-            p_team_id: teamId || null,
+            p_team_id: teamId || undefined, // Changed null to undefined
             p_start_date: monthStart.toISOString().split('T')[0],
             p_end_date: monthEnd.toISOString().split('T')[0]
           });
@@ -243,10 +248,15 @@ export const analyticsApi = {
     ).join(' ');
   },
 
-  formatEventDescription(properties: Record<string, any>): string {
-    if (properties.description) return properties.description;
-    if (properties.event_type) return `${properties.event_type} event`;
-    if (properties.team) return `Related to ${properties.team}`;
+  formatEventDescription(properties: any): string { // Changed to any to accept Supabase Json
+    if (properties && typeof properties === 'object' && !Array.isArray(properties)) {
+      if ('description' in properties && properties.description) return String(properties.description);
+      if ('event_type' in properties && properties.event_type) return `${properties.event_type} event`;
+      if ('team' in properties && properties.team) return `Related to ${properties.team}`;
+      return 'Complex event details';
+    } else if (typeof properties === 'string' && properties.trim() !== '') {
+      return properties;
+    }
     return 'Activity recorded';
   },
 

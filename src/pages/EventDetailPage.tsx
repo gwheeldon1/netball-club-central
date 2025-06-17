@@ -39,7 +39,7 @@ const EventDetailPage = () => {
     try {
       setLoading(true);
       const eventData = await api.getEventById(id);
-      setEvent(eventData);
+      setEvent(eventData || null); // Handle undefined case
 
       if (eventData) {
         const [teamData, attendanceData] = await Promise.all([

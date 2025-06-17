@@ -9,12 +9,36 @@ import { useToast } from '@/components/ui/use-toast';
 import { Settings, Save, Loader2 } from 'lucide-react';
 import { logger } from '@/utils/logger';
 
+// Raw type from Supabase for system_settings table
+interface RawSystemSetting {
+  id: string;
+  setting_key: string | null;
+  setting_value: string | null;
+  setting_type: string | null;
+  description: string | null;
+  created_at?: string | null; // Supabase might return these
+  updated_at?: string | null;
+  created_by?: string | null;
+}
+
+// Application-level type
 interface SystemSetting {
   id: string;
   setting_key: string;
   setting_value: string;
   setting_type: string;
-  description: string;
+  description: string; // Expects non-nullable string
+}
+
+// Mapper function
+function mapRawToSystemSetting(rawSetting: RawSystemSetting): SystemSetting {
+  return {
+    id: rawSetting.id,
+    setting_key: rawSetting.setting_key || 'unknown_key',
+    setting_value: rawSetting.setting_value || '',
+    setting_type: rawSetting.setting_type || 'string',
+    description: rawSetting.description || '', // Handle null description
+  };
 }
 
 export const SystemSettings = () => {
@@ -32,7 +56,8 @@ export const SystemSettings = () => {
         .order('setting_key');
 
       if (error) throw error;
-      setSettings(data || []);
+      const rawSettings = data as RawSystemSetting[] || [];
+      setSettings(rawSettings.map(mapRawToSystemSetting));
     } catch (error) {
       logger.error('Error loading settings:', error);
       toast({

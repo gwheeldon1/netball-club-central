@@ -7,21 +7,70 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+// import type { PostgrestError } from '@supabase/supabase-js'; // Removed
 import { parseISO } from 'date-fns';
 import { CalendarToolbarProps } from '@/types/component-props';
+import { logger } from '@/utils/logger'; // Import logger
 
 const localizer = momentLocalizer(moment);
 
+// Application-level Event type
 interface Event {
   id: string;
   title: string;
   description?: string;
-  event_date: string;
+  event_date: string; // ISO string date
   location?: string;
   event_type: string;
   team_id?: string;
   is_home?: boolean;
-  teams?: { name: string; age_group: string };
+  teams?: { name: string; age_group: string }; // Expects non-nullable strings if object exists
+}
+
+// SupabaseEventData is no longer strictly needed as mapper takes 'any'
+// interface SupabaseEventData {
+//   id: string;
+//   title: string | null;
+//   description?: string | null;
+//   event_date: string;
+//   location?: string | null;
+//   event_type: string | null;
+//   team_id?: string | null;
+//   is_home?: boolean | null;
+//   teams: unknown;
+// }
+
+// Mapper function
+function mapSupabaseToAppEvent(item: any): Event { // item is now any
+  let mappedTeams: Event['teams'] = undefined;
+  const rawTeams = item.teams as any; // item.teams is used directly
+
+  if (rawTeams && typeof rawTeams === 'object' && !Array.isArray(rawTeams)) {
+    if ('name' in rawTeams && 'age_group' in rawTeams) { // Check for team data structure
+      mappedTeams = {
+        name: rawTeams.name || 'Unknown Team',
+        age_group: rawTeams.age_group || 'N/A',
+      };
+    } else if ('message' in rawTeams && 'code' in rawTeams) { // Check for PostgrestError-like structure
+      logger.warn(`Error object in teams field for event ${item.id}: ${rawTeams.message}`);
+    } else if (Object.keys(rawTeams).length > 0) {
+        logger.warn(`Unexpected object structure for teams for event ${item.id}:`, rawTeams);
+    }
+  } else if (rawTeams !== null && rawTeams !== undefined) {
+    logger.warn(`Unexpected non-object type for teams for event ${item.id}:`, rawTeams);
+  }
+
+  return {
+    id: item.id,
+    title: item.title || 'Untitled Event',
+    description: item.description || undefined,
+    event_date: item.event_date,
+    location: item.location || undefined,
+    event_type: item.event_type || 'other',
+    team_id: item.team_id || undefined,
+    is_home: item.is_home === null ? undefined : item.is_home,
+    teams: mappedTeams,
+  };
 }
 
 interface CalendarEvent {
@@ -73,10 +122,8 @@ const CalendarView: React.FC<CalendarViewProps> = ({
 
       const { data, error } = await query;
       if (error) throw error;
-      return (data || []).map(item => ({
-        ...item,
-        teams: item.teams || { name: '', age_group: '' }
-      })) as Event[];
+      const supabaseData = data as any[] || []; // Cast to any[]
+      return supabaseData.map(mapSupabaseToAppEvent);
     }
   });
 

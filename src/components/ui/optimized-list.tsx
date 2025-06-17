@@ -76,7 +76,7 @@ function OptimizedListComponent<T>({
   return (
     <div className={cn("space-y-2", className)} style={listStyle}>
       {visibleItems.map(({ item, index }) => (
-        <MemoizedListItem
+        <MemoizedListItem // Reverted: Removed <T>
           key={getItemKey(item, index)}
           item={item}
           index={index}
@@ -95,7 +95,8 @@ interface MemoizedListItemProps<T> {
   itemHeight?: number;
 }
 
-const MemoizedListItem = memo(function MemoizedListItem<T>({
+// Correctly type the memoized generic component
+const MemoizedListItem = React.memo(function MemoizedListItem<T>({
   item,
   index,
   renderItem,
@@ -113,7 +114,7 @@ const MemoizedListItem = memo(function MemoizedListItem<T>({
       {renderItem(item, index)}
     </div>
   );
-});
+}) as <T>(props: MemoizedListItemProps<T>) => React.ReactElement; // Added explicit cast here
 
 export const OptimizedList = memo(OptimizedListComponent) as <T>(
   props: OptimizedListProps<T>
