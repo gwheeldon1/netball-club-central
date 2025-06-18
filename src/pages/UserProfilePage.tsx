@@ -17,11 +17,9 @@ import { Link } from "react-router-dom";
 import { useAsyncTransition } from "@/hooks/useAsyncTransition";
 
 const UserProfilePage = () => {
-  const { currentUser, user } = useAuth();
+  const { currentUser, userProfile, userRoles, refreshUserRoles } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [userTeams, setUserTeams] = useState<Team[]>([]);
-  const [userRoles, setUserRoles] = useState<{ role: string; teamId?: string; isActive: boolean }[]>([]);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -30,40 +28,18 @@ const UserProfilePage = () => {
   });
   const { executeWithTransition } = useAsyncTransition();
 
-  // Use the user from auth context, with fallback to currentUser for backward compatibility
-  const authUser = user || currentUser;
-
   useEffect(() => {
-    if (authUser) {
+    if (userProfile) {
       startTransition(() => {
         setFormData({
-          name: `${authUser.user_metadata?.first_name || ''} ${authUser.user_metadata?.last_name || ''}`.trim() || authUser.email?.split('@')[0] || '',
-          email: authUser.email || "",
-          phone: authUser.user_metadata?.phone || "",
-          profileImage: authUser.user_metadata?.profile_image || "",
+          name: `${userProfile.firstName || ''} ${userProfile.lastName || ''}`.trim() || 'User',
+          email: userProfile.email || "",
+          phone: userProfile.phone || "",
+          profileImage: userProfile.profileImage || "",
         });
       });
-      
-      loadUserRoles();
     }
-  }, [authUser]);
-
-  const loadUserRoles = async () => {
-    if (!authUser) return;
-    
-    try {
-      // TODO: Implement actual role loading from API
-      const roles: { role: string; teamId?: string; isActive: boolean }[] = [];
-      
-      startTransition(() => {
-        setUserRoles(roles);
-        setUserTeams([]);
-      });
-    } catch (error) {
-      console.error("Error loading user roles:", error);
-      toast.error("Failed to load user roles");
-    }
-  };
+  }, [userProfile]);
 
   const handleInputChange = (field: string, value: string) => {
     startTransition(() => {
@@ -78,7 +54,7 @@ const UserProfilePage = () => {
   };
 
   const handleSave = async () => {
-    if (!authUser) return;
+    if (!currentUser || !userProfile) return;
     
     executeWithTransition(async () => {
       setLoading(true);
@@ -86,21 +62,43 @@ const UserProfilePage = () => {
         const [firstName, ...lastNameParts] = formData.name.split(' ');
         const lastName = lastNameParts.join(' ');
 
-        const { error } = await supabase
+        // Update profiles table
+        const { error: profileError } = await supabase
           .from('profiles')
           .upsert({
-            user_id: authUser.id,
+            user_id: currentUser.id,
             first_name: firstName,
             last_name: lastName,
             email: formData.email,
             phone: formData.phone,
             profile_image: formData.profileImage,
+            guardian_id: userProfile.guardianId,
           });
 
-        if (error) throw error;
+        if (profileError) throw profileError;
+
+        // Update guardians table if guardian_id exists
+        if (userProfile.guardianId) {
+          const { error: guardianError } = await supabase
+            .from('guardians')
+            .update({
+              first_name: firstName,
+              last_name: lastName,
+              email: formData.email,
+              phone: formData.phone,
+              profile_image: formData.profileImage,
+            })
+            .eq('id', userProfile.guardianId);
+
+          if (guardianError) throw guardianError;
+        }
 
         toast.success("Profile updated successfully");
         setIsEditing(false);
+        
+        // Refresh user data
+        window.location.reload(); // Simple way to refresh all user data
+        
       } catch (error) {
         console.error("Error updating profile:", error);
         toast.error("Failed to update profile");
@@ -112,12 +110,12 @@ const UserProfilePage = () => {
 
   const handleCancel = () => {
     executeWithTransition(() => {
-      if (authUser) {
+      if (userProfile) {
         setFormData({
-          name: `${authUser.user_metadata?.first_name || ''} ${authUser.user_metadata?.last_name || ''}`.trim() || authUser.email?.split('@')[0] || '',
-          email: authUser.email || "",
-          phone: authUser.user_metadata?.phone || "",
-          profileImage: authUser.user_metadata?.profile_image || "",
+          name: `${userProfile.firstName || ''} ${userProfile.lastName || ''}`.trim() || 'User',
+          email: userProfile.email || "",
+          phone: userProfile.phone || "",
+          profileImage: userProfile.profileImage || "",
         });
       }
       setIsEditing(false);
@@ -140,13 +138,13 @@ const UserProfilePage = () => {
   };
 
   const getInitials = () => {
-    if (authUser?.user_metadata?.first_name && authUser?.user_metadata?.last_name) {
-      return authUser.user_metadata.first_name[0] + authUser.user_metadata.last_name[0];
+    if (userProfile?.firstName && userProfile?.lastName) {
+      return userProfile.firstName[0] + userProfile.lastName[0];
     }
-    return authUser?.email?.[0]?.toUpperCase() || 'U';
+    return currentUser?.email?.[0]?.toUpperCase() || 'U';
   };
 
-  if (!authUser) {
+  if (!currentUser) {
     return (
       <Layout>
         <div className="flex items-center justify-center min-h-[50vh]" role="status" aria-label="Loading profile">
@@ -250,7 +248,7 @@ const UserProfilePage = () => {
                       {formData.name || 'User'}
                     </h3>
                     <p className="text-sm text-muted-foreground">
-                      {authUser.email}
+                      {currentUser.email}
                     </p>
                   </div>
                 )}
@@ -261,13 +259,13 @@ const UserProfilePage = () => {
                 <div className="space-y-3">
                   <h4 className="text-sm font-semibold text-foreground">Current Roles</h4>
                   <div className="flex flex-wrap gap-2">
-                    {userRoles.map((roleAssignment, index) => (
+                    {userRoles.map((role, index) => (
                       <Badge 
                         key={index} 
-                        variant={getRoleBadgeVariant(roleAssignment.role)}
+                        variant={getRoleBadgeVariant(role)}
                         className="font-medium"
                       >
-                        {roleAssignment.role.charAt(0).toUpperCase() + roleAssignment.role.slice(1)}
+                        {role.charAt(0).toUpperCase() + role.slice(1)}
                       </Badge>
                     ))}
                   </div>
@@ -382,7 +380,7 @@ const UserProfilePage = () => {
             <CardContent>
               {userRoles.length > 0 ? (
                 <div className="space-y-4">
-                  {userRoles.map((roleAssignment, index) => (
+                  {userRoles.map((role, index) => (
                     <div
                       key={index}
                       className="flex items-start gap-3 p-4 rounded-lg border hover:border-primary/30 hover:bg-accent/30 transition-all duration-200"
@@ -392,19 +390,17 @@ const UserProfilePage = () => {
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center justify-between mb-2">
-                          <Badge variant={getRoleBadgeVariant(roleAssignment.role)} className="font-medium">
-                            {roleAssignment.role.charAt(0).toUpperCase() + roleAssignment.role.slice(1)}
+                          <Badge variant={getRoleBadgeVariant(role)} className="font-medium">
+                            {role.charAt(0).toUpperCase() + role.slice(1)}
                           </Badge>
-                          <Badge variant={roleAssignment.isActive ? "default" : "secondary"} className="text-xs">
-                            {roleAssignment.isActive ? "Active" : "Inactive"}
+                          <Badge variant="default" className="text-xs">
+                            Active
                           </Badge>
                         </div>
-                        {roleAssignment.teamId && (
-                          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                            <Users className="h-4 w-4" />
-                            <span>Team: {roleAssignment.teamId}</span>
-                          </div>
-                        )}
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                          <Users className="h-4 w-4" />
+                          <span>All Teams</span>
+                        </div>
                       </div>
                     </div>
                   ))}

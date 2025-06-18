@@ -9,6 +9,9 @@ interface UserProfile {
   firstName?: string;
   lastName?: string;
   email?: string;
+  guardianId?: string;
+  profileImage?: string;
+  phone?: string;
 }
 
 interface AuthContextType {
@@ -45,6 +48,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             setCurrentUser(session?.user ?? null);
             setLoading(false);
           });
+          
+          if (session?.user) {
+            await loadUserData(session.user);
+          }
         }
       } catch (error) {
         logger.error('Error in getInitialSession:', error);
@@ -65,9 +72,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         });
         
         if (session?.user) {
-          // Load user roles and profile in background
-          loadUserRoles(session.user.id);
-          loadUserProfile(session.user);
+          // Load user data in background
+          setTimeout(() => {
+            loadUserData(session.user);
+          }, 0);
         } else {
           startTransition(() => {
             setUserRoles([]);
@@ -80,64 +88,123 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return () => subscription.unsubscribe();
   }, []);
 
-  const loadUserRoles = async (userId: string) => {
+  const loadUserData = async (user: User) => {
     try {
-      const { data, error } = await supabase
-        .from('user_roles')
-        .select('role')
-        .eq('guardian_id', userId)
-        .eq('is_active', true);
+      // Load from profiles table first
+      const { data: profileData, error: profileError } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('user_id', user.id)
+        .maybeSingle();
 
-      if (error) {
-        logger.error('Error loading user roles:', error);
-        return;
+      if (profileError) {
+        logger.error('Error loading profile:', profileError);
       }
 
+      // Try to find guardian by email if no profile guardian_id
+      let guardianId = profileData?.guardian_id;
+      
+      if (!guardianId) {
+        const { data: guardianData, error: guardianError } = await supabase
+          .from('guardians')
+          .select('id, first_name, last_name, email, phone, profile_image')
+          .eq('email', user.email)
+          .maybeSingle();
+
+        if (guardianError) {
+          logger.error('Error loading guardian by email:', guardianError);
+        } else if (guardianData) {
+          guardianId = guardianData.id;
+          
+          // Update profile to link to guardian
+          if (profileData) {
+            await supabase
+              .from('profiles')
+              .update({ guardian_id: guardianId })
+              .eq('user_id', user.id);
+          }
+        }
+      }
+
+      // Load guardian data if we have a guardian_id
+      let guardianData = null;
+      if (guardianId) {
+        const { data, error } = await supabase
+          .from('guardians')
+          .select('first_name, last_name, email, phone, profile_image')
+          .eq('id', guardianId)
+          .maybeSingle();
+
+        if (error) {
+          logger.error('Error loading guardian data:', error);
+        } else {
+          guardianData = data;
+        }
+      }
+
+      // Set user profile from guardian data or profile data
       startTransition(() => {
-        setUserRoles(data?.map(r => r.role as UserRole) || ['parent']);
+        setUserProfile({
+          firstName: guardianData?.first_name || profileData?.first_name || '',
+          lastName: guardianData?.last_name || profileData?.last_name || '',
+          email: guardianData?.email || profileData?.email || user.email || '',
+          phone: guardianData?.phone || profileData?.phone || '',
+          profileImage: guardianData?.profile_image || profileData?.profile_image || '',
+          guardianId: guardianId || undefined,
+        });
       });
+
+      // Load user roles
+      await loadUserRoles(guardianId || user.id);
+
     } catch (error) {
-      logger.error('Error in loadUserRoles:', error);
+      logger.error('Error in loadUserData:', error);
+      // Set basic profile from auth user data
       startTransition(() => {
-        setUserRoles(['parent']);
+        setUserProfile({
+          firstName: user.user_metadata?.first_name || '',
+          lastName: user.user_metadata?.last_name || '',
+          email: user.email || '',
+          phone: user.user_metadata?.phone || '',
+          profileImage: user.user_metadata?.profile_image || '',
+        });
+        setUserRoles(['parent']); // Default role
       });
     }
   };
 
-  const loadUserProfile = async (user: User) => {
+  const loadUserRoles = async (guardianId: string) => {
     try {
       const { data, error } = await supabase
-        .from('guardians')
-        .select('first_name, last_name, email')
-        .eq('id', user.id)
-        .single();
+        .from('user_roles')
+        .select('role')
+        .eq('guardian_id', guardianId)
+        .eq('is_active', true);
 
-      if (error && error.code !== 'PGRST116') {
-        logger.error('Error loading user profile:', error);
+      if (error) {
+        logger.error('Error loading user roles:', error);
+        startTransition(() => {
+          setUserRoles(['parent']); // Default fallback
+        });
         return;
       }
 
+      const roles = data?.map(r => r.role as UserRole) || ['parent'];
       startTransition(() => {
-        setUserProfile({
-          firstName: data?.first_name || '',
-          lastName: data?.last_name || '',
-          email: data?.email || user.email || '',
-        });
+        setUserRoles(roles);
       });
     } catch (error) {
-      logger.error('Error in loadUserProfile:', error);
+      logger.error('Error in loadUserRoles:', error);
       startTransition(() => {
-        setUserProfile({
-          firstName: '',
-          lastName: '',
-          email: user.email || '',
-        });
+        setUserRoles(['parent']); // Default fallback
       });
     }
   };
 
   const refreshUserRoles = async () => {
-    if (currentUser) {
+    if (currentUser && userProfile?.guardianId) {
+      await loadUserRoles(userProfile.guardianId);
+    } else if (currentUser) {
       await loadUserRoles(currentUser.id);
     }
   };
