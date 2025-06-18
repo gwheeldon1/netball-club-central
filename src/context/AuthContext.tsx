@@ -90,6 +90,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const loadUserData = async (user: User) => {
     try {
+      console.log('=== loadUserData DEBUG ===');
+      console.log('User ID:', user.id);
+      console.log('User Email:', user.email);
+
       // Load from profiles table first
       const { data: profileData, error: profileError } = await supabase
         .from('profiles')
@@ -101,24 +105,33 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         logger.error('Error loading profile:', profileError);
       }
 
+      console.log('Profile data:', profileData);
+
       // Find guardian by email to get the guardian ID for role lookup
       let guardianId: string | undefined;
       let guardianData = null;
       
       try {
+        console.log('Looking for guardian with email:', user.email);
         const { data: guardianResponse, error: guardianError } = await supabase
           .from('guardians')
           .select('id, first_name, last_name, email, phone, profile_image')
           .eq('email', user.email)
           .maybeSingle();
 
+        console.log('Guardian query result:', { data: guardianResponse, error: guardianError });
+
         if (!guardianError && guardianResponse) {
           guardianId = guardianResponse.id;
           guardianData = guardianResponse;
+          console.log('Found guardian ID:', guardianId);
+        } else {
+          console.log('Guardian not found or error:', guardianError);
         }
       } catch (error) {
         // Guardians table might not exist, fall back to profile data
         logger.warn('Guardians table not accessible, using profile data:', error);
+        console.log('Guardian table error:', error);
       }
 
       // Set user profile from guardian data or profile data or auth data
@@ -135,8 +148,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       // Load user roles using the guardian ID (this is the key fix!)
       if (guardianId) {
+        console.log('Loading roles for guardian ID:', guardianId);
         await loadUserRoles(guardianId);
       } else {
+        console.log('No guardian ID found, defaulting to parent role');
         // If no guardian found, default to parent role
         startTransition(() => {
           setUserRoles(['parent']);
@@ -145,6 +160,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     } catch (error) {
       logger.error('Error in loadUserData:', error);
+      console.log('loadUserData error:', error);
       // Set basic profile from auth user data
       startTransition(() => {
         setUserProfile({
@@ -161,14 +177,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const loadUserRoles = async (guardianId: string) => {
     try {
+      console.log('=== loadUserRoles DEBUG ===');
+      console.log('Looking for roles for guardian ID:', guardianId);
+
       const { data, error } = await supabase
         .from('user_roles')
         .select('role')
         .eq('guardian_id', guardianId)
         .eq('is_active', true);
 
+      console.log('User roles query result:', { data, error });
+
       if (error) {
         logger.error('Error loading user roles:', error);
+        console.log('User roles error:', error);
         startTransition(() => {
           setUserRoles(['parent']); // Default fallback
         });
@@ -176,15 +198,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
 
       const roles = data?.map(r => r.role as UserRole) || ['parent'];
+      console.log('Mapped roles:', roles);
+      
       startTransition(() => {
         setUserRoles(roles);
       });
       
       // Debug logging
-      console.log('Loaded roles for guardian:', guardianId, 'roles:', roles);
+      console.log('Final roles set for guardian:', guardianId, 'roles:', roles);
       
     } catch (error) {
       logger.error('Error in loadUserRoles:', error);
+      console.log('loadUserRoles catch error:', error);
       startTransition(() => {
         setUserRoles(['parent']); // Default fallback
       });
