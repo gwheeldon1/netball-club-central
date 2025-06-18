@@ -21,7 +21,7 @@ const Index = () => {
       console.log('Index: No user found, redirecting to login');
       navigate('/login', { replace: true });
     } else {
-      console.log('Index: User found, loading dashboard for:', currentUser.email);
+      console.log('Index: User found, ready to load dashboard for:', currentUser.email);
     }
   }, [currentUser, loading, navigate]);
 

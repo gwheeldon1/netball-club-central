@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
@@ -151,6 +152,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         console.log('AuthProvider: No guardian ID found, defaulting to parent role');
         setUserRoles(['parent']);
       }
+
+      console.log('AuthProvider: User data loading complete');
 
     } catch (error) {
       console.error('AuthProvider: Error in loadUserData:', error);
