@@ -82,7 +82,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           setUserRoles([]);
           setUserProfile(null);
         }
-        setLoading(false);
+        
+        if (mounted) {
+          setLoading(false);
+        }
       }
     );
 
