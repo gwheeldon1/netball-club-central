@@ -45,142 +45,152 @@ function App() {
   return (
     <ErrorBoundary>
       <ThemeProvider defaultTheme="light" storageKey="netball-theme">
-      <AuthProvider>
-        <Router>
-          <Routes>
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/register" element={<RegistrationPage />} />
-            <Route path="/subscription-success" element={<SubscriptionSuccessPage />} />
-            <Route path="/unauthorized" element={<UnauthorizedPage />} />
-            
-            <Route path="/" element={
-              <ProtectedRoute>
-                <Index />
-              </ProtectedRoute>
-            } />
-            
-            <Route path="/analytics" element={
-              <ProtectedRoute>
-                <AnalyticsPage />
-              </ProtectedRoute>
-            } />
+        <AuthProvider>
+          <Router>
+            <div className="min-h-screen w-full">
+              <Routes>
+                <Route path="/login" element={
+                  <ProtectedRoute requireAuth={false}>
+                    <LoginPage />
+                  </ProtectedRoute>
+                } />
+                <Route path="/register" element={
+                  <ProtectedRoute requireAuth={false}>
+                    <RegistrationPage />
+                  </ProtectedRoute>
+                } />
+                <Route path="/subscription-success" element={<SubscriptionSuccessPage />} />
+                <Route path="/unauthorized" element={<UnauthorizedPage />} />
+                
+                <Route path="/" element={
+                  <ProtectedRoute>
+                    <Index />
+                  </ProtectedRoute>
+                } />
+                
+                <Route path="/analytics" element={
+                  <ProtectedRoute>
+                    <AnalyticsPage />
+                  </ProtectedRoute>
+                } />
 
-            <Route path="/groups" element={
-              <ProtectedRoute>
-                <GroupsPage />
-              </ProtectedRoute>
-            } />
+                <Route path="/groups" element={
+                  <ProtectedRoute>
+                    <GroupsPage />
+                  </ProtectedRoute>
+                } />
 
-            <Route path="/groups/new" element={
-              <ProtectedRoute allowedRoles={['admin']}>
-                <NewGroupPage />
-              </ProtectedRoute>
-            } />
+                <Route path="/groups/new" element={
+                  <ProtectedRoute allowedRoles={['admin']}>
+                    <NewGroupPage />
+                  </ProtectedRoute>
+                } />
 
-            <Route path="/groups/:id/edit" element={
-              <ProtectedRoute allowedRoles={['admin']}>
-                <EditGroupPage />
-              </ProtectedRoute>
-            } />
-            
-            <Route path="/teams" element={
-              <ProtectedRoute>
-                <Suspense fallback={<PageLoadingFallback />}>
-                  <TeamsPage />
-                </Suspense>
-              </ProtectedRoute>
-            } />
-            
-            <Route path="/teams/:id" element={
-              <ProtectedRoute>
-                <TeamDetailPage />
-              </ProtectedRoute>
-            } />
-            
-            <Route path="/teams/new" element={
-              <ProtectedRoute allowedRoles={['admin']}>
-                <NewTeamPage />
-              </ProtectedRoute>
-            } />
-            
-            <Route path="/teams/:id/edit" element={
-              <ProtectedRoute allowedRoles={['admin']}>
-                <EditTeamPage />
-              </ProtectedRoute>
-            } />
-            
-            <Route path="/children" element={
-              <ProtectedRoute allowedRoles={['parent']}>
-                <ChildrenPage />
-              </ProtectedRoute>
-            } />
-            
-            <Route path="/children/new" element={
-              <ProtectedRoute allowedRoles={['parent']}>
-                <NewChildPage />
-              </ProtectedRoute>
-            } />
-            
-            <Route path="/children/:id" element={
-              <ProtectedRoute>
-                <ChildDetailPage />
-              </ProtectedRoute>
-            } />
-            
-            <Route path="/events" element={
-              <ProtectedRoute>
-                <EventsPage />
-              </ProtectedRoute>
-            } />
-            
-            <Route path="/events/new" element={
-              <ProtectedRoute allowedRoles={['admin', 'coach', 'manager']}>
-                <Suspense fallback={<PageLoadingFallback />}>
-                  <NewEventPage />
-                </Suspense>
-              </ProtectedRoute>
-            } />
+                <Route path="/groups/:id/edit" element={
+                  <ProtectedRoute allowedRoles={['admin']}>
+                    <EditGroupPage />
+                  </ProtectedRoute>
+                } />
+                
+                <Route path="/teams" element={
+                  <ProtectedRoute>
+                    <Suspense fallback={<PageLoadingFallback />}>
+                      <TeamsPage />
+                    </Suspense>
+                  </ProtectedRoute>
+                } />
+                
+                <Route path="/teams/:id" element={
+                  <ProtectedRoute>
+                    <TeamDetailPage />
+                  </ProtectedRoute>
+                } />
+                
+                <Route path="/teams/new" element={
+                  <ProtectedRoute allowedRoles={['admin']}>
+                    <NewTeamPage />
+                  </ProtectedRoute>
+                } />
+                
+                <Route path="/teams/:id/edit" element={
+                  <ProtectedRoute allowedRoles={['admin']}>
+                    <EditTeamPage />
+                  </ProtectedRoute>
+                } />
+                
+                <Route path="/children" element={
+                  <ProtectedRoute allowedRoles={['parent']}>
+                    <ChildrenPage />
+                  </ProtectedRoute>
+                } />
+                
+                <Route path="/children/new" element={
+                  <ProtectedRoute allowedRoles={['parent']}>
+                    <NewChildPage />
+                  </ProtectedRoute>
+                } />
+                
+                <Route path="/children/:id" element={
+                  <ProtectedRoute>
+                    <ChildDetailPage />
+                  </ProtectedRoute>
+                } />
+                
+                <Route path="/events" element={
+                  <ProtectedRoute>
+                    <EventsPage />
+                  </ProtectedRoute>
+                } />
+                
+                <Route path="/events/new" element={
+                  <ProtectedRoute allowedRoles={['admin', 'coach', 'manager']}>
+                    <Suspense fallback={<PageLoadingFallback />}>
+                      <NewEventPage />
+                    </Suspense>
+                  </ProtectedRoute>
+                } />
 
-            <Route path="/events/:id" element={
-              <ProtectedRoute>
-                <EventDetailPage />
-              </ProtectedRoute>
-            } />
-            
-            <Route path="/events/:id/edit" element={
-              <ProtectedRoute allowedRoles={['admin', 'coach', 'manager']}>
-                <Suspense fallback={<PageLoadingFallback />}>
-                  <EditEventPage />
-                </Suspense>
-              </ProtectedRoute>
-            } />
+                <Route path="/events/:id" element={
+                  <ProtectedRoute>
+                    <EventDetailPage />
+                  </ProtectedRoute>
+                } />
+                
+                <Route path="/events/:id/edit" element={
+                  <ProtectedRoute allowedRoles={['admin', 'coach', 'manager']}>
+                    <Suspense fallback={<PageLoadingFallback />}>
+                      <EditEventPage />
+                    </Suspense>
+                  </ProtectedRoute>
+                } />
 
-            <Route path="/approvals" element={
-              <ProtectedRoute allowedRoles={['admin', 'coach', 'manager']}>
-                <ApprovalsPage />
-              </ProtectedRoute>
-            } />
-            
-            <Route path="/profile" element={
-              <ProtectedRoute>
-                <UserProfilePage />
-              </ProtectedRoute>
-            } />
-            
-            <Route path="/settings" element={
-              <ProtectedRoute allowedRoles={['admin']}>
-                <SettingsPage />
-              </ProtectedRoute>
-            } />
-            
-            <Route path="/design" element={<DesignSystemPage />} />
-            
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </Router>
-        <Toaster position="top-right" />
-      </AuthProvider>
-    </ThemeProvider>
+                <Route path="/approvals" element={
+                  <ProtectedRoute allowedRoles={['admin', 'coach', 'manager']}>
+                    <ApprovalsPage />
+                  </ProtectedRoute>
+                } />
+                
+                <Route path="/profile" element={
+                  <ProtectedRoute>
+                    <UserProfilePage />
+                  </ProtectedRoute>
+                } />
+                
+                <Route path="/settings" element={
+                  <ProtectedRoute allowedRoles={['admin']}>
+                    <SettingsPage />
+                  </ProtectedRoute>
+                } />
+                
+                <Route path="/design" element={<DesignSystemPage />} />
+                
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </div>
+          </Router>
+          <Toaster position="top-right" />
+        </AuthProvider>
+      </ThemeProvider>
     </ErrorBoundary>
   );
 }

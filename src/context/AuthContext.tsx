@@ -1,5 +1,5 @@
 
-import React, { createContext, useContext, useEffect, useState, useTransition, startTransition } from 'react';
+import React, { createContext, useContext, useEffect, useState } from 'react';
 import { User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { logger } from '@/utils/logger';
@@ -34,16 +34,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
   const [userRoles, setUserRoles] = useState<UserRole[]>([]);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
-  const [isPending, startAsyncTransition] = useTransition();
 
   useEffect(() => {
+    let mounted = true;
+
     // Get initial session
     const getInitialSession = async () => {
       try {
         const { data: { session }, error } = await supabase.auth.getSession();
         if (error) {
           logger.error('Error getting initial session:', error);
-        } else {
+        } else if (mounted) {
           setCurrentUser(session?.user ?? null);
           
           if (session?.user) {
@@ -53,7 +54,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       } catch (error) {
         logger.error('Error in getInitialSession:', error);
       } finally {
-        setLoading(false);
+        if (mounted) {
+          setLoading(false);
+        }
       }
     };
 
@@ -62,6 +65,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
+        if (!mounted) return;
+        
         console.log('Auth state change:', { event, user: session?.user?.email });
         
         setCurrentUser(session?.user ?? null);
@@ -77,7 +82,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
     );
 
-    return () => subscription.unsubscribe();
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
   }, []);
 
   const loadUserData = async (user: User) => {
@@ -256,7 +264,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const value = {
     currentUser,
     user: currentUser, // Alias for compatibility
-    loading: loading || isPending,
+    loading,
     userRoles,
     userProfile,
     hasRole,
