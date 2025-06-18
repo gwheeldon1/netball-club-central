@@ -6,16 +6,17 @@ import Layout from "@/components/Layout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Plus, Users, ChevronRight, Edit } from "lucide-react";
+import { Plus, Users, ChevronRight, Edit, RefreshCw } from "lucide-react";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
 import { groupApi, GroupWithTeams } from "@/services/api/groups";
 
 const GroupsPage = () => {
-  const { currentUser, userRoles, hasRole } = useAuth();
+  const { currentUser, userRoles, hasRole, refreshUserRoles } = useAuth();
   const permissions = usePermissions();
   const [groups, setGroups] = useState<GroupWithTeams[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+  const [refreshingRoles, setRefreshingRoles] = useState<boolean>(false);
 
   // Debug logging
   useEffect(() => {
@@ -52,6 +53,19 @@ const GroupsPage = () => {
     loadGroups();
   }, []);
 
+  const handleRefreshRoles = async () => {
+    setRefreshingRoles(true);
+    try {
+      await refreshUserRoles();
+      toast.success('Roles refreshed successfully');
+    } catch (error) {
+      console.error('Error refreshing roles:', error);
+      toast.error('Failed to refresh roles');
+    } finally {
+      setRefreshingRoles(false);
+    }
+  };
+
   if (loading) {
     return (
       <Layout>
@@ -69,12 +83,29 @@ const GroupsPage = () => {
       <div className="space-y-4 sm:space-y-6">
         {/* Debug info - remove after testing */}
         <div className="bg-yellow-100 p-4 rounded-lg text-sm">
-          <p><strong>Debug Info:</strong></p>
-          <p>Email: {currentUser?.email}</p>
-          <p>User Roles: {JSON.stringify(userRoles)}</p>
-          <p>Has Admin Role: {hasRole('admin').toString()}</p>
-          <p>Permissions Is Admin: {permissions.isAdmin.toString()}</p>
-          <p>Show Admin Features: {showAdminFeatures.toString()}</p>
+          <div className="flex items-center justify-between">
+            <div>
+              <p><strong>Debug Info:</strong></p>
+              <p>Email: {currentUser?.email}</p>
+              <p>User Roles: {JSON.stringify(userRoles)}</p>
+              <p>Has Admin Role: {hasRole('admin').toString()}</p>
+              <p>Permissions Is Admin: {permissions.isAdmin.toString()}</p>
+              <p>Show Admin Features: {showAdminFeatures.toString()}</p>
+            </div>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={handleRefreshRoles}
+              disabled={refreshingRoles}
+            >
+              {refreshingRoles ? (
+                <RefreshCw className="h-4 w-4 animate-spin" />
+              ) : (
+                <RefreshCw className="h-4 w-4" />
+              )}
+              Refresh Roles
+            </Button>
+          </div>
         </div>
 
         <div className="flex flex-col gap-3 sm:gap-4 sm:flex-row sm:items-center sm:justify-between">
