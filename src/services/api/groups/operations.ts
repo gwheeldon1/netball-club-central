@@ -172,14 +172,14 @@ export class GroupOperations {
     }
   }
 
-  async addStaffToGroup(groupId: string, guardianId: string, role: string): Promise<GroupStaff> {
+  async addStaffToGroup(groupId: string, guardianId: string, role: 'parent' | 'coach' | 'manager' | 'admin'): Promise<GroupStaff> {
     try {
       const { data, error } = await supabase
         .from('group_staff')
         .insert({
           group_id: groupId,
           guardian_id: guardianId,
-          role
+          role: role
         })
         .select()
         .single();
