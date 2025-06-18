@@ -40,10 +40,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     const getInitialSession = async () => {
       try {
+        console.log('AuthProvider: Getting initial session');
         const { data: { session }, error } = await supabase.auth.getSession();
+        
         if (error) {
+          console.error('AuthProvider: Error getting initial session:', error);
           logger.error('Error getting initial session:', error);
         } else if (mounted) {
+          console.log('AuthProvider: Initial session found:', session?.user?.email);
           setCurrentUser(session?.user ?? null);
           
           if (session?.user) {
@@ -51,9 +55,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           }
         }
       } catch (error) {
+        console.error('AuthProvider: Error in getInitialSession:', error);
         logger.error('Error in getInitialSession:', error);
       } finally {
         if (mounted) {
+          console.log('AuthProvider: Initial loading complete');
           setLoading(false);
         }
       }
@@ -65,13 +71,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       async (event, session) => {
         if (!mounted) return;
         
-        console.log('Auth state change:', { event, user: session?.user?.email });
+        console.log('AuthProvider: Auth state change:', { event, user: session?.user?.email });
         
         setCurrentUser(session?.user ?? null);
         
         if (session?.user) {
           await loadUserData(session.user);
         } else {
+          console.log('AuthProvider: Clearing user data');
           setUserRoles([]);
           setUserProfile(null);
         }
@@ -87,10 +94,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const loadUserData = async (user: User) => {
     try {
-      console.log('=== loadUserData DEBUG ===');
-      console.log('User ID:', user.id);
-      console.log('User Email:', user.email);
+      console.log('AuthProvider: Loading user data for:', user.email);
 
+      // Load profile data
       const { data: profileData, error: profileError } = await supabase
         .from('profiles')
         .select('*')
@@ -98,56 +104,56 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         .maybeSingle();
 
       if (profileError) {
+        console.warn('AuthProvider: Error loading profile:', profileError);
         logger.error('Error loading profile:', profileError);
       }
 
-      console.log('Profile data:', profileData);
-
+      // Load guardian data
       let guardianId: string | undefined;
       let guardianData = null;
       
       try {
-        console.log('Looking for guardian with email:', user.email);
         const { data: guardianResponse, error: guardianError } = await supabase
           .from('guardians')
           .select('id, first_name, last_name, email, phone, profile_image')
           .eq('email', user.email)
           .maybeSingle();
 
-        console.log('Guardian query result:', { data: guardianResponse, error: guardianError });
-
         if (!guardianError && guardianResponse) {
           guardianId = guardianResponse.id;
           guardianData = guardianResponse;
-          console.log('Found guardian ID:', guardianId);
-        } else {
-          console.log('Guardian not found or error:', guardianError);
+          console.log('AuthProvider: Found guardian ID:', guardianId);
         }
       } catch (error) {
-        logger.warn('Guardians table not accessible, using profile data:', error);
-        console.log('Guardian table error:', error);
+        console.warn('AuthProvider: Guardian table not accessible:', error);
+        logger.warn('Guardians table not accessible:', error);
       }
 
-      setUserProfile({
+      // Set user profile
+      const profile: UserProfile = {
         firstName: guardianData?.first_name || profileData?.first_name || user.user_metadata?.first_name || '',
         lastName: guardianData?.last_name || profileData?.last_name || user.user_metadata?.last_name || '',
         email: guardianData?.email || profileData?.email || user.email || '',
         phone: guardianData?.phone || profileData?.phone || user.user_metadata?.phone || '',
         profileImage: guardianData?.profile_image || profileData?.profile_image || user.user_metadata?.profile_image || '',
         guardianId: guardianId,
-      });
+      };
 
+      setUserProfile(profile);
+
+      // Load user roles
       if (guardianId) {
-        console.log('Loading roles for guardian ID:', guardianId);
         await loadUserRoles(guardianId);
       } else {
-        console.log('No guardian ID found, defaulting to parent role');
+        console.log('AuthProvider: No guardian ID found, defaulting to parent role');
         setUserRoles(['parent']);
       }
 
     } catch (error) {
+      console.error('AuthProvider: Error in loadUserData:', error);
       logger.error('Error in loadUserData:', error);
-      console.log('loadUserData error:', error);
+      
+      // Fallback profile
       setUserProfile({
         firstName: user.user_metadata?.first_name || '',
         lastName: user.user_metadata?.last_name || '',
@@ -161,8 +167,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const loadUserRoles = async (guardianId: string) => {
     try {
-      console.log('=== loadUserRoles DEBUG ===');
-      console.log('Looking for roles for guardian ID:', guardianId);
+      console.log('AuthProvider: Loading roles for guardian ID:', guardianId);
 
       const { data, error } = await supabase
         .from('user_roles')
@@ -170,25 +175,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         .eq('guardian_id', guardianId)
         .eq('is_active', true);
 
-      console.log('User roles query result:', { data, error });
-
       if (error) {
+        console.error('AuthProvider: Error loading user roles:', error);
         logger.error('Error loading user roles:', error);
-        console.log('User roles error:', error);
         setUserRoles(['parent']);
         return;
       }
 
       const roles = data?.map(r => r.role as UserRole) || ['parent'];
-      console.log('Mapped roles:', roles);
-      
+      console.log('AuthProvider: Loaded roles:', roles);
       setUserRoles(roles);
       
-      console.log('Final roles set for guardian:', guardianId, 'roles:', roles);
-      
     } catch (error) {
+      console.error('AuthProvider: Error in loadUserRoles:', error);
       logger.error('Error in loadUserRoles:', error);
-      console.log('loadUserRoles catch error:', error);
       setUserRoles(['parent']);
     }
   };
@@ -203,18 +203,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const login = async (email: string, password: string): Promise<boolean> => {
     try {
+      console.log('AuthProvider: Login attempt for:', email);
       const { error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
       if (error) {
+        console.error('AuthProvider: Login error:', error);
         logger.error('Login error:', error);
         return false;
       }
 
+      console.log('AuthProvider: Login successful');
       return true;
     } catch (error) {
+      console.error('AuthProvider: Login error:', error);
       logger.error('Login error:', error);
       return false;
     }
@@ -222,22 +226,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const logout = async () => {
     try {
-      console.log('Logout called');
+      console.log('AuthProvider: Logout initiated');
       const { error } = await supabase.auth.signOut();
+      
       if (error) {
+        console.error('AuthProvider: Logout error:', error);
         logger.error('Error signing out:', error);
-        console.error('Logout error:', error);
         throw error;
       }
-      console.log('Logout successful');
       
+      console.log('AuthProvider: Logout successful');
       setCurrentUser(null);
       setUserRoles([]);
       setUserProfile(null);
       
     } catch (error) {
+      console.error('AuthProvider: Error in logout:', error);
       logger.error('Error in logout:', error);
-      console.error('Logout catch error:', error);
       throw error;
     }
   };
@@ -262,6 +267,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     logout,
     refreshUserRoles,
   };
+
+  console.log('AuthProvider: Providing context with loading:', loading, 'user:', currentUser?.email);
 
   return (
     <AuthContext.Provider value={value}>

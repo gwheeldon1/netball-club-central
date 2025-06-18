@@ -10,25 +10,37 @@ const Index = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (loading) return;
+    console.log('Index: useEffect - loading:', loading, 'user:', currentUser?.email);
+    
+    if (loading) {
+      console.log('Index: Still loading auth state');
+      return;
+    }
     
     if (!currentUser) {
-      console.log('No user found, redirecting to login');
+      console.log('Index: No user found, redirecting to login');
       navigate('/login', { replace: true });
     } else {
-      console.log('User found, loading dashboard for:', currentUser.email);
+      console.log('Index: User found, loading dashboard for:', currentUser.email);
     }
   }, [currentUser, loading, navigate]);
 
   if (loading) {
+    console.log('Index: Showing loading fallback');
     return <DashboardLoadingFallback />;
   }
 
-  return currentUser ? (
+  if (!currentUser) {
+    console.log('Index: No user, returning null');
+    return null;
+  }
+
+  console.log('Index: Rendering dashboard');
+  return (
     <Suspense fallback={<DashboardLoadingFallback />}>
       <LazyDashboard />
     </Suspense>
-  ) : null;
+  );
 };
 
 export default Index;

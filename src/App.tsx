@@ -3,7 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Toaster } from 'sonner';
 import { ThemeProvider } from '@/components/theme-provider';
 import { AuthProvider } from '@/context/AuthContext';
-import { ErrorBoundary } from '@/utils/errorBoundary';
+import { AppErrorBoundary } from '@/components/AppErrorBoundary';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import { Suspense } from 'react';
 import {
@@ -24,7 +24,7 @@ import {
   PageLoadingFallback,
 } from '@/components/LazyLoadedComponents';
 
-// Critical pages loaded immediately (no lazy loading for login/auth)
+// Critical pages loaded immediately
 import LoginPage from '@/pages/LoginPage';
 import NotFound from '@/pages/NotFound';
 import UnauthorizedPage from '@/pages/UnauthorizedPage';
@@ -35,15 +35,17 @@ import NewGroupPage from '@/pages/NewGroupPage';
 import EditGroupPage from '@/pages/EditGroupPage';
 import Index from '@/pages/Index';
 
-// Lazy load heavy components that aren't immediately needed
+// Lazy load heavy components
 import { lazy } from 'react';
 const NewEventPage = lazy(() => import('@/pages/NewEventPage'));
 const EditEventPage = lazy(() => import('@/pages/EditEventPage'));
 import './App.css';
 
 function App() {
+  console.log('App component rendering');
+
   return (
-    <ErrorBoundary>
+    <AppErrorBoundary>
       <ThemeProvider defaultTheme="light" storageKey="netball-theme">
         <AuthProvider>
           <Router>
@@ -191,7 +193,7 @@ function App() {
           <Toaster position="top-right" />
         </AuthProvider>
       </ThemeProvider>
-    </ErrorBoundary>
+    </AppErrorBoundary>
   );
 }
 
