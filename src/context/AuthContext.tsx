@@ -101,7 +101,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         logger.error('Error loading profile:', profileError);
       }
 
-      // Try to find guardian by email since guardians table might not exist yet
+      // Find guardian by email to get the guardian ID for role lookup
       let guardianId: string | undefined;
       let guardianData = null;
       
@@ -133,8 +133,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         });
       });
 
-      // Load user roles if we have a guardian ID, otherwise use user ID
-      await loadUserRoles(guardianId || user.id);
+      // Load user roles using the guardian ID (this is the key fix!)
+      if (guardianId) {
+        await loadUserRoles(guardianId);
+      } else {
+        // If no guardian found, default to parent role
+        startTransition(() => {
+          setUserRoles(['parent']);
+        });
+      }
 
     } catch (error) {
       logger.error('Error in loadUserData:', error);
@@ -172,6 +179,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       startTransition(() => {
         setUserRoles(roles);
       });
+      
+      // Debug logging
+      console.log('Loaded roles for guardian:', guardianId, 'roles:', roles);
+      
     } catch (error) {
       logger.error('Error in loadUserRoles:', error);
       startTransition(() => {
@@ -184,7 +195,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (currentUser && userProfile?.guardianId) {
       await loadUserRoles(userProfile.guardianId);
     } else if (currentUser) {
-      await loadUserRoles(currentUser.id);
+      // Try to find guardian by email again
+      await loadUserData(currentUser);
     }
   };
 
