@@ -12,10 +12,20 @@ import { toast } from "sonner";
 import { groupApi, GroupWithTeams } from "@/services/api/groups";
 
 const GroupsPage = () => {
-  const { currentUser } = useAuth();
+  const { currentUser, userRoles, hasRole } = useAuth();
   const permissions = usePermissions();
   const [groups, setGroups] = useState<GroupWithTeams[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+
+  // Debug logging
+  useEffect(() => {
+    console.log('GroupsPage Debug Info:', {
+      currentUser: currentUser?.email,
+      userRoles,
+      hasAdminRole: hasRole('admin'),
+      permissionsIsAdmin: permissions.isAdmin
+    });
+  }, [currentUser, userRoles, hasRole, permissions.isAdmin]);
 
   useEffect(() => {
     const loadGroups = async () => {
@@ -52,9 +62,21 @@ const GroupsPage = () => {
     );
   }
 
+  const showAdminFeatures = permissions.isAdmin || hasRole('admin');
+
   return (
     <Layout>
       <div className="space-y-4 sm:space-y-6">
+        {/* Debug info - remove after testing */}
+        <div className="bg-yellow-100 p-4 rounded-lg text-sm">
+          <p><strong>Debug Info:</strong></p>
+          <p>Email: {currentUser?.email}</p>
+          <p>User Roles: {JSON.stringify(userRoles)}</p>
+          <p>Has Admin Role: {hasRole('admin').toString()}</p>
+          <p>Permissions Is Admin: {permissions.isAdmin.toString()}</p>
+          <p>Show Admin Features: {showAdminFeatures.toString()}</p>
+        </div>
+
         <div className="flex flex-col gap-3 sm:gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Age Groups</h1>
@@ -63,7 +85,7 @@ const GroupsPage = () => {
             </p>
           </div>
           
-          {permissions.isAdmin && (
+          {showAdminFeatures && (
             <Button className="bg-primary hover:bg-primary/90 w-full sm:w-auto" asChild>
               <Link to="/groups/new">
                 <Plus className="mr-2 h-4 w-4" />
@@ -89,7 +111,7 @@ const GroupsPage = () => {
                     <div className="flex-1 min-w-0">
                       <CardTitle className="text-xl flex items-center gap-2">
                         {group.name}
-                        {permissions.isAdmin && (
+                        {showAdminFeatures && (
                           <Button variant="ghost" size="icon" className="h-6 w-6" asChild>
                             <Link to={`/groups/${group.id}/edit`}>
                               <Edit className="h-3 w-3" />
@@ -140,7 +162,7 @@ const GroupsPage = () => {
           ) : (
             <div className="col-span-full text-center py-8 sm:py-12">
               <p className="text-muted-foreground text-sm sm:text-base">No groups found.</p>
-              {permissions.isAdmin && (
+              {showAdminFeatures && (
                 <Button className="mt-4" asChild>
                   <Link to="/groups/new">
                     <Plus className="mr-2 h-4 w-4" />
