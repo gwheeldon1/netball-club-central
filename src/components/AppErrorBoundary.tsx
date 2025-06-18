@@ -1,29 +1,41 @@
 
 import React from 'react';
-import { ErrorBoundary } from 'react-error-boundary';
 import { ErrorFallback } from './ErrorFallback';
 
 interface AppErrorBoundaryProps {
   children: React.ReactNode;
 }
 
-export const AppErrorBoundary: React.FC<AppErrorBoundaryProps> = ({ children }) => {
-  const handleError = (error: Error, errorInfo: any) => {
-    console.error('Error Boundary caught an error:', error, errorInfo);
+interface AppErrorBoundaryState {
+  hasError: boolean;
+  error?: Error;
+}
+
+export class AppErrorBoundary extends React.Component<AppErrorBoundaryProps, AppErrorBoundaryState> {
+  constructor(props: AppErrorBoundaryProps) {
+    super(props);
+    this.state = { hasError: false };
+  }
+
+  static getDerivedStateFromError(error: Error): AppErrorBoundaryState {
+    console.error('AppErrorBoundary: Error caught:', error);
+    return { hasError: true, error };
+  }
+
+  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
+    console.error('AppErrorBoundary: Component error details:', error, errorInfo);
+  }
+
+  private handleReset = () => {
+    console.log('AppErrorBoundary: Resetting error state');
+    this.setState({ hasError: false, error: undefined });
   };
 
-  const handleReset = () => {
-    console.log('Error boundary reset');
-    window.location.reload();
-  };
+  render() {
+    if (this.state.hasError && this.state.error) {
+      return <ErrorFallback error={this.state.error} resetError={this.handleReset} />;
+    }
 
-  return (
-    <ErrorBoundary
-      FallbackComponent={ErrorFallback}
-      onError={handleError}
-      onReset={handleReset}
-    >
-      {children}
-    </ErrorBoundary>
-  );
-};
+    return this.props.children;
+  }
+}
