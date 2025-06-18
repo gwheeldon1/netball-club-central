@@ -1,4 +1,3 @@
-
 import { ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
@@ -17,6 +16,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { useNavigate } from "react-router-dom";
 
 interface SidebarProps {
   isOpen: boolean;
@@ -25,10 +25,19 @@ interface SidebarProps {
 
 export const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
   const { currentUser, logout, hasRole, userProfile, userRoles } = useAuth();
+  const navigate = useNavigate();
 
-  const handleLogout = () => {
-    logout();
-    toast.success("Logged out successfully");
+  const handleLogout = async () => {
+    try {
+      console.log('Sidebar logout initiated');
+      await logout();
+      toast.success("Logged out successfully");
+      console.log('Logout successful, redirecting to login');
+      navigate('/login', { replace: true });
+    } catch (error) {
+      console.error('Logout failed:', error);
+      toast.error("Failed to log out. Please try again.");
+    }
   };
 
   // Get the primary role to display (prioritize admin, then coach, manager, parent)

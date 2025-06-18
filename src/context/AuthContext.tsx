@@ -45,7 +45,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           logger.error('Error getting initial session:', error);
         } else {
           setCurrentUser(session?.user ?? null);
-          setLoading(false);
           
           if (session?.user) {
             await loadUserData(session.user);
@@ -53,6 +52,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
       } catch (error) {
         logger.error('Error in getInitialSession:', error);
+      } finally {
         setLoading(false);
       }
     };
@@ -65,15 +65,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         console.log('Auth state change:', { event, user: session?.user?.email });
         
         setCurrentUser(session?.user ?? null);
-        setLoading(false);
         
         if (session?.user) {
-          // Load user data immediately, not in setTimeout
           await loadUserData(session.user);
         } else {
+          // Clear user data on logout
           setUserRoles([]);
           setUserProfile(null);
         }
+        setLoading(false);
       }
     );
 
@@ -121,7 +121,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           console.log('Guardian not found or error:', guardianError);
         }
       } catch (error) {
-        // Guardians table might not exist, fall back to profile data
         logger.warn('Guardians table not accessible, using profile data:', error);
         console.log('Guardian table error:', error);
       }
@@ -216,13 +215,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return false;
       }
 
-      // Immediately update current user state
-      if (data.user) {
-        setCurrentUser(data.user);
-        // Load user data immediately
-        await loadUserData(data.user);
-      }
-
       return true;
     } catch (error) {
       logger.error('Login error:', error);
@@ -232,13 +224,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const logout = async () => {
     try {
+      console.log('Logout called');
       const { error } = await supabase.auth.signOut();
       if (error) {
         logger.error('Error signing out:', error);
+        console.error('Logout error:', error);
         throw error;
       }
+      console.log('Logout successful');
+      
+      // Clear state immediately
+      setCurrentUser(null);
+      setUserRoles([]);
+      setUserProfile(null);
+      
     } catch (error) {
       logger.error('Error in logout:', error);
+      console.error('Logout catch error:', error);
       throw error;
     }
   };
