@@ -31,6 +31,8 @@ import UnauthorizedPage from '@/pages/UnauthorizedPage';
 import DesignSystemPage from '@/pages/DesignSystemPage';
 import AnalyticsPage from '@/pages/AnalyticsPage';
 import GroupsPage from '@/pages/GroupsPage';
+import NewGroupPage from '@/pages/NewGroupPage';
+import EditGroupPage from '@/pages/EditGroupPage';
 import Index from '@/pages/Index';
 
 // Lazy load heavy components that aren't immediately needed
@@ -66,6 +68,18 @@ function App() {
             <Route path="/groups" element={
               <ProtectedRoute>
                 <GroupsPage />
+              </ProtectedRoute>
+            } />
+
+            <Route path="/groups/new" element={
+              <ProtectedRoute allowedRoles={['admin']}>
+                <NewGroupPage />
+              </ProtectedRoute>
+            } />
+
+            <Route path="/groups/:id/edit" element={
+              <ProtectedRoute allowedRoles={['admin']}>
+                <EditGroupPage />
               </ProtectedRoute>
             } />
             

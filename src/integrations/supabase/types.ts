@@ -337,6 +337,72 @@ export type Database = {
           },
         ]
       }
+      group_staff: {
+        Row: {
+          assigned_at: string
+          group_id: string
+          guardian_id: string
+          id: string
+          role: Database["public"]["Enums"]["user_role"]
+        }
+        Insert: {
+          assigned_at?: string
+          group_id: string
+          guardian_id: string
+          id?: string
+          role: Database["public"]["Enums"]["user_role"]
+        }
+        Update: {
+          assigned_at?: string
+          group_id?: string
+          guardian_id?: string
+          id?: string
+          role?: Database["public"]["Enums"]["user_role"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "group_staff_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "groups"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "group_staff_guardian_id_fkey"
+            columns: ["guardian_id"]
+            isOneToOne: false
+            referencedRelation: "guardians"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      groups: {
+        Row: {
+          avatar_image: string | null
+          created_at: string
+          description: string | null
+          id: string
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          avatar_image?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          avatar_image?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       guardians: {
         Row: {
           additional_notes: string | null
@@ -1162,6 +1228,7 @@ export type Database = {
           archived: boolean
           created_at: string | null
           description: string | null
+          group_id: string | null
           id: string
           name: string
           season_year: number | null
@@ -1172,6 +1239,7 @@ export type Database = {
           archived?: boolean
           created_at?: string | null
           description?: string | null
+          group_id?: string | null
           id?: string
           name: string
           season_year?: number | null
@@ -1182,12 +1250,21 @@ export type Database = {
           archived?: boolean
           created_at?: string | null
           description?: string | null
+          group_id?: string | null
           id?: string
           name?: string
           season_year?: number | null
           updated_at?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "teams_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "groups"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_roles: {
         Row: {
@@ -1312,7 +1389,12 @@ export type Database = {
         Returns: boolean
       }
       user_has_role: {
-        Args: { check_role: Database["public"]["Enums"]["user_role"] }
+        Args:
+          | { check_role: Database["public"]["Enums"]["user_role"] }
+          | {
+              user_id: string
+              check_role: Database["public"]["Enums"]["user_role"]
+            }
         Returns: boolean
       }
     }
