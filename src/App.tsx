@@ -6,23 +6,7 @@ import { AuthProvider } from '@/context/AuthContext';
 import { AppErrorBoundary } from '@/components/AppErrorBoundary';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import { Suspense } from 'react';
-import {
-  LazyTeamsPage as TeamsPage,
-  LazyEventsPage as EventsPage,
-  LazyChildrenPage as ChildrenPage,
-  LazySettingsPage as SettingsPage,
-  LazyUserProfilePage as UserProfilePage,
-  LazyTeamDetailPage as TeamDetailPage,
-  LazyEventDetailPage as EventDetailPage,
-  LazyChildDetailPage as ChildDetailPage,
-  LazyNewTeamPage as NewTeamPage,
-  LazyEditTeamPage as EditTeamPage,
-  LazyNewChildPage as NewChildPage,
-  LazyRegistrationPage as RegistrationPage,
-  LazyApprovalsPage as ApprovalsPage,
-  LazySubscriptionSuccessPage as SubscriptionSuccessPage,
-  PageLoadingFallback,
-} from '@/components/LazyLoadedComponents';
+import { PageLoadingFallback } from '@/components/LazyLoadedComponents';
 
 // Critical pages loaded immediately
 import LoginPage from '@/pages/LoginPage';
@@ -35,10 +19,25 @@ import NewGroupPage from '@/pages/NewGroupPage';
 import EditGroupPage from '@/pages/EditGroupPage';
 import Index from '@/pages/Index';
 
-// Lazy load heavy components
+// Lazy load all other components to avoid circular dependencies
 import { lazy } from 'react';
+const TeamsPage = lazy(() => import('@/pages/TeamsPage'));
+const EventsPage = lazy(() => import('@/pages/EventsPage'));
+const ChildrenPage = lazy(() => import('@/pages/ChildrenPage'));
+const SettingsPage = lazy(() => import('@/pages/SettingsPage'));
+const UserProfilePage = lazy(() => import('@/pages/UserProfilePage'));
+const TeamDetailPage = lazy(() => import('@/pages/TeamDetailPage'));
+const EventDetailPage = lazy(() => import('@/pages/EventDetailPage'));
+const ChildDetailPage = lazy(() => import('@/pages/ChildDetailPage'));
+const NewTeamPage = lazy(() => import('@/pages/NewTeamPage'));
+const EditTeamPage = lazy(() => import('@/pages/EditTeamPage'));
+const NewChildPage = lazy(() => import('@/pages/NewChildPage'));
+const RegistrationPage = lazy(() => import('@/pages/RegistrationPage'));
+const ApprovalsPage = lazy(() => import('@/pages/ApprovalsPage'));
+const SubscriptionSuccessPage = lazy(() => import('@/pages/SubscriptionSuccessPage'));
 const NewEventPage = lazy(() => import('@/pages/NewEventPage'));
 const EditEventPage = lazy(() => import('@/pages/EditEventPage'));
+
 import './App.css';
 
 function App() {
@@ -58,10 +57,16 @@ function App() {
                 } />
                 <Route path="/register" element={
                   <ProtectedRoute requireAuth={false}>
-                    <RegistrationPage />
+                    <Suspense fallback={<PageLoadingFallback />}>
+                      <RegistrationPage />
+                    </Suspense>
                   </ProtectedRoute>
                 } />
-                <Route path="/subscription-success" element={<SubscriptionSuccessPage />} />
+                <Route path="/subscription-success" element={
+                  <Suspense fallback={<PageLoadingFallback />}>
+                    <SubscriptionSuccessPage />
+                  </Suspense>
+                } />
                 <Route path="/unauthorized" element={<UnauthorizedPage />} />
                 
                 <Route path="/" element={
@@ -104,43 +109,57 @@ function App() {
                 
                 <Route path="/teams/:id" element={
                   <ProtectedRoute>
-                    <TeamDetailPage />
+                    <Suspense fallback={<PageLoadingFallback />}>
+                      <TeamDetailPage />
+                    </Suspense>
                   </ProtectedRoute>
                 } />
                 
                 <Route path="/teams/new" element={
                   <ProtectedRoute allowedRoles={['admin']}>
-                    <NewTeamPage />
+                    <Suspense fallback={<PageLoadingFallback />}>
+                      <NewTeamPage />
+                    </Suspense>
                   </ProtectedRoute>
                 } />
                 
                 <Route path="/teams/:id/edit" element={
                   <ProtectedRoute allowedRoles={['admin']}>
-                    <EditTeamPage />
+                    <Suspense fallback={<PageLoadingFallback />}>
+                      <EditTeamPage />
+                    </Suspense>
                   </ProtectedRoute>
                 } />
                 
                 <Route path="/children" element={
                   <ProtectedRoute allowedRoles={['parent']}>
-                    <ChildrenPage />
+                    <Suspense fallback={<PageLoadingFallback />}>
+                      <ChildrenPage />
+                    </Suspense>
                   </ProtectedRoute>
                 } />
                 
                 <Route path="/children/new" element={
                   <ProtectedRoute allowedRoles={['parent']}>
-                    <NewChildPage />
+                    <Suspense fallback={<PageLoadingFallback />}>
+                      <NewChildPage />
+                    </Suspense>
                   </ProtectedRoute>
                 } />
                 
                 <Route path="/children/:id" element={
                   <ProtectedRoute>
-                    <ChildDetailPage />
+                    <Suspense fallback={<PageLoadingFallback />}>
+                      <ChildDetailPage />
+                    </Suspense>
                   </ProtectedRoute>
                 } />
                 
                 <Route path="/events" element={
                   <ProtectedRoute>
-                    <EventsPage />
+                    <Suspense fallback={<PageLoadingFallback />}>
+                      <EventsPage />
+                    </Suspense>
                   </ProtectedRoute>
                 } />
                 
@@ -154,7 +173,9 @@ function App() {
 
                 <Route path="/events/:id" element={
                   <ProtectedRoute>
-                    <EventDetailPage />
+                    <Suspense fallback={<PageLoadingFallback />}>
+                      <EventDetailPage />
+                    </Suspense>
                   </ProtectedRoute>
                 } />
                 
@@ -168,19 +189,25 @@ function App() {
 
                 <Route path="/approvals" element={
                   <ProtectedRoute allowedRoles={['admin', 'coach', 'manager']}>
-                    <ApprovalsPage />
+                    <Suspense fallback={<PageLoadingFallback />}>
+                      <ApprovalsPage />
+                    </Suspense>
                   </ProtectedRoute>
                 } />
                 
                 <Route path="/profile" element={
                   <ProtectedRoute>
-                    <UserProfilePage />
+                    <Suspense fallback={<PageLoadingFallback />}>
+                      <UserProfilePage />
+                    </Suspense>
                   </ProtectedRoute>
                 } />
                 
                 <Route path="/settings" element={
                   <ProtectedRoute allowedRoles={['admin']}>
-                    <SettingsPage />
+                    <Suspense fallback={<PageLoadingFallback />}>
+                      <SettingsPage />
+                    </Suspense>
                   </ProtectedRoute>
                 } />
                 

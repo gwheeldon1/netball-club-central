@@ -31,11 +31,11 @@ const Index = () => {
   }
 
   if (!currentUser) {
-    console.log('Index: No user, returning null');
+    console.log('Index: No user, returning null while redirect happens');
     return null;
   }
 
-  console.log('Index: Rendering dashboard');
+  console.log('Index: Rendering dashboard with Suspense');
   return (
     <Suspense fallback={<DashboardLoadingFallback />}>
       <LazyDashboard />

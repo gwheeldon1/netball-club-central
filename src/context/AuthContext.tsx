@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
@@ -59,7 +58,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         logger.error('Error in getInitialSession:', error);
       } finally {
         if (mounted) {
-          console.log('AuthProvider: Initial loading complete');
+          console.log('AuthProvider: Initial loading complete, setting loading to false');
           setLoading(false);
         }
       }
@@ -84,6 +83,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
         
         if (mounted) {
+          console.log('AuthProvider: Auth state change complete, setting loading to false');
           setLoading(false);
         }
       }
