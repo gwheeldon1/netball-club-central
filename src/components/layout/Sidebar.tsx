@@ -11,7 +11,8 @@ import {
   LogOut, 
   X, 
   Calendar,
-  BarChart3
+  BarChart3,
+  UserCircle
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -124,6 +125,17 @@ export const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
               >
                 <BarChart3 className="h-4 w-4" />
                 <span>Analytics</span>
+              </Link>
+            </li>
+
+            <li>
+              <Link 
+                to="/groups" 
+                className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-foreground hover:bg-accent/50 transition-all duration-200 card-hover" 
+                onClick={onClose}
+              >
+                <UserCircle className="h-4 w-4" />
+                <span>Groups</span>
               </Link>
             </li>
 

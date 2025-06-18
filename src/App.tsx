@@ -1,3 +1,4 @@
+
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Toaster } from 'sonner';
 import { ThemeProvider } from '@/components/theme-provider';
@@ -29,6 +30,7 @@ import NotFound from '@/pages/NotFound';
 import UnauthorizedPage from '@/pages/UnauthorizedPage';
 import DesignSystemPage from '@/pages/DesignSystemPage';
 import AnalyticsPage from '@/pages/AnalyticsPage';
+import GroupsPage from '@/pages/GroupsPage';
 import Index from '@/pages/Index';
 
 // Lazy load heavy components that aren't immediately needed
@@ -58,6 +60,12 @@ function App() {
             <Route path="/analytics" element={
               <ProtectedRoute>
                 <AnalyticsPage />
+              </ProtectedRoute>
+            } />
+
+            <Route path="/groups" element={
+              <ProtectedRoute>
+                <GroupsPage />
               </ProtectedRoute>
             } />
             
