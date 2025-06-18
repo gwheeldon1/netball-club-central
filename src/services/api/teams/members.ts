@@ -7,10 +7,11 @@ import { TeamPlayer, TeamStaff } from './types';
 export class TeamMembersAPI {
   async getTeamPlayers(teamId: string): Promise<TeamPlayer[]> {
     try {
+      // Use the correct foreign key relationship hint to avoid ambiguity
       const { data, error } = await supabase
         .from('player_teams')
         .select(`
-          player:players (
+          player:players!fk_player_teams_player_id (
             id,
             first_name,
             last_name,
@@ -20,7 +21,10 @@ export class TeamMembersAPI {
         `)
         .eq('team_id', teamId);
       
-      if (error) throw error;
+      if (error) {
+        logger.error('Error fetching team players:', error);
+        throw error;
+      }
       
       return data?.map(pt => ({
         id: (pt.player as any).id,
@@ -40,11 +44,12 @@ export class TeamMembersAPI {
 
   async getTeamStaff(teamId: string): Promise<{ coaches: TeamStaff[]; managers: TeamStaff[] }> {
     try {
+      // Use the correct foreign key relationship hint to avoid ambiguity
       const { data, error } = await supabase
         .from('user_roles')
         .select(`
           role,
-          guardian:guardians (
+          guardian:guardians!fk_user_roles_guardian_id (
             id,
             first_name,
             last_name,
@@ -56,7 +61,10 @@ export class TeamMembersAPI {
         .eq('is_active', true)
         .in('role', ['coach', 'manager']);
       
-      if (error) throw error;
+      if (error) {
+        logger.error('Error fetching team staff:', error);
+        throw error;
+      }
       
       const coaches: TeamStaff[] = [];
       const managers: TeamStaff[] = [];
