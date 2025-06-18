@@ -39,7 +39,6 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     return <Navigate to="/" replace />;
   }
 
-  // Check role-based access
   if (allowedRoles && currentUser) {
     const hasRequiredRole = allowedRoles.some(role => hasRole(role));
     if (!hasRequiredRole) {

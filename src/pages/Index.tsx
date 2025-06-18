@@ -10,10 +10,8 @@ const Index = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Wait for auth loading to complete
     if (loading) return;
     
-    // If no user is logged in, redirect to login page
     if (!currentUser) {
       console.log('No user found, redirecting to login');
       navigate('/login', { replace: true });
@@ -22,12 +20,10 @@ const Index = () => {
     }
   }, [currentUser, loading, navigate]);
 
-  // Show loading while auth is checking
   if (loading) {
     return <DashboardLoadingFallback />;
   }
 
-  // If user is logged in, show dashboard with proper lazy loading
   return currentUser ? (
     <Suspense fallback={<DashboardLoadingFallback />}>
       <LazyDashboard />

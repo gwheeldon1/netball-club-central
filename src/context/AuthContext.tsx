@@ -38,7 +38,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     let mounted = true;
 
-    // Get initial session
     const getInitialSession = async () => {
       try {
         const { data: { session }, error } = await supabase.auth.getSession();
@@ -62,7 +61,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     getInitialSession();
 
-    // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         if (!mounted) return;
@@ -74,7 +72,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         if (session?.user) {
           await loadUserData(session.user);
         } else {
-          // Clear user data on logout
           setUserRoles([]);
           setUserProfile(null);
         }
@@ -94,7 +91,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       console.log('User ID:', user.id);
       console.log('User Email:', user.email);
 
-      // Load from profiles table first
       const { data: profileData, error: profileError } = await supabase
         .from('profiles')
         .select('*')
@@ -107,7 +103,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       console.log('Profile data:', profileData);
 
-      // Find guardian by email to get the guardian ID for role lookup
       let guardianId: string | undefined;
       let guardianData = null;
       
@@ -133,7 +128,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         console.log('Guardian table error:', error);
       }
 
-      // Set user profile from guardian data or profile data or auth data
       setUserProfile({
         firstName: guardianData?.first_name || profileData?.first_name || user.user_metadata?.first_name || '',
         lastName: guardianData?.last_name || profileData?.last_name || user.user_metadata?.last_name || '',
@@ -143,7 +137,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         guardianId: guardianId,
       });
 
-      // Load user roles using the guardian ID
       if (guardianId) {
         console.log('Loading roles for guardian ID:', guardianId);
         await loadUserRoles(guardianId);
@@ -155,7 +148,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } catch (error) {
       logger.error('Error in loadUserData:', error);
       console.log('loadUserData error:', error);
-      // Set basic profile from auth user data
       setUserProfile({
         firstName: user.user_metadata?.first_name || '',
         lastName: user.user_metadata?.last_name || '',
@@ -163,7 +155,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         phone: user.user_metadata?.phone || '',
         profileImage: user.user_metadata?.profile_image || '',
       });
-      setUserRoles(['parent']); // Default role
+      setUserRoles(['parent']);
     }
   };
 
@@ -183,7 +175,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (error) {
         logger.error('Error loading user roles:', error);
         console.log('User roles error:', error);
-        setUserRoles(['parent']); // Default fallback
+        setUserRoles(['parent']);
         return;
       }
 
@@ -192,13 +184,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       
       setUserRoles(roles);
       
-      // Debug logging
       console.log('Final roles set for guardian:', guardianId, 'roles:', roles);
       
     } catch (error) {
       logger.error('Error in loadUserRoles:', error);
       console.log('loadUserRoles catch error:', error);
-      setUserRoles(['parent']); // Default fallback
+      setUserRoles(['parent']);
     }
   };
 
@@ -206,14 +197,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (currentUser && userProfile?.guardianId) {
       await loadUserRoles(userProfile.guardianId);
     } else if (currentUser) {
-      // Try to find guardian by email again
       await loadUserData(currentUser);
     }
   };
 
   const login = async (email: string, password: string): Promise<boolean> => {
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({
+      const { error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
@@ -241,7 +231,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
       console.log('Logout successful');
       
-      // Clear state immediately
       setCurrentUser(null);
       setUserRoles([]);
       setUserProfile(null);
@@ -263,7 +252,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const value = {
     currentUser,
-    user: currentUser, // Alias for compatibility
+    user: currentUser,
     loading,
     userRoles,
     userProfile,

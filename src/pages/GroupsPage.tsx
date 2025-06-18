@@ -18,7 +18,6 @@ const GroupsPage = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [refreshingRoles, setRefreshingRoles] = useState<boolean>(false);
 
-  // Debug logging
   useEffect(() => {
     console.log('GroupsPage Debug Info:', {
       currentUser: currentUser?.email,
@@ -33,7 +32,6 @@ const GroupsPage = () => {
       try {
         const groupsData = await groupApi.getGroups();
         
-        // Load full group data with teams for each group
         const groupsWithTeams = await Promise.all(
           groupsData.map(async (group) => {
             const fullGroup = await groupApi.getGroupById(group.id);
@@ -81,7 +79,6 @@ const GroupsPage = () => {
   return (
     <Layout>
       <div className="space-y-4 sm:space-y-6">
-        {/* Debug info - remove after testing */}
         <div className="bg-yellow-100 p-4 rounded-lg text-sm">
           <div className="flex items-center justify-between">
             <div>
@@ -126,7 +123,6 @@ const GroupsPage = () => {
           )}
         </div>
         
-        {/* Groups Grid */}
         <div className="grid gap-4 sm:gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
           {groups.length > 0 ? (
             groups.map((group) => (

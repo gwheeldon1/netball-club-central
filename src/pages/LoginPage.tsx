@@ -17,7 +17,6 @@ const LoginPage = () => {
   const { login, currentUser } = useAuth();
   const navigate = useNavigate();
 
-  // Redirect if already logged in
   useEffect(() => {
     if (currentUser) {
       console.log('User already logged in, redirecting to dashboard');
@@ -38,10 +37,7 @@ const LoginPage = () => {
       
       if (success) {
         console.log('Login successful, redirecting to dashboard');
-        // Small delay to ensure auth state is updated
-        setTimeout(() => {
-          navigate('/', { replace: true });
-        }, 100);
+        navigate('/', { replace: true });
       } else {
         setError('Invalid email or password');
       }
@@ -53,7 +49,6 @@ const LoginPage = () => {
     }
   };
 
-  // Don't render login form if user is already authenticated
   if (currentUser) {
     return null;
   }
