@@ -10,7 +10,6 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Edit, Save, X, Users, Shield, User, Mail, Phone, ChevronRight } from "lucide-react";
 import { toast } from "sonner";
-import { Team } from "@/types";
 import { supabase } from "@/integrations/supabase/client";
 import FileUpload from "@/components/FileUpload";
 import { Link } from "react-router-dom";
@@ -54,7 +53,7 @@ const UserProfilePage = () => {
   };
 
   const handleSave = async () => {
-    if (!currentUser || !userProfile) return;
+    if (!currentUser) return;
     
     executeWithTransition(async () => {
       setLoading(true);
@@ -72,25 +71,30 @@ const UserProfilePage = () => {
             email: formData.email,
             phone: formData.phone,
             profile_image: formData.profileImage,
-            guardian_id: userProfile.guardianId,
           });
 
         if (profileError) throw profileError;
 
-        // Update guardians table if guardian_id exists
-        if (userProfile.guardianId) {
-          const { error: guardianError } = await supabase
-            .from('guardians')
-            .update({
-              first_name: firstName,
-              last_name: lastName,
-              email: formData.email,
-              phone: formData.phone,
-              profile_image: formData.profileImage,
-            })
-            .eq('id', userProfile.guardianId);
+        // Try to update guardians table if guardian_id exists and guardians table is accessible
+        if (userProfile?.guardianId) {
+          try {
+            const { error: guardianError } = await supabase
+              .from('guardians')
+              .update({
+                first_name: firstName,
+                last_name: lastName,
+                email: formData.email,
+                phone: formData.phone,
+                profile_image: formData.profileImage,
+              })
+              .eq('id', userProfile.guardianId);
 
-          if (guardianError) throw guardianError;
+            if (guardianError) {
+              console.warn('Could not update guardians table:', guardianError);
+            }
+          } catch (error) {
+            console.warn('Guardians table not accessible:', error);
+          }
         }
 
         toast.success("Profile updated successfully");

@@ -101,60 +101,39 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         logger.error('Error loading profile:', profileError);
       }
 
-      // Try to find guardian by email if no profile guardian_id
-      let guardianId = profileData?.guardian_id;
+      // Try to find guardian by email since guardians table might not exist yet
+      let guardianId: string | undefined;
+      let guardianData = null;
       
-      if (!guardianId) {
-        const { data: guardianData, error: guardianError } = await supabase
+      try {
+        const { data: guardianResponse, error: guardianError } = await supabase
           .from('guardians')
           .select('id, first_name, last_name, email, phone, profile_image')
           .eq('email', user.email)
           .maybeSingle();
 
-        if (guardianError) {
-          logger.error('Error loading guardian by email:', guardianError);
-        } else if (guardianData) {
-          guardianId = guardianData.id;
-          
-          // Update profile to link to guardian
-          if (profileData) {
-            await supabase
-              .from('profiles')
-              .update({ guardian_id: guardianId })
-              .eq('user_id', user.id);
-          }
+        if (!guardianError && guardianResponse) {
+          guardianId = guardianResponse.id;
+          guardianData = guardianResponse;
         }
+      } catch (error) {
+        // Guardians table might not exist, fall back to profile data
+        logger.warn('Guardians table not accessible, using profile data:', error);
       }
 
-      // Load guardian data if we have a guardian_id
-      let guardianData = null;
-      if (guardianId) {
-        const { data, error } = await supabase
-          .from('guardians')
-          .select('first_name, last_name, email, phone, profile_image')
-          .eq('id', guardianId)
-          .maybeSingle();
-
-        if (error) {
-          logger.error('Error loading guardian data:', error);
-        } else {
-          guardianData = data;
-        }
-      }
-
-      // Set user profile from guardian data or profile data
+      // Set user profile from guardian data or profile data or auth data
       startTransition(() => {
         setUserProfile({
-          firstName: guardianData?.first_name || profileData?.first_name || '',
-          lastName: guardianData?.last_name || profileData?.last_name || '',
+          firstName: guardianData?.first_name || profileData?.first_name || user.user_metadata?.first_name || '',
+          lastName: guardianData?.last_name || profileData?.last_name || user.user_metadata?.last_name || '',
           email: guardianData?.email || profileData?.email || user.email || '',
-          phone: guardianData?.phone || profileData?.phone || '',
-          profileImage: guardianData?.profile_image || profileData?.profile_image || '',
-          guardianId: guardianId || undefined,
+          phone: guardianData?.phone || profileData?.phone || user.user_metadata?.phone || '',
+          profileImage: guardianData?.profile_image || profileData?.profile_image || user.user_metadata?.profile_image || '',
+          guardianId: guardianId,
         });
       });
 
-      // Load user roles
+      // Load user roles if we have a guardian ID, otherwise use user ID
       await loadUserRoles(guardianId || user.id);
 
     } catch (error) {
