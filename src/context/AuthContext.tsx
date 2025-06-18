@@ -44,10 +44,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         if (error) {
           logger.error('Error getting initial session:', error);
         } else {
-          startTransition(() => {
-            setCurrentUser(session?.user ?? null);
-            setLoading(false);
-          });
+          setCurrentUser(session?.user ?? null);
+          setLoading(false);
           
           if (session?.user) {
             await loadUserData(session.user);
@@ -55,9 +53,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
       } catch (error) {
         logger.error('Error in getInitialSession:', error);
-        startTransition(() => {
-          setLoading(false);
-        });
+        setLoading(false);
       }
     };
 
@@ -66,21 +62,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        startTransition(() => {
-          setCurrentUser(session?.user ?? null);
-          setLoading(false);
-        });
+        console.log('Auth state change:', { event, user: session?.user?.email });
+        
+        setCurrentUser(session?.user ?? null);
+        setLoading(false);
         
         if (session?.user) {
-          // Load user data in background
-          setTimeout(() => {
-            loadUserData(session.user);
-          }, 0);
+          // Load user data immediately, not in setTimeout
+          await loadUserData(session.user);
         } else {
-          startTransition(() => {
-            setUserRoles([]);
-            setUserProfile(null);
-          });
+          setUserRoles([]);
+          setUserProfile(null);
         }
       }
     );
@@ -135,43 +127,36 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
 
       // Set user profile from guardian data or profile data or auth data
-      startTransition(() => {
-        setUserProfile({
-          firstName: guardianData?.first_name || profileData?.first_name || user.user_metadata?.first_name || '',
-          lastName: guardianData?.last_name || profileData?.last_name || user.user_metadata?.last_name || '',
-          email: guardianData?.email || profileData?.email || user.email || '',
-          phone: guardianData?.phone || profileData?.phone || user.user_metadata?.phone || '',
-          profileImage: guardianData?.profile_image || profileData?.profile_image || user.user_metadata?.profile_image || '',
-          guardianId: guardianId,
-        });
+      setUserProfile({
+        firstName: guardianData?.first_name || profileData?.first_name || user.user_metadata?.first_name || '',
+        lastName: guardianData?.last_name || profileData?.last_name || user.user_metadata?.last_name || '',
+        email: guardianData?.email || profileData?.email || user.email || '',
+        phone: guardianData?.phone || profileData?.phone || user.user_metadata?.phone || '',
+        profileImage: guardianData?.profile_image || profileData?.profile_image || user.user_metadata?.profile_image || '',
+        guardianId: guardianId,
       });
 
-      // Load user roles using the guardian ID (this is the key fix!)
+      // Load user roles using the guardian ID
       if (guardianId) {
         console.log('Loading roles for guardian ID:', guardianId);
         await loadUserRoles(guardianId);
       } else {
         console.log('No guardian ID found, defaulting to parent role');
-        // If no guardian found, default to parent role
-        startTransition(() => {
-          setUserRoles(['parent']);
-        });
+        setUserRoles(['parent']);
       }
 
     } catch (error) {
       logger.error('Error in loadUserData:', error);
       console.log('loadUserData error:', error);
       // Set basic profile from auth user data
-      startTransition(() => {
-        setUserProfile({
-          firstName: user.user_metadata?.first_name || '',
-          lastName: user.user_metadata?.last_name || '',
-          email: user.email || '',
-          phone: user.user_metadata?.phone || '',
-          profileImage: user.user_metadata?.profile_image || '',
-        });
-        setUserRoles(['parent']); // Default role
+      setUserProfile({
+        firstName: user.user_metadata?.first_name || '',
+        lastName: user.user_metadata?.last_name || '',
+        email: user.email || '',
+        phone: user.user_metadata?.phone || '',
+        profileImage: user.user_metadata?.profile_image || '',
       });
+      setUserRoles(['parent']); // Default role
     }
   };
 
@@ -191,18 +176,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (error) {
         logger.error('Error loading user roles:', error);
         console.log('User roles error:', error);
-        startTransition(() => {
-          setUserRoles(['parent']); // Default fallback
-        });
+        setUserRoles(['parent']); // Default fallback
         return;
       }
 
       const roles = data?.map(r => r.role as UserRole) || ['parent'];
       console.log('Mapped roles:', roles);
       
-      startTransition(() => {
-        setUserRoles(roles);
-      });
+      setUserRoles(roles);
       
       // Debug logging
       console.log('Final roles set for guardian:', guardianId, 'roles:', roles);
@@ -210,9 +191,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } catch (error) {
       logger.error('Error in loadUserRoles:', error);
       console.log('loadUserRoles catch error:', error);
-      startTransition(() => {
-        setUserRoles(['parent']); // Default fallback
-      });
+      setUserRoles(['parent']); // Default fallback
     }
   };
 
@@ -235,6 +214,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (error) {
         logger.error('Login error:', error);
         return false;
+      }
+
+      // Immediately update current user state
+      if (data.user) {
+        setCurrentUser(data.user);
+        // Load user data immediately
+        await loadUserData(data.user);
       }
 
       return true;

@@ -37,9 +37,11 @@ const LoginPage = () => {
       console.log('Login result:', success);
       
       if (success) {
-        // Force navigate to dashboard immediately
         console.log('Login successful, redirecting to dashboard');
-        navigate('/', { replace: true });
+        // Small delay to ensure auth state is updated
+        setTimeout(() => {
+          navigate('/', { replace: true });
+        }, 100);
       } else {
         setError('Invalid email or password');
       }
@@ -50,6 +52,11 @@ const LoginPage = () => {
       setLoading(false);
     }
   };
+
+  // Don't render login form if user is already authenticated
+  if (currentUser) {
+    return null;
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
