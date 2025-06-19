@@ -24,6 +24,8 @@ const ageGroups = [
   "U14", "U15", "U16", "U17", "U18", "Senior", "Mixed"
 ];
 
+const categories = ["Junior", "Senior", "Mixed"];
+
 export const TeamForm = ({ team, onSubmit, onCancel }: TeamFormProps) => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
@@ -32,6 +34,7 @@ export const TeamForm = ({ team, onSubmit, onCancel }: TeamFormProps) => {
   const [formData, setFormData] = useState({
     name: team?.name || "",
     ageGroup: team?.ageGroup || "",
+    category: team?.category || "Junior",
     description: team?.description || "",
     archived: team?.archived || false
   });
@@ -47,6 +50,9 @@ export const TeamForm = ({ team, onSubmit, onCancel }: TeamFormProps) => {
       }
       if (!formData.ageGroup) {
         throw new Error("Age group is required");
+      }
+      if (!formData.category) {
+        throw new Error("Category is required");
       }
 
       let savedTeam: Team;
@@ -121,23 +127,44 @@ export const TeamForm = ({ team, onSubmit, onCancel }: TeamFormProps) => {
             />
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="ageGroup">Age Group *</Label>
-            <Select 
-              value={formData.ageGroup} 
-              onValueChange={(value) => setFormData({ ...formData, ageGroup: value })}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select age group" />
-              </SelectTrigger>
-              <SelectContent>
-                {ageGroups.map((age) => (
-                  <SelectItem key={age} value={age}>
-                    {age}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="ageGroup">Age Group *</Label>
+              <Select 
+                value={formData.ageGroup} 
+                onValueChange={(value) => setFormData({ ...formData, ageGroup: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select age group" />
+                </SelectTrigger>
+                <SelectContent>
+                  {ageGroups.map((age) => (
+                    <SelectItem key={age} value={age}>
+                      {age}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="category">Category *</Label>
+              <Select 
+                value={formData.category} 
+                onValueChange={(value) => setFormData({ ...formData, category: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select category" />
+                </SelectTrigger>
+                <SelectContent>
+                  {categories.map((cat) => (
+                    <SelectItem key={cat} value={cat}>
+                      {cat}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
 
           <div className="space-y-2">
