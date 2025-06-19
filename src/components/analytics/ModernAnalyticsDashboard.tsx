@@ -1,61 +1,33 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { 
-  Calendar, 
-  Download, 
-  Filter, 
-  RefreshCw, 
-  Settings, 
-  Share,
-  Maximize2,
-  BarChart3,
-  PieChart,
-  TrendingUp,
-  Users
-} from "lucide-react";
+import { Calendar, Download, Filter, RefreshCw, Settings, Share, Maximize2, BarChart3, PieChart, TrendingUp, Users } from "lucide-react";
 import { ExecutiveSummary } from "@/components/dashboard/ExecutiveSummary";
 import { MetricsOverview } from "@/components/dashboard/MetricsOverview";
 import { AdvancedCharts } from "@/components/dashboard/AdvancedCharts";
 import { ActionCenter } from "@/components/dashboard/ActionCenter";
-
 export const ModernAnalyticsDashboard = () => {
   const [timeRange, setTimeRange] = useState("30d");
   const [activeTab, setActiveTab] = useState("overview");
   const [loading, setLoading] = useState(false);
-
   const handleRefresh = async () => {
     setLoading(true);
     // Simulate data refresh
     await new Promise(resolve => setTimeout(resolve, 1000));
     setLoading(false);
   };
-
   const handleExport = () => {
     // Implement export functionality
     console.log("Exporting dashboard data...");
   };
-
-  return (
-    <div className="space-y-8">
+  return <div className="space-y-8">
       {/* Header Section */}
       <div className="flex flex-col lg:flex-row gap-4 items-start lg:items-center justify-between">
         <div className="space-y-2">
-          <div className="flex items-center space-x-3">
-            <div className="h-10 w-10 rounded-lg bg-primary/10 dark:bg-primary/20 flex items-center justify-center">
-              <BarChart3 className="h-5 w-5 text-primary" />
-            </div>
-            <div>
-              <h1 className="text-3xl font-bold tracking-tight">Analytics Dashboard</h1>
-              <p className="text-muted-foreground">
-                Comprehensive insights and performance metrics for your netball club
-              </p>
-            </div>
-          </div>
+          
         </div>
         
         <div className="flex flex-col sm:flex-row gap-3 w-full lg:w-auto">
@@ -204,6 +176,5 @@ export const ModernAnalyticsDashboard = () => {
           <ActionCenter />
         </TabsContent>
       </Tabs>
-    </div>
-  );
+    </div>;
 };
