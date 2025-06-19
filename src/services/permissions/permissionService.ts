@@ -33,7 +33,8 @@ class PermissionService {
         logger.error('Error fetching accessible teams:', teamsError);
       }
 
-      const permissions = permissionsData?.map(p => p.permission_name) || [];
+      // Type assertion: database returns strings that should be valid PermissionName values
+      const permissions = (permissionsData?.map(p => p.permission_name) || []) as PermissionName[];
       const accessibleTeams = teamsData?.map(t => t.team_id) || [];
 
       const userPermissions: UserPermissions = {
