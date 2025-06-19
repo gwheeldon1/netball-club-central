@@ -1,142 +1,90 @@
-
 import { useState, useEffect } from "react";
-import { useAuth } from "@/context/AuthContext";
-import { useEnterprisePermissions } from "@/hooks/useEnterprisePermissions";
-import Layout from "@/components/Layout";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Plus, Users } from "lucide-react";
 import { Link } from "react-router-dom";
-import { toast } from "sonner";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Plus, Users, Calendar, Award } from "lucide-react";
+import Layout from "@/components/Layout";
+import { useEnterprisePermissions } from "@/hooks/useEnterprisePermissions";
+import { api } from '@/services/api';
 import { Team } from "@/types";
-import { api } from "@/services/api";
-import { EnterprisePermissionGate } from "@/components/permissions/EnterprisePermissionGate";
-import { PermissionDebugPanel } from "@/components/permissions/PermissionDebugPanel";
-import { TeamPermission } from "@/store/types/permissions";
+import { Permission } from '@/store/types/permissions';
 
 const TeamsPage = () => {
-  const { currentUser } = useAuth();
-  const { 
-    hasPermission, 
-    canAccessTeam, 
-    accessibleTeams, 
-    loading: permissionsLoading 
-  } = useEnterprisePermissions();
-  
   const [teams, setTeams] = useState<Team[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [loading, setLoading] = useState(true);
+  const { hasPermission } = useEnterprisePermissions();
 
   useEffect(() => {
     const loadTeams = async () => {
-      if (permissionsLoading) return;
-
+      setLoading(true);
       try {
         const teamsData = await api.getTeams();
-        
-        // Filter teams based on user permissions
-        let filteredTeams = teamsData;
-        
-        if (!hasPermission(TeamPermission.VIEW_ALL)) {
-          // User can only see teams they have access to
-          filteredTeams = teamsData.filter(team => canAccessTeam(team.id));
-        }
-        
-        setTeams(filteredTeams);
+        setTeams(teamsData);
       } catch (error) {
-        console.error('Error loading teams:', error);
-        toast.error('Failed to load teams');
+        console.error("Error loading teams:", error);
       } finally {
         setLoading(false);
       }
     };
 
     loadTeams();
-  }, [hasPermission, canAccessTeam, permissionsLoading]);
+  }, []);
 
-  if (loading || permissionsLoading) {
-    return (
-      <Layout>
-        <div className="flex items-center justify-center h-64">
-          <p>Loading teams...</p>
-        </div>
-      </Layout>
-    );
-  }
-
-  const getPageDescription = () => {
-    if (hasPermission(TeamPermission.VIEW_ALL)) {
-      return "Manage all teams and their members";
-    } else if (accessibleTeams.length > 0) {
-      return "Teams you coach, manage, or have children in";
-    } else {
-      return "Browse available teams";
-    }
-  };
+  const canCreateTeam = hasPermission('teams.create' as Permission);
 
   return (
     <Layout>
-      <div className="space-y-4 sm:space-y-6">
-        <div className="flex flex-col gap-3 sm:gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Teams</h1>
-            <p className="text-muted-foreground mt-1 text-sm sm:text-base">
-              {getPageDescription()}
+            <h1 className="text-3xl font-bold tracking-tight">Teams</h1>
+            <p className="text-muted-foreground">
+              Manage your teams and track their progress
             </p>
           </div>
-          
-          <EnterprisePermissionGate permission={TeamPermission.CREATE}>
-            <Button className="bg-primary hover:bg-primary/90 w-full sm:w-auto" asChild>
+          {canCreateTeam && (
+            <Button asChild>
               <Link to="/teams/new">
                 <Plus className="mr-2 h-4 w-4" />
-                Create Team
+                New Team
               </Link>
             </Button>
-          </EnterprisePermissionGate>
-        </div>
-        
-        {/* Teams grid */}
-        <div className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-          {teams.length > 0 ? (
-            teams.map((team) => (
-              <Link key={team.id} to={`/teams/${team.id}`} className="hover:no-underline">
-                <Card className="h-full transition-all hover:shadow-md overflow-hidden">
-                  <CardHeader className="flex flex-row items-center gap-3 p-4 sm:p-6">
-                    <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full overflow-hidden flex-shrink-0 bg-accent flex items-center justify-center">
-                      <Users className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <CardTitle className="text-lg sm:text-xl truncate">{team.name}</CardTitle>
-                      <p className="text-sm text-muted-foreground truncate">{team.ageGroup}</p>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="p-4 sm:p-6 pt-0">
-                    <div className="mt-2 sm:mt-3 flex items-center gap-1">
-                      <Users className="h-3 w-3 sm:h-4 sm:w-4 text-primary flex-shrink-0" />
-                      <span className="text-xs sm:text-sm text-muted-foreground">
-                        {canAccessTeam(team.id) ? 'Access granted' : 'View only'}
-                      </span>
-                    </div>
-                  </CardContent>
-                </Card>
-              </Link>
-            ))
-          ) : (
-            <div className="col-span-full text-center py-8 sm:py-12">
-              <p className="text-muted-foreground text-sm sm:text-base">No teams found.</p>
-              <EnterprisePermissionGate permission={TeamPermission.CREATE}>
-                <Button className="mt-4" asChild>
-                  <Link to="/teams/new">
-                    <Plus className="mr-2 h-4 w-4" />
-                    Create First Team
-                  </Link>
-                </Button>
-              </EnterprisePermissionGate>
-            </div>
           )}
         </div>
 
-        {/* Enhanced Debug Panel */}
-        <PermissionDebugPanel />
+        <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+          {loading ? (
+            <p>Loading teams...</p>
+          ) : (
+            teams.map((team) => (
+              <Card key={team.id}>
+                <CardHeader>
+                  <CardTitle>{team.name}</CardTitle>
+                  <CardDescription>
+                    <Badge variant="secondary">{team.ageGroup}</Badge>
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-2">
+                  <p className="text-sm text-muted-foreground">
+                    {team.description || "No description available"}
+                  </p>
+                  <div className="flex items-center space-x-2">
+                    <Users className="h-4 w-4" />
+                    <span className="text-sm text-gray-500">12 Players</span>
+                    <Calendar className="h-4 w-4" />
+                    <span className="text-sm text-gray-500">Next Match: July 22</span>
+                    <Award className="h-4 w-4" />
+                    <span className="text-sm text-gray-500">Rank: 3rd</span>
+                  </div>
+                  <Button asChild variant="link">
+                    <Link to={`/teams/${team.id}`}>View Details</Link>
+                  </Button>
+                </CardContent>
+              </Card>
+            ))
+          )}
+        </div>
       </div>
     </Layout>
   );

@@ -4,7 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { logger } from '@/utils/logger';
 import { UserRole } from '@/types/unified';
 import { permissionService } from '@/services/permissions/permissionService';
-import { PermissionName } from '@/services/permissions/types';
+import { Permission } from '@/services/permissions/types';
 
 interface UserProfile {
   firstName?: string;
@@ -22,7 +22,7 @@ interface AuthContextType {
   userRoles: UserRole[];
   userProfile: UserProfile | null;
   hasRole: (role: UserRole) => boolean;
-  hasPermission: (permission: PermissionName) => Promise<boolean>;
+  hasPermission: (permission: Permission) => Promise<boolean>;
   signOut: () => Promise<void>;
   login: (email: string, password: string) => Promise<boolean>;
   logout: () => Promise<void>;
@@ -231,7 +231,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return userRoles.includes(role);
   };
 
-  const hasPermission = async (permission: PermissionName): Promise<boolean> => {
+  const hasPermission = async (permission: Permission): Promise<boolean> => {
     if (!currentUser) return false;
     return permissionService.hasPermission(currentUser.id, permission);
   };

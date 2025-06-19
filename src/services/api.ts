@@ -19,7 +19,16 @@ class UnifiedAPI {
         .order('name');
 
       if (error) throw error;
-      return data || [];
+      
+      return data?.map(team => ({
+        id: team.id,
+        name: team.name,
+        ageGroup: team.age_group,
+        category: 'Junior' as 'Junior' | 'Senior' | 'Mixed', // Default mapping
+        description: team.description,
+        season_year: team.season_year,
+        created_at: team.created_at
+      })) || [];
     } catch (error) {
       logger.error('Error fetching teams:', error);
       throw error;
@@ -35,7 +44,16 @@ class UnifiedAPI {
         .single();
 
       if (error) throw error;
-      return data;
+      
+      return {
+        id: data.id,
+        name: data.name,
+        ageGroup: data.age_group,
+        category: 'Junior' as 'Junior' | 'Senior' | 'Mixed',
+        description: data.description,
+        season_year: data.season_year,
+        created_at: data.created_at
+      };
     } catch (error) {
       logger.error('Error fetching team:', error);
       return undefined;
@@ -46,12 +64,26 @@ class UnifiedAPI {
     try {
       const { data, error } = await supabase
         .from('teams')
-        .insert(team)
+        .insert({
+          name: team.name,
+          age_group: team.ageGroup,
+          description: team.description,
+          season_year: team.season_year
+        })
         .select()
         .single();
 
       if (error) throw error;
-      return data;
+      
+      return {
+        id: data.id,
+        name: data.name,
+        ageGroup: data.age_group,
+        category: 'Junior' as 'Junior' | 'Senior' | 'Mixed',
+        description: data.description,
+        season_year: data.season_year,
+        created_at: data.created_at
+      };
     } catch (error) {
       logger.error('Error creating team:', error);
       throw error;
@@ -60,15 +92,30 @@ class UnifiedAPI {
 
   async updateTeam(id: string, updates: Partial<Team>): Promise<Team | undefined> {
     try {
+      const updateData: any = {};
+      if (updates.name) updateData.name = updates.name;
+      if (updates.ageGroup) updateData.age_group = updates.ageGroup;
+      if (updates.description) updateData.description = updates.description;
+      if (updates.season_year) updateData.season_year = updates.season_year;
+
       const { data, error } = await supabase
         .from('teams')
-        .update(updates)
+        .update(updateData)
         .eq('id', id)
         .select()
         .single();
 
       if (error) throw error;
-      return data;
+      
+      return {
+        id: data.id,
+        name: data.name,
+        ageGroup: data.age_group,
+        category: 'Junior' as 'Junior' | 'Senior' | 'Mixed',
+        description: data.description,
+        season_year: data.season_year,
+        created_at: data.created_at
+      };
     } catch (error) {
       logger.error('Error updating team:', error);
       return undefined;
@@ -109,9 +156,8 @@ class UnifiedAPI {
         notes: event.description || '',
         eventType: event.event_type as 'training' | 'match' | 'social' | 'meeting' | 'other',
         teamId: event.team_id || '',
-        opponent: event.opponent || '',
         isHome: event.is_home || false,
-        requiresRSVP: event.requires_rsvp !== false
+        requiresRSVP: true // Default value since field doesn't exist in DB
       })) || [];
     } catch (error) {
       logger.error('Error fetching events:', error);
@@ -138,9 +184,8 @@ class UnifiedAPI {
         notes: data.description || '',
         eventType: data.event_type as 'training' | 'match' | 'social' | 'meeting' | 'other',
         teamId: data.team_id || '',
-        opponent: data.opponent || '',
         isHome: data.is_home || false,
-        requiresRSVP: data.requires_rsvp !== false
+        requiresRSVP: true
       };
     } catch (error) {
       logger.error('Error fetching event:', error);
@@ -159,9 +204,7 @@ class UnifiedAPI {
           description: event.notes,
           event_type: event.eventType,
           team_id: event.teamId || null,
-          opponent: event.opponent,
-          is_home: event.isHome,
-          requires_rsvp: event.requiresRSVP
+          is_home: event.isHome
         })
         .select()
         .single();
@@ -177,9 +220,8 @@ class UnifiedAPI {
         notes: data.description || '',
         eventType: data.event_type as 'training' | 'match' | 'social' | 'meeting' | 'other',
         teamId: data.team_id || '',
-        opponent: data.opponent || '',
         isHome: data.is_home || false,
-        requiresRSVP: data.requires_rsvp !== false
+        requiresRSVP: true
       };
     } catch (error) {
       logger.error('Error creating event:', error);
@@ -198,9 +240,7 @@ class UnifiedAPI {
       if (updates.notes) updateData.description = updates.notes;
       if (updates.eventType) updateData.event_type = updates.eventType;
       if (updates.teamId !== undefined) updateData.team_id = updates.teamId || null;
-      if (updates.opponent !== undefined) updateData.opponent = updates.opponent;
       if (updates.isHome !== undefined) updateData.is_home = updates.isHome;
-      if (updates.requiresRSVP !== undefined) updateData.requires_rsvp = updates.requiresRSVP;
       
       const { data, error } = await supabase
         .from('events')
@@ -220,9 +260,8 @@ class UnifiedAPI {
         notes: data.description || '',
         eventType: data.event_type as 'training' | 'match' | 'social' | 'meeting' | 'other',
         teamId: data.team_id || '',
-        opponent: data.opponent || '',
         isHome: data.is_home || false,
-        requiresRSVP: data.requires_rsvp !== false
+        requiresRSVP: true
       };
     } catch (error) {
       logger.error('Error updating event:', error);
@@ -241,7 +280,7 @@ class UnifiedAPI {
       return true;
     } catch (error) {
       logger.error('Error deleting event:', error);
-      throw error;
+      return false;
     }
   }
 
@@ -249,12 +288,24 @@ class UnifiedAPI {
   async getChildren(): Promise<Child[]> {
     try {
       const { data, error } = await supabase
-        .from('children')
+        .from('players')
         .select('*')
-        .order('name');
+        .order('first_name');
 
       if (error) throw error;
-      return data || [];
+      
+      return data?.map(player => ({
+        id: player.id,
+        name: `${player.first_name} ${player.last_name}`,
+        dateOfBirth: player.date_of_birth || '',
+        medicalInfo: player.medical_conditions || '',
+        notes: player.additional_medical_notes || '',
+        profileImage: player.profile_image || '',
+        teamId: '',
+        ageGroup: '',
+        parentId: '',
+        status: player.approval_status as 'pending' | 'approved' | 'rejected'
+      })) || [];
     } catch (error) {
       logger.error('Error fetching children:', error);
       throw error;
@@ -264,13 +315,28 @@ class UnifiedAPI {
   async getChildrenByTeamId(teamId: string): Promise<Child[]> {
     try {
       const { data, error } = await supabase
-        .from('children')
-        .select('*')
-        .eq('team_id', teamId)
-        .order('name');
+        .from('players')
+        .select(`
+          *,
+          player_teams!inner(team_id)
+        `)
+        .eq('player_teams.team_id', teamId)
+        .order('first_name');
 
       if (error) throw error;
-      return data || [];
+      
+      return data?.map(player => ({
+        id: player.id,
+        name: `${player.first_name} ${player.last_name}`,
+        dateOfBirth: player.date_of_birth || '',
+        medicalInfo: player.medical_conditions || '',
+        notes: player.additional_medical_notes || '',
+        profileImage: player.profile_image || '',
+        teamId: teamId,
+        ageGroup: '',
+        parentId: '',
+        status: player.approval_status as 'pending' | 'approved' | 'rejected'
+      })) || [];
     } catch (error) {
       logger.error('Error fetching children by team:', error);
       throw error;
@@ -279,14 +345,37 @@ class UnifiedAPI {
 
   async createChild(child: Omit<Child, 'id'>): Promise<Child> {
     try {
+      const [firstName, ...lastNameParts] = child.name.split(' ');
+      const lastName = lastNameParts.join(' ') || '';
+
       const { data, error } = await supabase
-        .from('children')
-        .insert(child)
+        .from('players')
+        .insert({
+          first_name: firstName,
+          last_name: lastName,
+          date_of_birth: child.dateOfBirth,
+          medical_conditions: child.medicalInfo,
+          additional_medical_notes: child.notes,
+          profile_image: child.profileImage,
+          approval_status: child.status
+        })
         .select()
         .single();
 
       if (error) throw error;
-      return data;
+      
+      return {
+        id: data.id,
+        name: `${data.first_name} ${data.last_name}`,
+        dateOfBirth: data.date_of_birth || '',
+        medicalInfo: data.medical_conditions || '',
+        notes: data.additional_medical_notes || '',
+        profileImage: data.profile_image || '',
+        teamId: child.teamId,
+        ageGroup: child.ageGroup,
+        parentId: child.parentId,
+        status: data.approval_status as 'pending' | 'approved' | 'rejected'
+      };
     } catch (error) {
       logger.error('Error creating child:', error);
       throw error;
@@ -295,15 +384,41 @@ class UnifiedAPI {
 
   async updateChild(id: string, updates: Partial<Child>): Promise<Child | undefined> {
     try {
+      const updateData: any = {};
+      
+      if (updates.name) {
+        const [firstName, ...lastNameParts] = updates.name.split(' ');
+        updateData.first_name = firstName;
+        updateData.last_name = lastNameParts.join(' ') || '';
+      }
+      
+      if (updates.dateOfBirth) updateData.date_of_birth = updates.dateOfBirth;
+      if (updates.medicalInfo) updateData.medical_conditions = updates.medicalInfo;
+      if (updates.notes) updateData.additional_medical_notes = updates.notes;
+      if (updates.profileImage) updateData.profile_image = updates.profileImage;
+      if (updates.status) updateData.approval_status = updates.status;
+
       const { data, error } = await supabase
-        .from('children')
-        .update(updates)
+        .from('players')
+        .update(updateData)
         .eq('id', id)
         .select()
         .single();
 
       if (error) throw error;
-      return data;
+      
+      return {
+        id: data.id,
+        name: `${data.first_name} ${data.last_name}`,
+        dateOfBirth: data.date_of_birth || '',
+        medicalInfo: data.medical_conditions || '',
+        notes: data.additional_medical_notes || '',
+        profileImage: data.profile_image || '',
+        teamId: updates.teamId || '',
+        ageGroup: updates.ageGroup || '',
+        parentId: updates.parentId || '',
+        status: data.approval_status as 'pending' | 'approved' | 'rejected'
+      };
     } catch (error) {
       logger.error('Error updating child:', error);
       return undefined;
@@ -314,7 +429,7 @@ class UnifiedAPI {
   async getAttendanceByEventId(eventId: string): Promise<any[]> {
     try {
       const { data, error } = await supabase
-        .from('attendance')
+        .from('event_responses')
         .select('*')
         .eq('event_id', eventId);
 
@@ -329,7 +444,7 @@ class UnifiedAPI {
   async createAttendance(attendance: any): Promise<any> {
     try {
       const { data, error } = await supabase
-        .from('attendance')
+        .from('event_responses')
         .insert(attendance)
         .select()
         .single();
@@ -344,3 +459,4 @@ class UnifiedAPI {
 }
 
 export const api = new UnifiedAPI();
+export const teamApi = api; // Export alias for compatibility

@@ -1,2 +1,25 @@
 
-export type { Permission, UserPermissions } from '@/store/types/permissions';
+export type Permission = 
+  | 'teams.view.all'
+  | 'teams.view.children'
+  | 'teams.create'
+  | 'teams.edit'
+  | 'teams.delete'
+  | 'events.view.all'
+  | 'events.create'
+  | 'events.edit'
+  | 'events.delete'
+  | 'children.view.all'
+  | 'children.create'
+  | 'children.edit'
+  | 'approvals.manage'
+  | 'users.manage'
+  | 'settings.manage';
+
+export interface UserPermissions {
+  permissions: Permission[];
+  accessibleTeams: string[];
+  roles: string[];
+  lastUpdated: number;
+  expiresAt: number;
+}
