@@ -1,12 +1,13 @@
 
 import { configureStore } from '@reduxjs/toolkit';
 import { setupListeners } from '@reduxjs/toolkit/query';
-import { permissionsApi } from './api/permissionsApi';
-import { authSlice } from './slices/authSlice';
-import { uiSlice } from './slices/uiSlice';
 import { persistStore, persistReducer } from 'redux-persist';
 import storage from 'redux-persist/lib/storage';
 import { combineReducers } from '@reduxjs/toolkit';
+
+import { permissionsApi } from './api/permissionsApi';
+import { authSlice } from './slices/authSlice';
+import { uiSlice } from './slices/uiSlice';
 
 const persistConfig = {
   key: 'root',
