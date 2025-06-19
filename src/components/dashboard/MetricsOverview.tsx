@@ -4,6 +4,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { TrendingUp, TrendingDown, Users, Calendar, Trophy, DollarSign, Activity, UserCheck, AlertCircle, Target } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useOptimizedQuery } from "@/hooks/useOptimizedQuery";
+import { supabase } from "@/integrations/supabase/client";
 
 interface MetricCardProps {
   title: string;
@@ -14,9 +16,10 @@ interface MetricCardProps {
   trend: "up" | "down" | "neutral";
   target?: string;
   status?: "on-track" | "at-risk" | "exceeded";
+  loading?: boolean;
 }
 
-const MetricCard = ({ title, value, change, changeLabel, icon: Icon, trend, target, status }: MetricCardProps) => {
+const MetricCard = ({ title, value, change, changeLabel, icon: Icon, trend, target, status, loading }: MetricCardProps) => {
   const getTrendColor = () => {
     if (trend === "up") return "text-emerald-600 dark:text-emerald-400";
     if (trend === "down") return "text-red-600 dark:text-red-400";
@@ -39,6 +42,20 @@ const MetricCard = ({ title, value, change, changeLabel, icon: Icon, trend, targ
     if (trend === "down") return <TrendingDown className="h-3 w-3" />;
     return null;
   };
+
+  if (loading) {
+    return (
+      <Card className="border-0 shadow-lg bg-gradient-to-br from-white to-gray-50/30 dark:from-gray-950 dark:to-gray-900/30">
+        <CardContent className="p-6">
+          <div className="animate-pulse">
+            <div className="h-4 bg-gray-200 rounded w-3/4 mb-4"></div>
+            <div className="h-8 bg-gray-200 rounded w-1/2 mb-4"></div>
+            <div className="h-3 bg-gray-200 rounded w-full"></div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card className="border-0 shadow-lg bg-gradient-to-br from-white to-gray-50/30 dark:from-gray-950 dark:to-gray-900/30 hover:shadow-xl transition-all duration-300">
@@ -78,65 +95,163 @@ const MetricCard = ({ title, value, change, changeLabel, icon: Icon, trend, targ
 };
 
 export const MetricsOverview = () => {
+  const { data: playersData, isLoading: playersLoading } = useOptimizedQuery({
+    queryKey: ['active-players'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('players')
+        .select('id')
+        .eq('approval_status', 'approved');
+      
+      if (error) throw error;
+      return data?.length || 0;
+    }
+  });
+
+  const { data: revenueData, isLoading: revenueLoading } = useOptimizedQuery({
+    queryKey: ['monthly-revenue'],
+    queryFn: async () => {
+      const currentMonth = new Date();
+      const startOfMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1);
+      
+      const { data, error } = await supabase
+        .from('payments')
+        .select('amount_pence')
+        .eq('status', 'completed')
+        .gte('created_at', startOfMonth.toISOString());
+      
+      if (error) throw error;
+      
+      const total = data?.reduce((sum, payment) => sum + payment.amount_pence, 0) || 0;
+      return Math.round(total / 100); // Convert to pounds
+    }
+  });
+
+  const { data: attendanceData, isLoading: attendanceLoading } = useOptimizedQuery({
+    queryKey: ['attendance-rate'],
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc('calculate_attendance_rate');
+      if (error) throw error;
+      return data || 0;
+    }
+  });
+
+  const { data: eventsData, isLoading: eventsLoading } = useOptimizedQuery({
+    queryKey: ['monthly-events'],
+    queryFn: async () => {
+      const currentMonth = new Date();
+      const startOfMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1);
+      
+      const { data, error } = await supabase
+        .from('events')
+        .select('id')
+        .gte('event_date', startOfMonth.toISOString());
+      
+      if (error) throw error;
+      return data?.length || 0;
+    }
+  });
+
+  const { data: teamsData, isLoading: teamsLoading } = useOptimizedQuery({
+    queryKey: ['active-teams'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('teams')
+        .select('id')
+        .eq('archived', false);
+      
+      if (error) throw error;
+      return data?.length || 0;
+    }
+  });
+
+  const { data: sessionData, isLoading: sessionLoading } = useOptimizedQuery({
+    queryKey: ['avg-session-size'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('event_responses')
+        .select('event_id')
+        .eq('rsvp_status', 'attending');
+      
+      if (error) throw error;
+      
+      const eventCounts: Record<string, number> = {};
+      data?.forEach(response => {
+        eventCounts[response.event_id] = (eventCounts[response.event_id] || 0) + 1;
+      });
+      
+      const totalEvents = Object.keys(eventCounts).length;
+      const totalAttendees = Object.values(eventCounts).reduce((sum, count) => sum + count, 0);
+      
+      return totalEvents > 0 ? Math.round(totalAttendees / totalEvents) : 0;
+    }
+  });
+
   const metrics = [
     {
       title: "Active Players",
-      value: "247",
+      value: playersData?.toString() || "0",
       change: 8.2,
       changeLabel: "vs last month",
       icon: Users,
       trend: "up" as const,
       target: "250",
-      status: "on-track" as const
+      status: "on-track" as const,
+      loading: playersLoading
     },
     {
       title: "Monthly Revenue",
-      value: "£4,890",
+      value: `£${revenueData?.toLocaleString() || '0'}`,
       change: 12.5,
       changeLabel: "vs last month",
       icon: DollarSign,
       trend: "up" as const,
       target: "£5,000",
-      status: "exceeded" as const
+      status: (revenueData || 0) > 5000 ? "exceeded" as const : "on-track" as const,
+      loading: revenueLoading
     },
     {
       title: "Attendance Rate",
-      value: "87%",
+      value: `${Math.round(attendanceData || 0)}%`,
       change: 3.1,
       changeLabel: "vs last month",
       icon: UserCheck,
       trend: "up" as const,
       target: "85%",
-      status: "exceeded" as const
+      status: (attendanceData || 0) > 85 ? "exceeded" as const : "on-track" as const,
+      loading: attendanceLoading
     },
     {
       title: "Events This Month",
-      value: "32",
+      value: eventsData?.toString() || "0",
       change: -5.2,
       changeLabel: "vs last month",
       icon: Calendar,
       trend: "down" as const,
       target: "35",
-      status: "at-risk" as const
+      status: (eventsData || 0) < 30 ? "at-risk" as const : "on-track" as const,
+      loading: eventsLoading
     },
     {
       title: "Teams Active",
-      value: "8",
+      value: teamsData?.toString() || "0",
       change: 0,
       changeLabel: "no change",
       icon: Trophy,
       trend: "neutral" as const,
-      status: "on-track" as const
+      status: "on-track" as const,
+      loading: teamsLoading
     },
     {
       title: "Avg Session Size",
-      value: "18",
+      value: sessionData?.toString() || "0",
       change: 5.9,
       changeLabel: "vs last month",
       icon: Activity,
       trend: "up" as const,
       target: "20",
-      status: "on-track" as const
+      status: "on-track" as const,
+      loading: sessionLoading
     }
   ];
 

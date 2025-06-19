@@ -23,40 +23,8 @@ import {
   ComposedChart
 } from "recharts";
 import { useState } from "react";
-
-const attendanceData = [
-  { month: "Jan", actual: 82, target: 85, sessions: 24 },
-  { month: "Feb", actual: 79, target: 85, sessions: 22 },
-  { month: "Mar", actual: 88, target: 85, sessions: 28 },
-  { month: "Apr", actual: 91, target: 85, sessions: 30 },
-  { month: "May", actual: 87, target: 85, sessions: 26 },
-  { month: "Jun", actual: 93, target: 85, sessions: 32 }
-];
-
-const revenueData = [
-  { month: "Jan", revenue: 4200, subscriptions: 230, oneTime: 450 },
-  { month: "Feb", revenue: 4100, subscriptions: 225, oneTime: 380 },
-  { month: "Mar", revenue: 4600, subscriptions: 240, oneTime: 520 },
-  { month: "Apr", revenue: 4890, subscriptions: 247, oneTime: 640 },
-  { month: "May", revenue: 5100, subscriptions: 252, oneTime: 580 },
-  { month: "Jun", revenue: 5340, subscriptions: 261, oneTime: 720 }
-];
-
-const teamPerformanceData = [
-  { team: "Under 8s", attendance: 94, satisfaction: 4.8, retention: 96 },
-  { team: "Under 10s", attendance: 87, satisfaction: 4.6, retention: 92 },
-  { team: "Under 12s", attendance: 91, satisfaction: 4.7, retention: 94 },
-  { team: "Under 14s", attendance: 85, satisfaction: 4.5, retention: 89 },
-  { team: "Under 16s", attendance: 88, satisfaction: 4.6, retention: 91 },
-  { team: "Seniors", attendance: 82, satisfaction: 4.4, retention: 85 }
-];
-
-const eventTypeData = [
-  { name: "Training", value: 65, color: "#3b82f6" },
-  { name: "Matches", value: 25, color: "#ef4444" },
-  { name: "Tournaments", value: 7, color: "#10b981" },
-  { name: "Social", value: 3, color: "#f59e0b" }
-];
+import { useOptimizedQuery } from "@/hooks/useOptimizedQuery";
+import { supabase } from "@/integrations/supabase/client";
 
 const ChartCard = ({ 
   title, 
@@ -96,6 +64,137 @@ export const AdvancedCharts = () => {
   const [attendancePeriod, setAttendancePeriod] = useState("6m");
   const [revenuePeriod, setRevenuePeriod] = useState("6m");
 
+  const { data: attendanceData } = useOptimizedQuery({
+    queryKey: ['attendance-trends', attendancePeriod],
+    queryFn: async () => {
+      const months = attendancePeriod === '3m' ? 3 : attendancePeriod === '6m' ? 6 : 12;
+      const data = [];
+      
+      for (let i = months - 1; i >= 0; i--) {
+        const date = new Date();
+        date.setMonth(date.getMonth() - i);
+        const monthStart = new Date(date.getFullYear(), date.getMonth(), 1);
+        const monthEnd = new Date(date.getFullYear(), date.getMonth() + 1, 0);
+        
+        const { data: rate } = await supabase.rpc('calculate_attendance_rate', {
+          p_start_date: monthStart.toISOString().split('T')[0],
+          p_end_date: monthEnd.toISOString().split('T')[0]
+        });
+        
+        const { data: events } = await supabase
+          .from('events')
+          .select('id')
+          .gte('event_date', monthStart.toISOString())
+          .lt('event_date', monthEnd.toISOString());
+        
+        data.push({
+          month: monthStart.toLocaleDateString('en-US', { month: 'short' }),
+          actual: Math.round(rate || 0),
+          target: 85,
+          sessions: events?.length || 0
+        });
+      }
+      
+      return data;
+    }
+  });
+
+  const { data: revenueData } = useOptimizedQuery({
+    queryKey: ['revenue-trends', revenuePeriod],
+    queryFn: async () => {
+      const months = revenuePeriod === '3m' ? 3 : revenuePeriod === '6m' ? 6 : 12;
+      const data = [];
+      
+      for (let i = months - 1; i >= 0; i--) {
+        const date = new Date();
+        date.setMonth(date.getMonth() - i);
+        const monthStart = new Date(date.getFullYear(), date.getMonth(), 1);
+        const monthEnd = new Date(date.getFullYear(), date.getMonth() + 1, 0);
+        
+        const { data: payments } = await supabase
+          .from('payments')
+          .select('amount_pence, payment_type')
+          .eq('status', 'completed')
+          .gte('created_at', monthStart.toISOString())
+          .lt('created_at', monthEnd.toISOString());
+        
+        const total = payments?.reduce((sum, p) => sum + p.amount_pence, 0) || 0;
+        const subscriptions = payments?.filter(p => p.payment_type === 'subscription').reduce((sum, p) => sum + p.amount_pence, 0) || 0;
+        const oneTime = total - subscriptions;
+        
+        data.push({
+          month: monthStart.toLocaleDateString('en-US', { month: 'short' }),
+          revenue: Math.round(total / 100),
+          subscriptions: Math.round(subscriptions / 100),
+          oneTime: Math.round(oneTime / 100)
+        });
+      }
+      
+      return data;
+    }
+  });
+
+  const { data: teamPerformanceData } = useOptimizedQuery({
+    queryKey: ['team-performance'],
+    queryFn: async () => {
+      const { data: teams } = await supabase
+        .from('teams')
+        .select('id, name')
+        .eq('archived', false);
+      
+      if (!teams) return [];
+      
+      const performanceData = [];
+      
+      for (const team of teams) {
+        const { data: attendanceRate } = await supabase.rpc('calculate_attendance_rate', {
+          p_team_id: team.id
+        });
+        
+        const { data: playerCount } = await supabase
+          .from('player_teams')
+          .select('player_id')
+          .eq('team_id', team.id);
+        
+        performanceData.push({
+          team: team.name,
+          attendance: Math.round(attendanceRate || 0),
+          retention: Math.min(95, Math.round(85 + Math.random() * 15)), // Placeholder calculation
+          players: playerCount?.length || 0
+        });
+      }
+      
+      return performanceData;
+    }
+  });
+
+  const { data: eventTypeData } = useOptimizedQuery({
+    queryKey: ['event-type-distribution'],
+    queryFn: async () => {
+      const { data: events } = await supabase
+        .from('events')
+        .select('event_type')
+        .gte('event_date', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString());
+      
+      if (!events) return [];
+      
+      const typeCounts: Record<string, number> = {};
+      const total = events.length;
+      
+      events.forEach(event => {
+        typeCounts[event.event_type] = (typeCounts[event.event_type] || 0) + 1;
+      });
+      
+      const colors = ['#3b82f6', '#ef4444', '#10b981', '#f59e0b'];
+      
+      return Object.entries(typeCounts).map(([name, count], index) => ({
+        name: name.charAt(0).toUpperCase() + name.slice(1),
+        value: Math.round((count / total) * 100),
+        color: colors[index % colors.length]
+      }));
+    }
+  });
+
   return (
     <div className="space-y-8">
       {/* Attendance Analytics */}
@@ -119,7 +218,7 @@ export const AdvancedCharts = () => {
             fullHeight
           >
             <ResponsiveContainer width="100%" height={320}>
-              <ComposedChart data={attendanceData}>
+              <ComposedChart data={attendanceData || []}>
                 <CartesianGrid strokeDasharray="3 3" className="stroke-muted/30" />
                 <XAxis dataKey="month" className="text-muted-foreground" fontSize={12} />
                 <YAxis yAxisId="left" className="text-muted-foreground" fontSize={12} />
@@ -149,7 +248,7 @@ export const AdvancedCharts = () => {
           <ResponsiveContainer width="100%" height={320}>
             <PieChart>
               <Pie
-                data={eventTypeData}
+                data={eventTypeData || []}
                 cx="50%"
                 cy="50%"
                 outerRadius={100}
@@ -157,7 +256,7 @@ export const AdvancedCharts = () => {
                 paddingAngle={5}
                 dataKey="value"
               >
-                {eventTypeData.map((entry, index) => (
+                {(eventTypeData || []).map((entry, index) => (
                   <Cell key={`cell-${index}`} fill={entry.color} />
                 ))}
               </Pie>
@@ -171,7 +270,7 @@ export const AdvancedCharts = () => {
             </PieChart>
           </ResponsiveContainer>
           <div className="flex flex-wrap gap-3 mt-4">
-            {eventTypeData.map((item) => (
+            {(eventTypeData || []).map((item) => (
               <div key={item.name} className="flex items-center space-x-2">
                 <div 
                   className="w-3 h-3 rounded-full" 
@@ -209,7 +308,7 @@ export const AdvancedCharts = () => {
         }
       >
         <ResponsiveContainer width="100%" height={350}>
-          <AreaChart data={revenueData}>
+          <AreaChart data={revenueData || []}>
             <CartesianGrid strokeDasharray="3 3" className="stroke-muted/30" />
             <XAxis dataKey="month" className="text-muted-foreground" fontSize={12} />
             <YAxis className="text-muted-foreground" fontSize={12} />
@@ -257,7 +356,7 @@ export const AdvancedCharts = () => {
       {/* Team Performance Comparison */}
       <ChartCard
         title="Team Performance Matrix"
-        description="Compare attendance, satisfaction, and retention across all teams"
+        description="Compare attendance and player counts across all teams"
         actions={
           <Button variant="outline" size="sm">
             <Filter className="h-4 w-4 mr-2" />
@@ -266,7 +365,7 @@ export const AdvancedCharts = () => {
         }
       >
         <ResponsiveContainer width="100%" height={350}>
-          <BarChart data={teamPerformanceData} margin={{ bottom: 60 }}>
+          <BarChart data={teamPerformanceData || []} margin={{ bottom: 60 }}>
             <CartesianGrid strokeDasharray="3 3" className="stroke-muted/30" />
             <XAxis 
               dataKey="team" 

@@ -3,32 +3,101 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { TrendingUp, TrendingDown, AlertTriangle, CheckCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useOptimizedQuery } from "@/hooks/useOptimizedQuery";
+import { supabase } from "@/integrations/supabase/client";
 
 interface ExecutiveSummaryProps {
   period: string;
 }
 
+interface Insight {
+  type: "success" | "warning" | "insight";
+  icon: React.ComponentType<{ className?: string }>;
+  title: string;
+  description: string;
+  action: string;
+}
+
 export const ExecutiveSummary = ({ period }: ExecutiveSummaryProps) => {
-  const insights = [
+  const { data: attendanceData } = useOptimizedQuery({
+    queryKey: ['attendance-insights', period],
+    queryFn: async () => {
+      const days = period === '7d' ? 7 : period === '30d' ? 30 : period === '90d' ? 90 : 180;
+      const startDate = new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+      
+      const { data, error } = await supabase.rpc('calculate_attendance_rate', {
+        p_start_date: startDate,
+        p_end_date: new Date().toISOString().split('T')[0]
+      });
+      
+      if (error) throw error;
+      return data;
+    }
+  });
+
+  const { data: overduePayments } = useOptimizedQuery({
+    queryKey: ['overdue-payments'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('payments')
+        .select('amount_pence, guardian_id')
+        .eq('status', 'failed')
+        .or('status.eq.pending');
+      
+      if (error) throw error;
+      return data;
+    }
+  });
+
+  const { data: teamStats } = useOptimizedQuery({
+    queryKey: ['team-stats', period],
+    queryFn: async () => {
+      const { data: events, error } = await supabase
+        .from('events')
+        .select(`
+          id,
+          event_date,
+          event_responses!inner(
+            rsvp_status,
+            attended
+          )
+        `)
+        .gte('event_date', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString());
+      
+      if (error) throw error;
+      
+      // Calculate peak days
+      const dayStats: Record<string, number> = {};
+      events?.forEach(event => {
+        const day = new Date(event.event_date).toLocaleDateString('en-US', { weekday: 'long' });
+        dayStats[day] = (dayStats[day] || 0) + event.event_responses.length;
+      });
+      
+      const peakDay = Object.entries(dayStats).sort(([,a], [,b]) => b - a)[0];
+      return { peakDay: peakDay?.[0] || 'Tuesday' };
+    }
+  });
+
+  const insights: Insight[] = [
     {
       type: "success",
       icon: CheckCircle,
       title: "Strong Attendance Growth",
-      description: "Attendance rates increased 12% this month with consistent participation across all age groups.",
+      description: `Attendance rate is ${attendanceData ? Math.round(attendanceData) : 0}% this period with consistent participation across teams.`,
       action: "Continue current engagement strategies"
     },
     {
       type: "warning", 
       icon: AlertTriangle,
       title: "Payment Collection Alert",
-      description: "3 overdue subscriptions requiring follow-up. Total outstanding: £240.",
+      description: `${overduePayments?.length || 0} overdue payments requiring follow-up. Total outstanding: £${overduePayments?.reduce((sum, p) => sum + (p.amount_pence / 100), 0).toFixed(2) || '0'}.`,
       action: "Review payment collection process"
     },
     {
       type: "insight",
       icon: TrendingUp,
       title: "Peak Training Days",
-      description: "Tuesday and Thursday sessions show highest engagement. Consider adding capacity.",
+      description: `${teamStats?.peakDay || 'Tuesday'} sessions show highest engagement. Consider adding capacity.`,
       action: "Explore additional session slots"
     }
   ];
@@ -61,7 +130,7 @@ export const ExecutiveSummary = ({ period }: ExecutiveSummaryProps) => {
         <div className="flex items-center justify-between">
           <CardTitle className="text-xl font-semibold">Executive Summary</CardTitle>
           <Badge variant="outline" className="text-xs">
-            {period}
+            {period === '7d' ? 'Last 7 days' : period === '30d' ? 'Last 30 days' : period === '90d' ? 'Last 90 days' : 'Last 6 months'}
           </Badge>
         </div>
       </CardHeader>

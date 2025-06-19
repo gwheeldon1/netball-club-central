@@ -1,4 +1,3 @@
-
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -13,9 +12,12 @@ import {
   ArrowRight,
   Star,
   MessageSquare,
-  TrendingUp
+  TrendingUp,
+  Activity
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useOptimizedQuery } from "@/hooks/useOptimizedQuery";
+import { supabase } from "@/integrations/supabase/client";
 
 interface ActionItem {
   id: string;
@@ -45,75 +47,6 @@ interface RecentActivity {
   };
   status: "success" | "warning" | "info";
 }
-
-const actionItems: ActionItem[] = [
-  {
-    id: "1",
-    type: "urgent",
-    title: "Overdue Payments",
-    description: "3 families have payments overdue totaling £240",
-    action: "Send payment reminders",
-    dueDate: "Today",
-    assignee: { name: "Sarah Johnson", initials: "SJ" },
-    priority: "high"
-  },
-  {
-    id: "2",
-    type: "important", 
-    title: "Equipment Maintenance",
-    description: "Annual safety check due for training equipment",
-    action: "Schedule inspection",
-    dueDate: "This week",
-    assignee: { name: "Mike Chen", initials: "MC" },
-    priority: "medium"
-  },
-  {
-    id: "3",
-    type: "info",
-    title: "New Registration Approvals",
-    description: "5 new player applications awaiting approval",
-    action: "Review applications",
-    assignee: { name: "Emma Davis", initials: "ED" },
-    priority: "medium"
-  }
-];
-
-const recentActivities: RecentActivity[] = [
-  {
-    id: "1",
-    type: "achievement",
-    title: "Player of the Match",
-    description: "Jessica Smith awarded Player of the Match for exceptional performance",
-    timestamp: "2 hours ago",
-    user: { name: "Jessica Smith", initials: "JS" },
-    status: "success"
-  },
-  {
-    id: "2",
-    type: "registration",
-    title: "New Player Registration",
-    description: "Tom Wilson has completed registration for Under 12s team",
-    timestamp: "4 hours ago",
-    user: { name: "Tom Wilson", initials: "TW" },
-    status: "info"
-  },
-  {
-    id: "3",
-    type: "payment",
-    title: "Subscription Renewed",
-    description: "The Roberts family renewed their annual subscription",
-    timestamp: "6 hours ago",
-    status: "success"
-  },
-  {
-    id: "4",
-    type: "attendance",
-    title: "High Attendance Alert",
-    description: "Under 10s training session reached 95% attendance",
-    timestamp: "1 day ago",
-    status: "success"
-  }
-];
 
 const ActionItem = ({ item }: { item: ActionItem }) => {
   const getTypeStyles = (type: string) => {
@@ -234,6 +167,105 @@ const ActivityItem = ({ activity }: { activity: RecentActivity }) => {
 };
 
 export const ActionCenter = () => {
+  const { data: overduePayments } = useOptimizedQuery({
+    queryKey: ['overdue-payments'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('payments')
+        .select(`
+          id,
+          amount_pence,
+          guardian_id,
+          created_at,
+          guardians(first_name, last_name)
+        `)
+        .eq('status', 'failed')
+        .order('created_at', { ascending: false })
+        .limit(3);
+      
+      if (error) throw error;
+      return data;
+    }
+  });
+
+  const { data: pendingRegistrations } = useOptimizedQuery({
+    queryKey: ['pending-registrations'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('players')
+        .select(`
+          id,
+          first_name,
+          last_name,
+          created_at
+        `)
+        .eq('approval_status', 'pending')
+        .order('created_at', { ascending: false })
+        .limit(5);
+      
+      if (error) throw error;
+      return data;
+    }
+  });
+
+  const { data: recentActivities } = useOptimizedQuery({
+    queryKey: ['recent-activities'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('analytics_events')
+        .select(`
+          id,
+          event_type,
+          event_name,
+          properties,
+          timestamp,
+          user_id
+        `)
+        .order('timestamp', { ascending: false })
+        .limit(10);
+      
+      if (error) throw error;
+      
+      return data?.map(event => ({
+        id: event.id,
+        type: event.event_type === 'attendance' ? 'attendance' : 
+              event.event_type === 'payment' ? 'payment' :
+              event.event_type === 'registration' ? 'registration' : 'achievement',
+        title: formatEventTitle(event.event_name),
+        description: formatEventDescription(event.properties),
+        timestamp: formatTimeAgo(event.timestamp),
+        status: getEventStatus(event.event_type),
+        user: event.user_id ? {
+          name: 'User',
+          initials: 'U'
+        } : undefined
+      })) || [];
+    }
+  });
+
+  const actionItems = [
+    ...(overduePayments?.map(payment => ({
+      id: payment.id,
+      type: "urgent" as const,
+      title: "Overdue Payment",
+      description: `£${(payment.amount_pence / 100).toFixed(2)} payment from ${payment.guardians?.first_name} ${payment.guardians?.last_name}`,
+      action: "Send reminder",
+      dueDate: "Overdue",
+      assignee: { name: "Finance Team", initials: "FT" },
+      priority: "high" as const
+    })) || []),
+    
+    ...(pendingRegistrations?.length ? [{
+      id: "registrations",
+      type: "info" as const,
+      title: "New Registration Approvals",
+      description: `${pendingRegistrations.length} new player applications awaiting approval`,
+      action: "Review applications",
+      assignee: { name: "Admin Team", initials: "AT" },
+      priority: "medium" as const
+    }] : [])
+  ];
+
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
       {/* Action Items */}
@@ -250,13 +282,22 @@ export const ActionCenter = () => {
           </div>
         </CardHeader>
         <CardContent className="space-y-4">
-          {actionItems.map((item) => (
-            <ActionItem key={item.id} item={item} />
-          ))}
-          <Button variant="ghost" className="w-full text-sm">
-            View all actions
-            <ArrowRight className="h-4 w-4 ml-2" />
-          </Button>
+          {actionItems.length > 0 ? (
+            actionItems.map((item) => (
+              <ActionItem key={item.id} item={item} />
+            ))
+          ) : (
+            <div className="text-center py-8 text-muted-foreground">
+              <CheckCircle className="h-12 w-12 mx-auto mb-2 text-emerald-500" />
+              <p>No pending actions</p>
+            </div>
+          )}
+          {actionItems.length > 0 && (
+            <Button variant="ghost" className="w-full text-sm">
+              View all actions
+              <ArrowRight className="h-4 w-4 ml-2" />
+            </Button>
+          )}
         </CardContent>
       </Card>
 
@@ -274,15 +315,61 @@ export const ActionCenter = () => {
           </div>
         </CardHeader>
         <CardContent className="space-y-2">
-          {recentActivities.map((activity) => (
-            <ActivityItem key={activity.id} activity={activity} />
-          ))}
-          <Button variant="ghost" className="w-full text-sm mt-4">
-            View activity feed
-            <ArrowRight className="h-4 w-4 ml-2" />
-          </Button>
+          {recentActivities?.length ? (
+            recentActivities.map((activity) => (
+              <ActivityItem key={activity.id} activity={activity} />
+            ))
+          ) : (
+            <div className="text-center py-8 text-muted-foreground">
+              <Activity className="h-12 w-12 mx-auto mb-2" />
+              <p>No recent activity</p>
+            </div>
+          )}
+          {recentActivities?.length && (
+            <Button variant="ghost" className="w-full text-sm mt-4">
+              View activity feed
+              <ArrowRight className="h-4 w-4 ml-2" />
+            </Button>
+          )}
         </CardContent>
       </Card>
     </div>
   );
 };
+
+// Helper functions
+function formatEventTitle(eventName: string): string {
+  return eventName.split('_').map(word => 
+    word.charAt(0).toUpperCase() + word.slice(1)
+  ).join(' ');
+}
+
+function formatEventDescription(properties: any): string {
+  if (properties?.description) return properties.description;
+  if (properties?.event_type) return `${properties.event_type} event`;
+  if (properties?.team) return `Related to ${properties.team}`;
+  return 'Activity recorded';
+}
+
+function formatTimeAgo(timestamp: string): string {
+  const now = new Date();
+  const eventTime = new Date(timestamp);
+  const diffInHours = Math.floor((now.getTime() - eventTime.getTime()) / (1000 * 60 * 60));
+  
+  if (diffInHours < 1) return 'Less than an hour ago';
+  if (diffInHours < 24) return `${diffInHours} hours ago`;
+  return `${Math.floor(diffInHours / 24)} days ago`;
+}
+
+function getEventStatus(eventType: string): 'success' | 'warning' | 'error' | 'info' {
+  switch (eventType) {
+    case 'attendance':
+      return 'success';
+    case 'payment':
+      return 'info';
+    case 'error':
+      return 'error';
+    default:
+      return 'info';
+  }
+}
