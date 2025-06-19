@@ -9,6 +9,7 @@ import TeamDetailPage from "@/pages/TeamDetailPage";
 import EventsPage from './pages/EventsPage';
 import AnalyticsPage from './pages/AnalyticsPage';
 import EnhancedAnalyticsPage from './pages/EnhancedAnalyticsPage';
+import ModernAnalyticsPage from './pages/ModernAnalyticsPage';
 import { AnalyticsDashboard } from './components/analytics/AnalyticsDashboard';
 import PlayerPerformanceDashboard from './components/PlayerPerformanceDashboard';
 
@@ -20,12 +21,13 @@ function App() {
       <AuthProvider>
         <Router>
           <Routes>
-            <Route path="/" element={<EnhancedAnalyticsPage />} />
+            <Route path="/" element={<ModernAnalyticsPage />} />
             <Route path="/teams" element={<TeamsPage />} />
             <Route path="/teams/new" element={<NewTeamPage />} />
             <Route path="/teams/:id" element={<TeamDetailPage />} />
             <Route path="/events" element={<EventsPage />} />
-            <Route path="/analytics" element={<EnhancedAnalyticsPage />} />
+            <Route path="/analytics" element={<ModernAnalyticsPage />} />
+            <Route path="/analytics/enhanced" element={<EnhancedAnalyticsPage />} />
             <Route path="/analytics/legacy" element={<AnalyticsPage />} />
             <Route path="/analytics/overview" element={<AnalyticsDashboard />} />
             <Route path="/analytics/player-performance" element={<PlayerPerformanceDashboard />} />
