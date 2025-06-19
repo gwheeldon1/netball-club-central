@@ -16,44 +16,84 @@ import type {
   TeamStaff
 } from '@/types/core';
 
+export interface ApiResponse<T = any> {
+  data?: T;
+  error?: string;
+  success: boolean;
+}
+
 class APIService {
+  // Health check
+  async isConnected(): Promise<boolean> {
+    try {
+      const { error } = await supabase.from('teams').select('id').limit(1);
+      return !error;
+    } catch {
+      return false;
+    }
+  }
+
+  // Generic error handler
+  private handleError(operation: string, error: any): never {
+    logger.error(`${operation} failed:`, error);
+    throw new Error(error?.message || `Failed to ${operation}`);
+  }
+
   // ========== TEAMS ==========
   async getTeams(): Promise<Team[]> {
     try {
+      logger.info('Fetching teams from Supabase...');
+      
       const { data, error } = await supabase
         .from('teams')
         .select('*')
         .eq('archived', false)
         .order('name');
 
-      if (error) throw error;
+      if (error) {
+        this.handleError('fetch teams', error);
+      }
+
+      const teams = data?.map(this.mapDatabaseTeamToTeam) || [];
+      logger.info(`Successfully fetched ${teams.length} teams`);
       
-      return data?.map(this.mapDatabaseTeamToTeam) || [];
+      return teams;
     } catch (error) {
-      logger.error('Error fetching teams:', error);
-      throw error;
+      this.handleError('fetch teams', error);
     }
   }
 
-  async getTeamById(id: string): Promise<Team | undefined> {
+  async getTeamById(id: string): Promise<Team | null> {
     try {
+      logger.info(`Fetching team with ID: ${id}`);
+      
       const { data, error } = await supabase
         .from('teams')
         .select('*')
         .eq('id', id)
         .single();
 
-      if (error) throw error;
+      if (error) {
+        if (error.code === 'PGRST116') {
+          logger.warn(`Team not found: ${id}`);
+          return null;
+        }
+        this.handleError('fetch team', error);
+      }
       
-      return this.mapDatabaseTeamToTeam(data);
+      const team = this.mapDatabaseTeamToTeam(data);
+      logger.info(`Successfully fetched team: ${team.name}`);
+      
+      return team;
     } catch (error) {
-      logger.error('Error fetching team:', error);
-      return undefined;
+      this.handleError('fetch team', error);
     }
   }
 
   async createTeam(team: Omit<Team, 'id'>): Promise<Team> {
     try {
+      logger.info(`Creating team: ${team.name}`);
+      
       const { data, error } = await supabase
         .from('teams')
         .insert({
@@ -65,20 +105,26 @@ class APIService {
         .select()
         .single();
 
-      if (error) throw error;
+      if (error) {
+        this.handleError('create team', error);
+      }
       
-      return this.mapDatabaseTeamToTeam(data);
+      const newTeam = this.mapDatabaseTeamToTeam(data);
+      logger.info(`Successfully created team: ${newTeam.name}`);
+      
+      return newTeam;
     } catch (error) {
-      logger.error('Error creating team:', error);
-      throw error;
+      this.handleError('create team', error);
     }
   }
 
-  async updateTeam(id: string, updates: Partial<Team>): Promise<Team | undefined> {
+  async updateTeam(id: string, updates: Partial<Team>): Promise<Team> {
     try {
+      logger.info(`Updating team: ${id}`);
+      
       const updateData: any = {};
-      if (updates.name) updateData.name = updates.name;
-      if (updates.ageGroup) updateData.age_group = updates.ageGroup;
+      if (updates.name !== undefined) updateData.name = updates.name;
+      if (updates.ageGroup !== undefined) updateData.age_group = updates.ageGroup;
       if (updates.description !== undefined) updateData.description = updates.description;
       if (updates.archived !== undefined) updateData.archived = updates.archived;
 
@@ -89,33 +135,44 @@ class APIService {
         .select()
         .single();
 
-      if (error) throw error;
+      if (error) {
+        this.handleError('update team', error);
+      }
       
-      return this.mapDatabaseTeamToTeam(data);
+      const updatedTeam = this.mapDatabaseTeamToTeam(data);
+      logger.info(`Successfully updated team: ${updatedTeam.name}`);
+      
+      return updatedTeam;
     } catch (error) {
-      logger.error('Error updating team:', error);
-      return undefined;
+      this.handleError('update team', error);
     }
   }
 
   async deleteTeam(id: string): Promise<boolean> {
     try {
+      logger.info(`Deleting team: ${id}`);
+      
       const { error } = await supabase
         .from('teams')
         .delete()
         .eq('id', id);
 
-      if (error) throw error;
+      if (error) {
+        this.handleError('delete team', error);
+      }
+      
+      logger.info(`Successfully deleted team: ${id}`);
       return true;
     } catch (error) {
-      logger.error('Error deleting team:', error);
-      return false;
+      this.handleError('delete team', error);
     }
   }
 
   // Team member operations
   async getTeamPlayers(teamId: string): Promise<TeamPlayer[]> {
     try {
+      logger.info(`Fetching players for team: ${teamId}`);
+      
       const { data, error } = await supabase
         .from('player_teams')
         .select(`
@@ -124,31 +181,41 @@ class APIService {
             first_name,
             last_name,
             profile_image,
-            date_of_birth
+            date_of_birth,
+            approval_status
           )
         `)
         .eq('team_id', teamId);
       
-      if (error) throw error;
+      if (error) {
+        this.handleError('fetch team players', error);
+      }
       
-      return data?.map(pt => ({
-        id: (pt.player as any).id,
-        name: `${(pt.player as any).first_name} ${(pt.player as any).last_name}`,
-        profileImage: (pt.player as any).profile_image,
-        ageGroup: '',
-        dateOfBirth: (pt.player as any).date_of_birth,
-        teamId: teamId,
-        parentId: '',
-        status: 'approved' as const
-      })) || [];
+      const players = data?.map(pt => {
+        const player = pt.player as any;
+        return {
+          id: player.id,
+          name: `${player.first_name} ${player.last_name}`,
+          profileImage: player.profile_image,
+          ageGroup: '', // Calculate from date_of_birth if needed
+          dateOfBirth: player.date_of_birth,
+          teamId: teamId,
+          parentId: '', // Would need to join with guardians table
+          status: player.approval_status as 'pending' | 'approved' | 'rejected'
+        };
+      }) || [];
+      
+      logger.info(`Successfully fetched ${players.length} players for team: ${teamId}`);
+      return players;
     } catch (error) {
-      logger.error('Error fetching team players:', error);
-      return [];
+      this.handleError('fetch team players', error);
     }
   }
 
   async getTeamStaff(teamId: string): Promise<{ coaches: TeamStaff[]; managers: TeamStaff[] }> {
     try {
+      logger.info(`Fetching staff for team: ${teamId}`);
+      
       const { data, error } = await supabase
         .from('user_roles')
         .select(`
@@ -165,18 +232,21 @@ class APIService {
         .eq('is_active', true)
         .in('role', ['coach', 'manager']);
       
-      if (error) throw error;
+      if (error) {
+        this.handleError('fetch team staff', error);
+      }
       
       const coaches: TeamStaff[] = [];
       const managers: TeamStaff[] = [];
       
       data?.forEach(ur => {
         if (ur.guardian) {
+          const guardian = ur.guardian as any;
           const user: TeamStaff = {
-            id: (ur.guardian as any).id,
-            name: `${(ur.guardian as any).first_name} ${(ur.guardian as any).last_name}`,
-            email: (ur.guardian as any).email,
-            profileImage: (ur.guardian as any).profile_image,
+            id: guardian.id,
+            name: `${guardian.first_name} ${guardian.last_name}`,
+            email: guardian.email || '',
+            profileImage: guardian.profile_image,
             roles: [ur.role]
           };
           
@@ -188,32 +258,38 @@ class APIService {
         }
       });
       
+      logger.info(`Successfully fetched staff for team: ${teamId} (${coaches.length} coaches, ${managers.length} managers)`);
       return { coaches, managers };
     } catch (error) {
-      logger.error('Error fetching team staff:', error);
-      return { coaches: [], managers: [] };
+      this.handleError('fetch team staff', error);
     }
   }
 
   async getTeamParents(teamId: string): Promise<TeamStaff[]> {
     try {
-      const { data, error } = await supabase
+      logger.info(`Fetching parents for team: ${teamId}`);
+      
+      // First get all players in the team
+      const { data: playerTeams, error: playerTeamsError } = await supabase
         .from('player_teams')
         .select('player_id')
         .eq('team_id', teamId);
       
-      if (error) throw error;
+      if (playerTeamsError) {
+        this.handleError('fetch team players for parents', playerTeamsError);
+      }
 
-      if (!data || data.length === 0) {
+      if (!playerTeams || playerTeams.length === 0) {
         return [];
       }
 
-      const playerIds = data.map(pt => pt.player_id).filter(Boolean);
+      const playerIds = playerTeams.map(pt => pt.player_id).filter(Boolean);
       
       if (playerIds.length === 0) {
         return [];
       }
 
+      // Then get guardians for those players
       const { data: guardiansData, error: guardiansError } = await supabase
         .from('guardians')
         .select(`
@@ -227,7 +303,9 @@ class APIService {
         .in('player_id', playerIds)
         .eq('approval_status', 'approved');
       
-      if (guardiansError) throw guardiansError;
+      if (guardiansError) {
+        this.handleError('fetch team parents', guardiansError);
+      }
       
       const parents: TeamStaff[] = [];
       const seenParentIds = new Set<string>();
@@ -245,249 +323,56 @@ class APIService {
         }
       });
       
+      logger.info(`Successfully fetched ${parents.length} parents for team: ${teamId}`);
       return parents;
     } catch (error) {
-      logger.error('Error fetching team parents:', error);
-      return [];
+      this.handleError('fetch team parents', error);
     }
   }
 
   // ========== EVENTS ==========
   async getEvents(): Promise<Event[]> {
     try {
+      logger.info('Fetching events from Supabase...');
+      
       const { data, error } = await supabase
         .from('events')
         .select('*')
         .order('event_date');
 
-      if (error) throw error;
-      
-      return data?.map(this.mapDatabaseEventToEvent) || [];
-    } catch (error) {
-      logger.error('Error fetching events:', error);
-      throw error;
-    }
-  }
-
-  async getEventById(id: string): Promise<Event | undefined> {
-    try {
-      const { data, error } = await supabase
-        .from('events')
-        .select('*')
-        .eq('id', id)
-        .single();
-
-      if (error || !data) return undefined;
-      
-      return this.mapDatabaseEventToEvent(data);
-    } catch (error) {
-      logger.error('Error fetching event:', error);
-      return undefined;
-    }
-  }
-
-  async createEvent(event: Omit<Event, 'id'>): Promise<Event> {
-    try {
-      const { data, error } = await supabase
-        .from('events')
-        .insert({
-          title: event.name,
-          event_date: new Date(`${event.date}T${event.time}`).toISOString(),
-          location: event.location,
-          description: event.notes,
-          event_type: event.eventType,
-          team_id: event.teamId || null,
-          is_home: event.isHome
-        })
-        .select()
-        .single();
-
-      if (error) throw error;
-      
-      return this.mapDatabaseEventToEvent(data);
-    } catch (error) {
-      logger.error('Error creating event:', error);
-      throw error;
-    }
-  }
-
-  async updateEvent(id: string, updates: Partial<Omit<Event, 'id'>>): Promise<Event | undefined> {
-    try {
-      const updateData: any = {};
-      if (updates.name) updateData.title = updates.name;
-      if (updates.date && updates.time) {
-        updateData.event_date = new Date(`${updates.date}T${updates.time}`).toISOString();
+      if (error) {
+        this.handleError('fetch events', error);
       }
-      if (updates.location) updateData.location = updates.location;
-      if (updates.notes) updateData.description = updates.notes;
-      if (updates.eventType) updateData.event_type = updates.eventType;
-      if (updates.teamId !== undefined) updateData.team_id = updates.teamId || null;
-      if (updates.isHome !== undefined) updateData.is_home = updates.isHome;
       
-      const { data, error } = await supabase
-        .from('events')
-        .update(updateData)
-        .eq('id', id)
-        .select()
-        .single();
-
-      if (error) throw error;
+      const events = data?.map(this.mapDatabaseEventToEvent) || [];
+      logger.info(`Successfully fetched ${events.length} events`);
       
-      return this.mapDatabaseEventToEvent(data);
+      return events;
     } catch (error) {
-      logger.error('Error updating event:', error);
-      return undefined;
-    }
-  }
-
-  async deleteEvent(id: string): Promise<boolean> {
-    try {
-      const { error } = await supabase
-        .from('events')
-        .delete()
-        .eq('id', id);
-
-      if (error) throw error;
-      return true;
-    } catch (error) {
-      logger.error('Error deleting event:', error);
-      return false;
+      this.handleError('fetch events', error);
     }
   }
 
   // ========== CHILDREN ==========
   async getChildren(): Promise<Child[]> {
     try {
+      logger.info('Fetching children from Supabase...');
+      
       const { data, error } = await supabase
         .from('players')
         .select('*')
         .order('first_name');
 
-      if (error) throw error;
-      
-      return data?.map(this.mapDatabasePlayerToChild) || [];
-    } catch (error) {
-      logger.error('Error fetching children:', error);
-      throw error;
-    }
-  }
-
-  async getChildrenByTeamId(teamId: string): Promise<Child[]> {
-    try {
-      const { data, error } = await supabase
-        .from('players')
-        .select(`
-          *,
-          player_teams!inner(team_id)
-        `)
-        .eq('player_teams.team_id', teamId)
-        .order('first_name');
-
-      if (error) throw error;
-      
-      return data?.map(player => ({
-        ...this.mapDatabasePlayerToChild(player),
-        teamId: teamId
-      })) || [];
-    } catch (error) {
-      logger.error('Error fetching children by team:', error);
-      throw error;
-    }
-  }
-
-  async createChild(child: Omit<Child, 'id'>): Promise<Child> {
-    try {
-      const [firstName, ...lastNameParts] = child.name.split(' ');
-      const lastName = lastNameParts.join(' ') || '';
-
-      const { data, error } = await supabase
-        .from('players')
-        .insert({
-          first_name: firstName,
-          last_name: lastName,
-          date_of_birth: child.dateOfBirth,
-          medical_conditions: child.medicalInfo,
-          additional_medical_notes: child.notes,
-          profile_image: child.profileImage,
-          approval_status: child.status,
-          terms_accepted: true,
-          code_of_conduct_accepted: true,
-          photo_consent: true,
-          data_processing_consent: true
-        })
-        .select()
-        .single();
-
-      if (error) throw error;
-      
-      return this.mapDatabasePlayerToChild(data);
-    } catch (error) {
-      logger.error('Error creating child:', error);
-      throw error;
-    }
-  }
-
-  async updateChild(id: string, updates: Partial<Child>): Promise<Child | undefined> {
-    try {
-      const updateData: any = {};
-      
-      if (updates.name) {
-        const [firstName, ...lastNameParts] = updates.name.split(' ');
-        updateData.first_name = firstName;
-        updateData.last_name = lastNameParts.join(' ') || '';
+      if (error) {
+        this.handleError('fetch children', error);
       }
       
-      if (updates.dateOfBirth) updateData.date_of_birth = updates.dateOfBirth;
-      if (updates.medicalInfo) updateData.medical_conditions = updates.medicalInfo;
-      if (updates.notes) updateData.additional_medical_notes = updates.notes;
-      if (updates.profileImage) updateData.profile_image = updates.profileImage;
-      if (updates.status) updateData.approval_status = updates.status;
-
-      const { data, error } = await supabase
-        .from('players')
-        .update(updateData)
-        .eq('id', id)
-        .select()
-        .single();
-
-      if (error) throw error;
+      const children = data?.map(this.mapDatabasePlayerToChild) || [];
+      logger.info(`Successfully fetched ${children.length} children`);
       
-      return this.mapDatabasePlayerToChild(data);
+      return children;
     } catch (error) {
-      logger.error('Error updating child:', error);
-      return undefined;
-    }
-  }
-
-  // ========== ATTENDANCE ==========
-  async getAttendanceByEventId(eventId: string): Promise<any[]> {
-    try {
-      const { data, error } = await supabase
-        .from('event_responses')
-        .select('*')
-        .eq('event_id', eventId);
-
-      if (error) throw error;
-      return data || [];
-    } catch (error) {
-      logger.error('Error fetching attendance:', error);
-      throw error;
-    }
-  }
-
-  async createAttendance(attendance: any): Promise<any> {
-    try {
-      const { data, error } = await supabase
-        .from('event_responses')
-        .insert(attendance)
-        .select()
-        .single();
-
-      if (error) throw error;
-      return data;
-    } catch (error) {
-      logger.error('Error creating attendance:', error);
-      throw error;
+      this.handleError('fetch children', error);
     }
   }
 
@@ -497,7 +382,7 @@ class APIService {
       id: dbTeam.id,
       name: dbTeam.name,
       ageGroup: dbTeam.age_group,
-      category: 'Junior' as Team['category'],
+      category: this.mapAgeGroupToCategory(dbTeam.age_group),
       description: dbTeam.description || '',
       archived: dbTeam.archived
     };
@@ -533,6 +418,59 @@ class APIService {
       parentId: '',
       status: dbPlayer.approval_status as Child['status']
     };
+  }
+
+  private mapAgeGroupToCategory(ageGroup: string): Team['category'] {
+    const age = parseInt(ageGroup.replace(/\D/g, ''));
+    if (age <= 16) return 'Junior';
+    if (age >= 18) return 'Senior';
+    return 'Mixed';
+  }
+
+  // Placeholder implementations for missing methods
+  async getEventById(id: string): Promise<Event | undefined> {
+    // TODO: Implement
+    return undefined;
+  }
+
+  async createEvent(event: Omit<Event, 'id'>): Promise<Event> {
+    // TODO: Implement
+    throw new Error('Not implemented');
+  }
+
+  async updateEvent(id: string, updates: Partial<Omit<Event, 'id'>>): Promise<Event | undefined> {
+    // TODO: Implement
+    return undefined;
+  }
+
+  async deleteEvent(id: string): Promise<boolean> {
+    // TODO: Implement
+    return false;
+  }
+
+  async getChildrenByTeamId(teamId: string): Promise<Child[]> {
+    // TODO: Implement
+    return [];
+  }
+
+  async createChild(child: Omit<Child, 'id'>): Promise<Child> {
+    // TODO: Implement
+    throw new Error('Not implemented');
+  }
+
+  async updateChild(id: string, updates: Partial<Child>): Promise<Child | undefined> {
+    // TODO: Implement
+    return undefined;
+  }
+
+  async getAttendanceByEventId(eventId: string): Promise<any[]> {
+    // TODO: Implement
+    return [];
+  }
+
+  async createAttendance(attendance: any): Promise<any> {
+    // TODO: Implement
+    throw new Error('Not implemented');
   }
 }
 
