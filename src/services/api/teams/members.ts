@@ -98,44 +98,60 @@ export class TeamMembersAPI {
   async getTeamParents(teamId: string): Promise<TeamStaff[]> {
     try {
       // Get parents whose children are in this team
+      // First get all players in the team, then get their guardians
       const { data, error } = await supabase
         .from('player_teams')
         .select(`
-          player:players!player_teams_player_id_fkey (
-            id,
-            guardians!guardians_player_id_fkey (
-              id,
-              first_name,
-              last_name,
-              email,
-              profile_image
-            )
-          )
+          player_id
         `)
         .eq('team_id', teamId);
       
       if (error) {
-        logger.error('Error fetching team parents:', error);
+        logger.error('Error fetching team players for parents:', error);
+        return [];
+      }
+
+      if (!data || data.length === 0) {
+        return [];
+      }
+
+      const playerIds = data.map(pt => pt.player_id).filter(Boolean);
+      
+      if (playerIds.length === 0) {
+        return [];
+      }
+
+      // Now get guardians for these players
+      const { data: guardiansData, error: guardiansError } = await supabase
+        .from('guardians')
+        .select(`
+          id,
+          first_name,
+          last_name,
+          email,
+          profile_image,
+          player_id
+        `)
+        .in('player_id', playerIds)
+        .eq('approval_status', 'approved');
+      
+      if (guardiansError) {
+        logger.error('Error fetching guardians:', guardiansError);
         return [];
       }
       
       const parents: TeamStaff[] = [];
       const seenParentIds = new Set<string>();
       
-      data?.forEach(pt => {
-        const player = pt.player as any;
-        if (player && player.guardians) {
-          player.guardians.forEach((guardian: any) => {
-            if (!seenParentIds.has(guardian.id)) {
-              seenParentIds.add(guardian.id);
-              parents.push({
-                id: guardian.id,
-                name: `${guardian.first_name} ${guardian.last_name}`,
-                email: guardian.email,
-                profileImage: guardian.profile_image,
-                roles: ['parent']
-              });
-            }
+      guardiansData?.forEach(guardian => {
+        if (!seenParentIds.has(guardian.id)) {
+          seenParentIds.add(guardian.id);
+          parents.push({
+            id: guardian.id,
+            name: `${guardian.first_name} ${guardian.last_name}`,
+            email: guardian.email || '',
+            profileImage: guardian.profile_image,
+            roles: ['parent']
           });
         }
       });
