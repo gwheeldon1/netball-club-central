@@ -1,3 +1,4 @@
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -177,7 +178,7 @@ export const ActionCenter = () => {
           amount_pence,
           guardian_id,
           created_at,
-          guardians(first_name, last_name)
+          guardian:guardians!guardian_id(first_name, last_name)
         `)
         .eq('status', 'failed')
         .order('created_at', { ascending: false })
@@ -228,13 +229,11 @@ export const ActionCenter = () => {
       
       return data?.map(event => ({
         id: event.id,
-        type: event.event_type === 'attendance' ? 'attendance' : 
-              event.event_type === 'payment' ? 'payment' :
-              event.event_type === 'registration' ? 'registration' : 'achievement',
+        type: mapEventTypeToActivityType(event.event_type),
         title: formatEventTitle(event.event_name),
         description: formatEventDescription(event.properties),
         timestamp: formatTimeAgo(event.timestamp),
-        status: getEventStatus(event.event_type),
+        status: getEventStatus(event.event_type) as "success" | "warning" | "info",
         user: event.user_id ? {
           name: 'User',
           initials: 'U'
@@ -248,7 +247,7 @@ export const ActionCenter = () => {
       id: payment.id,
       type: "urgent" as const,
       title: "Overdue Payment",
-      description: `£${(payment.amount_pence / 100).toFixed(2)} payment from ${payment.guardians?.first_name} ${payment.guardians?.last_name}`,
+      description: `£${(payment.amount_pence / 100).toFixed(2)} payment from ${payment.guardian?.first_name} ${payment.guardian?.last_name}`,
       action: "Send reminder",
       dueDate: "Overdue",
       assignee: { name: "Finance Team", initials: "FT" },
@@ -371,5 +370,20 @@ function getEventStatus(eventType: string): 'success' | 'warning' | 'error' | 'i
       return 'error';
     default:
       return 'info';
+  }
+}
+
+function mapEventTypeToActivityType(eventType: string): "attendance" | "payment" | "registration" | "achievement" {
+  switch (eventType) {
+    case 'attendance':
+      return 'attendance';
+    case 'payment':
+      return 'payment';
+    case 'registration':
+      return 'registration';
+    case 'achievement':
+      return 'achievement';
+    default:
+      return 'registration'; // Default fallback
   }
 }
