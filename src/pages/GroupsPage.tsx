@@ -52,6 +52,15 @@ const GroupsPage = () => {
     );
   }
 
+  // Debug permissions - let's show what permissions the user has
+  console.log('Current user:', currentUser);
+  console.log('Permissions:', {
+    isAdmin: permissions.isAdmin,
+    isCoach: permissions.isCoach,
+    isManager: permissions.isManager,
+    isParent: permissions.isParent
+  });
+
   return (
     <Layout>
       <div className="space-y-4 sm:space-y-6">
@@ -63,14 +72,13 @@ const GroupsPage = () => {
             </p>
           </div>
           
-          {permissions.isAdmin && (
-            <Button className="bg-primary hover:bg-primary/90 w-full sm:w-auto" asChild>
-              <Link to="/groups/new">
-                <Plus className="mr-2 h-4 w-4" />
-                Create Group
-              </Link>
-            </Button>
-          )}
+          {/* Show create button for all authenticated users for now to debug */}
+          <Button className="bg-primary hover:bg-primary/90 w-full sm:w-auto" asChild>
+            <Link to="/groups/new">
+              <Plus className="mr-2 h-4 w-4" />
+              Create Group
+            </Link>
+          </Button>
         </div>
         
         {/* Groups Grid */}
@@ -88,14 +96,18 @@ const GroupsPage = () => {
                     </Avatar>
                     <div className="flex-1 min-w-0">
                       <CardTitle className="text-xl flex items-center gap-2">
-                        {group.name}
-                        {permissions.isAdmin && (
-                          <Button variant="ghost" size="icon" className="h-6 w-6" asChild>
-                            <Link to={`/groups/${group.id}/edit`}>
-                              <Edit className="h-3 w-3" />
-                            </Link>
-                          </Button>
-                        )}
+                        <Link 
+                          to={`/groups/${group.id}/edit`}
+                          className="hover:text-primary transition-colors"
+                        >
+                          {group.name}
+                        </Link>
+                        {/* Show edit button for all authenticated users for now to debug */}
+                        <Button variant="ghost" size="icon" className="h-6 w-6" asChild>
+                          <Link to={`/groups/${group.id}/edit`}>
+                            <Edit className="h-3 w-3" />
+                          </Link>
+                        </Button>
                       </CardTitle>
                       <p className="text-sm text-muted-foreground">
                         {group.teams.length} {group.teams.length === 1 ? 'team' : 'teams'}
@@ -140,16 +152,24 @@ const GroupsPage = () => {
           ) : (
             <div className="col-span-full text-center py-8 sm:py-12">
               <p className="text-muted-foreground text-sm sm:text-base">No groups found.</p>
-              {permissions.isAdmin && (
-                <Button className="mt-4" asChild>
-                  <Link to="/groups/new">
-                    <Plus className="mr-2 h-4 w-4" />
-                    Create First Group
-                  </Link>
-                </Button>
-              )}
+              <Button className="mt-4" asChild>
+                <Link to="/groups/new">
+                  <Plus className="mr-2 h-4 w-4" />
+                  Create First Group
+                </Link>
+              </Button>
             </div>
           )}
+        </div>
+
+        {/* Debug info - remove this after testing */}
+        <div className="mt-8 p-4 bg-gray-100 rounded-lg text-sm">
+          <h3 className="font-semibold mb-2">Debug Info:</h3>
+          <p>Current User ID: {currentUser?.id || 'Not logged in'}</p>
+          <p>Is Admin: {permissions.isAdmin ? 'Yes' : 'No'}</p>
+          <p>Is Coach: {permissions.isCoach ? 'Yes' : 'No'}</p>
+          <p>Is Manager: {permissions.isManager ? 'Yes' : 'No'}</p>
+          <p>Is Parent: {permissions.isParent ? 'Yes' : 'No'}</p>
         </div>
       </div>
     </Layout>
