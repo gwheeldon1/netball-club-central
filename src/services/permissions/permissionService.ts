@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { logger } from '@/utils/logger';
 import { PermissionName, UserPermissions } from './types';
@@ -9,9 +8,12 @@ class PermissionService {
   private readonly CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
 
   async getUserPermissions(userId: string): Promise<UserPermissions> {
+    console.log('🔍 Getting permissions for user:', userId);
+    
     // Check cache first
     const cached = this.getCachedPermissions(userId);
     if (cached) {
+      console.log('📋 Using cached permissions:', cached);
       return cached;
     }
 
@@ -19,6 +21,8 @@ class PermissionService {
       // Get user permissions from database function
       const { data: permissionsData, error: permError } = await supabase
         .rpc('get_user_permissions', { user_id: userId });
+
+      console.log('📊 Permissions query result:', { permissionsData, permError, userId });
 
       if (permError) {
         logger.error('Error fetching user permissions:', permError);
@@ -29,6 +33,8 @@ class PermissionService {
       const { data: teamsData, error: teamsError } = await supabase
         .rpc('get_accessible_teams', { user_id: userId });
 
+      console.log('📊 Accessible teams query result:', { teamsData, teamsError, userId });
+
       if (teamsError) {
         logger.error('Error fetching accessible teams:', teamsError);
       }
@@ -36,6 +42,8 @@ class PermissionService {
       // Type assertion: database returns strings that should be valid PermissionName values
       const permissions = (permissionsData?.map(p => p.permission_name) || []) as PermissionName[];
       const accessibleTeams = teamsData?.map(t => t.team_id) || [];
+
+      console.log('🎯 Final permissions and teams:', { permissions, accessibleTeams });
 
       const userPermissions: UserPermissions = {
         permissions,
@@ -50,6 +58,7 @@ class PermissionService {
       return userPermissions;
     } catch (error) {
       logger.error('Error in getUserPermissions:', error);
+      console.error('🚨 Permissions service error:', error);
       return this.getDefaultPermissions();
     }
   }

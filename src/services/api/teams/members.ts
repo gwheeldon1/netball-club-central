@@ -7,6 +7,8 @@ import { TeamPlayer, TeamStaff } from './types';
 export class TeamMembersAPI {
   async getTeamPlayers(teamId: string): Promise<TeamPlayer[]> {
     try {
+      console.log('🔍 Getting players for team:', teamId);
+      
       // Get players assigned to the team
       const { data, error } = await supabase
         .from('player_teams')
@@ -21,12 +23,14 @@ export class TeamMembersAPI {
         `)
         .eq('team_id', teamId);
       
+      console.log('📊 Player teams query result:', { data, error, teamId });
+      
       if (error) {
         logger.error('Error fetching team players:', error);
         throw error;
       }
       
-      return data?.map(pt => ({
+      const players = data?.map(pt => ({
         id: (pt.player as any).id,
         name: `${(pt.player as any).first_name} ${(pt.player as any).last_name}`,
         profileImage: (pt.player as any).profile_image,
@@ -36,6 +40,9 @@ export class TeamMembersAPI {
         parentId: '',
         status: 'approved' as const
       })) || [];
+      
+      console.log('👥 Processed players:', players);
+      return players;
     } catch (error) {
       logger.warn('Failed to get team players:', error);
       return [];
@@ -44,6 +51,8 @@ export class TeamMembersAPI {
 
   async getTeamStaff(teamId: string): Promise<{ coaches: TeamStaff[]; managers: TeamStaff[] }> {
     try {
+      console.log('🔍 Getting staff for team:', teamId);
+      
       // Get staff assigned to this specific team
       const { data, error } = await supabase
         .from('user_roles')
@@ -61,9 +70,10 @@ export class TeamMembersAPI {
         .eq('is_active', true)
         .in('role', ['coach', 'manager']);
       
+      console.log('📊 Staff query result:', { data, error, teamId });
+      
       if (error) {
         logger.error('Error fetching team staff:', error);
-        // Don't throw, just log and return empty arrays
         console.error('Staff fetch error details:', error);
       }
       
@@ -88,6 +98,7 @@ export class TeamMembersAPI {
         }
       });
       
+      console.log('👨‍🏫 Processed staff:', { coaches, managers });
       return { coaches, managers };
     } catch (error) {
       logger.warn('Failed to get team staff:', error);
@@ -97,6 +108,8 @@ export class TeamMembersAPI {
 
   async getTeamParents(teamId: string): Promise<TeamStaff[]> {
     try {
+      console.log('🔍 Getting parents for team:', teamId);
+      
       // Get parents whose children are in this team
       // First get all players in the team, then get their guardians
       const { data, error } = await supabase
@@ -106,18 +119,23 @@ export class TeamMembersAPI {
         `)
         .eq('team_id', teamId);
       
+      console.log('📊 Player teams for parents query:', { data, error, teamId });
+      
       if (error) {
         logger.error('Error fetching team players for parents:', error);
         return [];
       }
 
       if (!data || data.length === 0) {
+        console.log('⚠️ No players found in team for parents lookup');
         return [];
       }
 
       const playerIds = data.map(pt => pt.player_id).filter(Boolean);
+      console.log('👶 Player IDs to look up parents for:', playerIds);
       
       if (playerIds.length === 0) {
+        console.log('⚠️ No valid player IDs found');
         return [];
       }
 
@@ -134,6 +152,8 @@ export class TeamMembersAPI {
         `)
         .in('player_id', playerIds)
         .eq('approval_status', 'approved');
+      
+      console.log('📊 Guardians query result:', { guardiansData, guardiansError, playerIds });
       
       if (guardiansError) {
         logger.error('Error fetching guardians:', guardiansError);
@@ -156,9 +176,11 @@ export class TeamMembersAPI {
         }
       });
       
+      console.log('👨‍👩‍👧‍👦 Processed parents:', parents);
       return parents;
     } catch (error) {
       logger.warn('Failed to get team parents:', error);
+      console.error('Parents fetch error:', error);
       return [];
     }
   }
