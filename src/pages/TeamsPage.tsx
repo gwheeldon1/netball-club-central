@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -6,8 +7,8 @@ import { Badge } from "@/components/ui/badge";
 import { Plus, Users, Calendar, Award } from "lucide-react";
 import Layout from "@/components/Layout";
 import { useEnterprisePermissions } from "@/hooks/useEnterprisePermissions";
-import { api } from '@/services/api';
-import { Team } from "@/types";
+import { api } from '@/services/apiService';
+import { Team } from "@/types/core";
 import { Permission } from '@/store/types/permissions';
 
 const TeamsPage = () => {

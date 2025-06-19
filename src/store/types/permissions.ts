@@ -1,4 +1,5 @@
 
+// Simplified permission types
 export type Permission = 
   | 'teams.view.all'
   | 'teams.view.children'
@@ -15,6 +16,8 @@ export type Permission =
   | 'approvals.manage'
   | 'users.manage'
   | 'settings.manage';
+
+export type TeamPermission = Permission;
 
 export interface UserPermissions {
   permissions: Permission[];

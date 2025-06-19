@@ -1,7 +1,16 @@
 
-import { useDispatch, useSelector } from 'react-redux';
-import type { RootState, AppDispatch } from './index';
+// Simplified hooks without Redux
+import { useAuth } from '@/context/AuthContext';
 
-// Simple hooks without complex generics
-export const useAppDispatch = () => useDispatch<AppDispatch>();
-export const useAppSelector = <T>(selector: (state: RootState) => T) => useSelector(selector);
+export const useAppSelector = (selector: any) => {
+  // For now, return empty function - we'll use React Context instead
+  return {};
+};
+
+export const useAppDispatch = () => {
+  // For now, return empty function - we'll use React Context instead
+  return () => {};
+};
+
+// Re-export auth hook for convenience
+export { useAuth };
