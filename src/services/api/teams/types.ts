@@ -1,15 +1,17 @@
 
-// Team API specific types
+// Types for team-related API operations
 export interface TeamData {
   id: string;
   name: string;
   age_group: string;
   season_year?: number;
-  archived: boolean;
   description?: string;
   profile_image?: string;
   banner_image?: string;
   icon?: string;
+  archived?: boolean;
+  created_at?: string;
+  updated_at?: string;
 }
 
 export interface TeamCreateData {
@@ -20,7 +22,6 @@ export interface TeamCreateData {
   profile_image?: string;
   banner_image?: string;
   icon?: string;
-  archived?: boolean;
 }
 
 export interface TeamUpdateData {
@@ -41,7 +42,7 @@ export interface TeamPlayer {
   dateOfBirth?: string;
   teamId: string;
   parentId: string;
-  status: 'approved';
+  status: 'pending' | 'approved' | 'rejected';
 }
 
 export interface TeamStaff {

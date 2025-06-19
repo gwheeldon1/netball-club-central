@@ -13,7 +13,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { Calendar, User as UserIcon, Award, Edit, Camera, Archive } from "lucide-react";
+import { Calendar, User as UserIcon, Award, Edit, Camera, Archive, Users } from "lucide-react";
 import { toast } from "sonner";
 import { TeamImageManager } from "@/components/TeamImageManager";
 
@@ -25,6 +25,7 @@ const TeamDetailPage = () => {
   const [players, setPlayers] = useState<Child[]>([]);
   const [coaches, setCoaches] = useState<User[]>([]);
   const [managers, setManagers] = useState<User[]>([]);
+  const [parents, setParents] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [showImageManager, setShowImageManager] = useState(false);
   const [updatingArchived, setUpdatingArchived] = useState(false);
@@ -69,10 +70,14 @@ const TeamDetailPage = () => {
         const teamPlayers = await teamApi.getTeamPlayers(id);
         setPlayers(teamPlayers.map(convertTeamPlayerToChild));
         
-        // Get team staff
+        // Get team staff (coaches and managers)
         const { coaches: teamCoaches, managers: teamManagers } = await teamApi.getTeamStaff(id);
         setCoaches(teamCoaches.map(convertTeamStaffToUser));
         setManagers(teamManagers.map(convertTeamStaffToUser));
+        
+        // Get team parents
+        const teamParents = await teamApi.getTeamParents(id);
+        setParents(teamParents.map(convertTeamStaffToUser));
       } catch (error) {
         console.error("Error loading team data:", error);
         toast.error("Failed to load team data");
@@ -247,10 +252,11 @@ const TeamDetailPage = () => {
         {/* Team content */}
         <div>
           <Tabs defaultValue="about">
-            <TabsList className="w-full max-w-md mb-6">
+            <TabsList className="w-full max-w-lg mb-6">
               <TabsTrigger value="about" className="flex-1">About</TabsTrigger>
               <TabsTrigger value="players" className="flex-1">Players ({players.length})</TabsTrigger>
               <TabsTrigger value="staff" className="flex-1">Staff ({coaches.length + managers.length})</TabsTrigger>
+              <TabsTrigger value="parents" className="flex-1">Parents ({parents.length})</TabsTrigger>
             </TabsList>
             
             <TabsContent value="about">
@@ -362,6 +368,39 @@ const TeamDetailPage = () => {
                   </CardContent>
                 </Card>
               </div>
+            </TabsContent>
+
+            <TabsContent value="parents">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Users className="h-5 w-5 text-primary" />
+                    Parents & Guardians
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {parents.length > 0 ? (
+                    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                      {parents.map((parent) => (
+                        <div key={parent.id} className="flex items-center gap-3 p-3 rounded-lg border">
+                          <Avatar className="h-10 w-10">
+                            <AvatarImage src={parent.profileImage} alt={parent.name} />
+                            <AvatarFallback>
+                              <UserIcon className="h-4 w-4" />
+                            </AvatarFallback>
+                          </Avatar>
+                          <div>
+                            <p className="font-medium text-sm">{parent.name}</p>
+                            <p className="text-xs text-muted-foreground">{parent.email}</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-muted-foreground">No parents found for this team's players.</p>
+                  )}
+                </CardContent>
+              </Card>
             </TabsContent>
           </Tabs>
         </div>

@@ -19,6 +19,10 @@ class TeamAPI extends TeamOperations {
   async getTeamStaff(teamId: string) {
     return this.membersAPI.getTeamStaff(teamId);
   }
+
+  async getTeamParents(teamId: string) {
+    return this.membersAPI.getTeamParents(teamId);
+  }
 }
 
 export const teamApi = new TeamAPI();

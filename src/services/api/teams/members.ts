@@ -7,11 +7,11 @@ import { TeamPlayer, TeamStaff } from './types';
 export class TeamMembersAPI {
   async getTeamPlayers(teamId: string): Promise<TeamPlayer[]> {
     try {
-      // Use the correct foreign key relationship hint to avoid ambiguity
+      // Get players assigned to the team
       const { data, error } = await supabase
         .from('player_teams')
         .select(`
-          player:players!fk_player_teams_player_id (
+          player:players!player_teams_player_id_fkey (
             id,
             first_name,
             last_name,
@@ -44,12 +44,12 @@ export class TeamMembersAPI {
 
   async getTeamStaff(teamId: string): Promise<{ coaches: TeamStaff[]; managers: TeamStaff[] }> {
     try {
-      // Use the correct foreign key relationship hint to avoid ambiguity
+      // Get staff assigned to this specific team
       const { data, error } = await supabase
         .from('user_roles')
         .select(`
           role,
-          guardian:guardians!fk_user_roles_guardian_id (
+          guardian:guardians!user_roles_guardian_id_fkey (
             id,
             first_name,
             last_name,
@@ -63,25 +63,28 @@ export class TeamMembersAPI {
       
       if (error) {
         logger.error('Error fetching team staff:', error);
-        throw error;
+        // Don't throw, just log and return empty arrays
+        console.error('Staff fetch error details:', error);
       }
       
       const coaches: TeamStaff[] = [];
       const managers: TeamStaff[] = [];
       
       data?.forEach(ur => {
-        const user: TeamStaff = {
-          id: (ur.guardian as any).id,
-          name: `${(ur.guardian as any).first_name} ${(ur.guardian as any).last_name}`,
-          email: (ur.guardian as any).email,
-          profileImage: (ur.guardian as any).profile_image,
-          roles: [ur.role]
-        };
-        
-        if (ur.role === 'coach') {
-          coaches.push(user);
-        } else if (ur.role === 'manager') {
-          managers.push(user);
+        if (ur.guardian) {
+          const user: TeamStaff = {
+            id: (ur.guardian as any).id,
+            name: `${(ur.guardian as any).first_name} ${(ur.guardian as any).last_name}`,
+            email: (ur.guardian as any).email,
+            profileImage: (ur.guardian as any).profile_image,
+            roles: [ur.role]
+          };
+          
+          if (ur.role === 'coach') {
+            coaches.push(user);
+          } else if (ur.role === 'manager') {
+            managers.push(user);
+          }
         }
       });
       
@@ -89,6 +92,58 @@ export class TeamMembersAPI {
     } catch (error) {
       logger.warn('Failed to get team staff:', error);
       return { coaches: [], managers: [] };
+    }
+  }
+
+  async getTeamParents(teamId: string): Promise<TeamStaff[]> {
+    try {
+      // Get parents whose children are in this team
+      const { data, error } = await supabase
+        .from('player_teams')
+        .select(`
+          player:players!player_teams_player_id_fkey (
+            id,
+            guardians!guardians_player_id_fkey (
+              id,
+              first_name,
+              last_name,
+              email,
+              profile_image
+            )
+          )
+        `)
+        .eq('team_id', teamId);
+      
+      if (error) {
+        logger.error('Error fetching team parents:', error);
+        return [];
+      }
+      
+      const parents: TeamStaff[] = [];
+      const seenParentIds = new Set<string>();
+      
+      data?.forEach(pt => {
+        const player = pt.player as any;
+        if (player && player.guardians) {
+          player.guardians.forEach((guardian: any) => {
+            if (!seenParentIds.has(guardian.id)) {
+              seenParentIds.add(guardian.id);
+              parents.push({
+                id: guardian.id,
+                name: `${guardian.first_name} ${guardian.last_name}`,
+                email: guardian.email,
+                profileImage: guardian.profile_image,
+                roles: ['parent']
+              });
+            }
+          });
+        }
+      });
+      
+      return parents;
+    } catch (error) {
+      logger.warn('Failed to get team parents:', error);
+      return [];
     }
   }
 }
