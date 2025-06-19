@@ -60,25 +60,25 @@ function App() {
             } />
             
             <Route path="/analytics" element={
-              <ProtectedRoute>
+              <ProtectedRoute requiredPermission="analytics.view.all">
                 <AnalyticsPage />
               </ProtectedRoute>
             } />
 
             <Route path="/groups" element={
-              <ProtectedRoute>
+              <ProtectedRoute requiredPermission="groups.view.all">
                 <GroupsPage />
               </ProtectedRoute>
             } />
 
             <Route path="/groups/new" element={
-              <ProtectedRoute allowedRoles={['admin']}>
+              <ProtectedRoute requiredPermission="groups.create">
                 <NewGroupPage />
               </ProtectedRoute>
             } />
 
             <Route path="/groups/:id/edit" element={
-              <ProtectedRoute allowedRoles={['admin']}>
+              <ProtectedRoute requiredPermission="groups.edit.all">
                 <EditGroupPage />
               </ProtectedRoute>
             } />
@@ -98,13 +98,13 @@ function App() {
             } />
             
             <Route path="/teams/new" element={
-              <ProtectedRoute allowedRoles={['admin']}>
+              <ProtectedRoute requiredPermission="teams.create">
                 <NewTeamPage />
               </ProtectedRoute>
             } />
             
             <Route path="/teams/:id/edit" element={
-              <ProtectedRoute allowedRoles={['admin']}>
+              <ProtectedRoute requiredPermission="teams.edit.all">
                 <EditTeamPage />
               </ProtectedRoute>
             } />
@@ -134,7 +134,7 @@ function App() {
             } />
             
             <Route path="/events/new" element={
-              <ProtectedRoute allowedRoles={['admin', 'coach', 'manager']}>
+              <ProtectedRoute requiredPermission="events.create">
                 <Suspense fallback={<PageLoadingFallback />}>
                   <NewEventPage />
                 </Suspense>
@@ -148,7 +148,7 @@ function App() {
             } />
             
             <Route path="/events/:id/edit" element={
-              <ProtectedRoute allowedRoles={['admin', 'coach', 'manager']}>
+              <ProtectedRoute requiredPermission="events.edit.all">
                 <Suspense fallback={<PageLoadingFallback />}>
                   <EditEventPage />
                 </Suspense>
@@ -156,7 +156,7 @@ function App() {
             } />
 
             <Route path="/approvals" element={
-              <ProtectedRoute allowedRoles={['admin', 'coach', 'manager']}>
+              <ProtectedRoute requiredPermission="approvals.manage">
                 <ApprovalsPage />
               </ProtectedRoute>
             } />
@@ -168,7 +168,7 @@ function App() {
             } />
             
             <Route path="/settings" element={
-              <ProtectedRoute allowedRoles={['admin']}>
+              <ProtectedRoute requiredPermission="settings.manage">
                 <SettingsPage />
               </ProtectedRoute>
             } />

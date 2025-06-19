@@ -1,83 +1,83 @@
 
-import { useState, useEffect, startTransition } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
-// Role checking now handled through auth context
+import { permissionService } from '@/services/permissions/permissionService';
+import { PermissionName, UserPermissions } from '@/services/permissions/types';
 import { logger } from '@/utils/logger';
 
-interface UserPermissions {
-  isAdmin: boolean;
-  isCoach: boolean;
-  isManager: boolean;
-  isParent: boolean;
-  userTeams: string[];
-  canViewTeam: (teamId: string) => boolean;
-  canEditTeam: (teamId: string) => boolean;
-  canViewAllUsers: boolean;
-  canManageRoles: boolean;
-  canApproveRegistrations: boolean;
-}
-
-export const usePermissions = (): UserPermissions => {
-  const { currentUser, hasRole } = useAuth();
-  const [userTeams, setUserTeams] = useState<string[]>([]);
+export const usePermissions = () => {
+  const { currentUser } = useAuth();
+  const [permissions, setPermissions] = useState<UserPermissions>({
+    permissions: [],
+    accessibleTeams: [],
+    hasPermission: () => false,
+    canAccessTeam: () => false
+  });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const loadUserTeams = async () => {
+    const loadPermissions = async () => {
       if (!currentUser) {
-        startTransition(() => {
-          setLoading(false);
-        });
+        setLoading(false);
         return;
       }
 
       try {
-        // Role loading will be handled through auth context for now
-        startTransition(() => {
-          setUserTeams([]);
-        });
+        const userPermissions = await permissionService.getUserPermissions(currentUser.id);
+        setPermissions(userPermissions);
       } catch (error) {
-        logger.error('Error loading user teams:', error);
-        startTransition(() => {
-          setUserTeams([]);
-        });
+        logger.error('Error loading permissions:', error);
       } finally {
-        startTransition(() => {
-          setLoading(false);
-        });
+        setLoading(false);
       }
     };
 
-    loadUserTeams();
+    loadPermissions();
   }, [currentUser]);
 
-  const isAdmin = hasRole('admin');
-  const isCoach = hasRole('coach');
-  const isManager = hasRole('manager');
-  const isParent = hasRole('parent');
-
-  const canViewTeam = (teamId: string): boolean => {
-    return isAdmin || userTeams.includes(teamId);
+  const hasPermission = (permission: PermissionName): boolean => {
+    return permissions.hasPermission(permission);
   };
 
-  const canEditTeam = (teamId: string): boolean => {
-    return isAdmin || (isManager && userTeams.includes(teamId));
+  const canAccessTeam = (teamId: string): boolean => {
+    return permissions.canAccessTeam(teamId);
   };
 
-  const canViewAllUsers = isAdmin;
-  const canManageRoles = isAdmin;
-  const canApproveRegistrations = isAdmin || isCoach || isManager;
+  const refreshPermissions = async () => {
+    if (currentUser) {
+      permissionService.clearCache(currentUser.id);
+      const userPermissions = await permissionService.getUserPermissions(currentUser.id);
+      setPermissions(userPermissions);
+    }
+  };
+
+  // Legacy compatibility - map old permission checks to new system
+  const isAdmin = hasPermission('teams.view.all'); // Admin has view all permission
+  const isCoach = hasPermission('events.create') && !hasPermission('teams.view.all');
+  const isManager = hasPermission('approvals.manage') && !hasPermission('teams.view.all');
+  const isParent = hasPermission('teams.view.children') && !hasPermission('events.create');
 
   return {
+    // New permission system
+    hasPermission,
+    canAccessTeam,
+    refreshPermissions,
+    permissions: permissions.permissions,
+    accessibleTeams: permissions.accessibleTeams,
+    loading,
+    
+    // Legacy compatibility
     isAdmin,
     isCoach,
     isManager,
     isParent,
-    userTeams,
-    canViewTeam,
-    canEditTeam,
-    canViewAllUsers,
-    canManageRoles,
-    canApproveRegistrations,
+    userTeams: permissions.accessibleTeams,
+    canViewTeam: canAccessTeam,
+    canEditTeam: (teamId: string) => 
+      hasPermission('teams.edit.all') || 
+      (hasPermission('teams.edit.assigned') && canAccessTeam(teamId)),
+    canViewAllUsers: hasPermission('users.view.all'),
+    canManageRoles: hasPermission('roles.assign'),
+    canApproveRegistrations: hasPermission('approvals.manage')
   };
 };

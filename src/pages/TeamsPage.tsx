@@ -10,10 +10,11 @@ import { Link } from "react-router-dom";
 import { toast } from "sonner";
 import { Team } from "@/types";
 import { api } from "@/services/api";
+import { PermissionGate } from "@/components/permissions/PermissionGate";
 
 const TeamsPage = () => {
   const { currentUser } = useAuth();
-  const permissions = usePermissions();
+  const { hasPermission, accessibleTeams, canAccessTeam } = usePermissions();
   const [teams, setTeams] = useState<Team[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
 
@@ -21,7 +22,16 @@ const TeamsPage = () => {
     const loadTeams = async () => {
       try {
         const teamsData = await api.getTeams();
-        setTeams(teamsData);
+        
+        // Filter teams based on user permissions
+        let filteredTeams = teamsData;
+        
+        if (!hasPermission('teams.view.all')) {
+          // User can only see teams they have access to
+          filteredTeams = teamsData.filter(team => canAccessTeam(team.id));
+        }
+        
+        setTeams(filteredTeams);
       } catch (error) {
         console.error('Error loading teams:', error);
         toast.error('Failed to load teams');
@@ -31,7 +41,7 @@ const TeamsPage = () => {
     };
 
     loadTeams();
-  }, []);
+  }, [hasPermission, canAccessTeam]);
 
   if (loading) {
     return (
@@ -43,6 +53,16 @@ const TeamsPage = () => {
     );
   }
 
+  const getPageDescription = () => {
+    if (hasPermission('teams.view.all')) {
+      return "Manage all teams and their members";
+    } else if (accessibleTeams.length > 0) {
+      return "Teams you coach, manage, or have children in";
+    } else {
+      return "Browse available teams";
+    }
+  };
+
   return (
     <Layout>
       <div className="space-y-4 sm:space-y-6">
@@ -50,22 +70,18 @@ const TeamsPage = () => {
           <div>
             <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Teams</h1>
             <p className="text-muted-foreground mt-1 text-sm sm:text-base">
-              {permissions.isAdmin 
-                ? "Manage all teams and their members"
-                : permissions.userTeams.length > 0
-                ? "Teams you coach or manage"
-                : "Browse available teams"}
+              {getPageDescription()}
             </p>
           </div>
           
-          {permissions.isAdmin && (
+          <PermissionGate permission="teams.create">
             <Button className="bg-primary hover:bg-primary/90 w-full sm:w-auto" asChild>
               <Link to="/teams/new">
                 <Plus className="mr-2 h-4 w-4" />
                 Create Team
               </Link>
             </Button>
-          )}
+          </PermissionGate>
         </div>
         
         {/* Teams grid */}
@@ -86,7 +102,9 @@ const TeamsPage = () => {
                   <CardContent className="p-4 sm:p-6 pt-0">
                     <div className="mt-2 sm:mt-3 flex items-center gap-1">
                       <Users className="h-3 w-3 sm:h-4 sm:w-4 text-primary flex-shrink-0" />
-                      <span className="text-xs sm:text-sm text-muted-foreground">Team Details</span>
+                      <span className="text-xs sm:text-sm text-muted-foreground">
+                        {canAccessTeam(team.id) ? 'Access granted' : 'View only'}
+                      </span>
                     </div>
                   </CardContent>
                 </Card>
@@ -95,9 +113,28 @@ const TeamsPage = () => {
           ) : (
             <div className="col-span-full text-center py-8 sm:py-12">
               <p className="text-muted-foreground text-sm sm:text-base">No teams found.</p>
+              <PermissionGate permission="teams.create">
+                <Button className="mt-4" asChild>
+                  <Link to="/teams/new">
+                    <Plus className="mr-2 h-4 w-4" />
+                    Create First Team
+                  </Link>
+                </Button>
+              </PermissionGate>
             </div>
           )}
         </div>
+
+        {/* Debug info for development */}
+        {process.env.NODE_ENV === 'development' && (
+          <div className="mt-8 p-4 bg-gray-100 rounded-lg text-sm">
+            <h3 className="font-semibold mb-2">Debug Info (Development Only):</h3>
+            <p>Current User ID: {currentUser?.id || 'Not logged in'}</p>
+            <p>Can view all teams: {hasPermission('teams.view.all') ? 'Yes' : 'No'}</p>
+            <p>Can create teams: {hasPermission('teams.create') ? 'Yes' : 'No'}</p>
+            <p>Accessible teams: {accessibleTeams.length}</p>
+          </div>
+        )}
       </div>
     </Layout>
   );

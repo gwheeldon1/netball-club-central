@@ -1,9 +1,10 @@
-
 import React, { createContext, useContext, useEffect, useState, useTransition, startTransition } from 'react';
 import { User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { logger } from '@/utils/logger';
 import { UserRole } from '@/types/unified';
+import { permissionService } from '@/services/permissions/permissionService';
+import { PermissionName } from '@/services/permissions/types';
 
 interface UserProfile {
   firstName?: string;
@@ -21,6 +22,7 @@ interface AuthContextType {
   userRoles: UserRole[];
   userProfile: UserProfile | null;
   hasRole: (role: UserRole) => boolean;
+  hasPermission: (permission: PermissionName) => Promise<boolean>;
   signOut: () => Promise<void>;
   login: (email: string, password: string) => Promise<boolean>;
   logout: () => Promise<void>;
@@ -81,6 +83,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             setUserRoles([]);
             setUserProfile(null);
           });
+          // Clear permission cache when user logs out
+          permissionService.clearCache();
         }
       }
     );
@@ -183,8 +187,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const refreshUserRoles = async () => {
     if (currentUser && userProfile?.guardianId) {
       await loadUserRoles(userProfile.guardianId);
+      // Clear permission cache to force refresh
+      permissionService.clearCache(currentUser.id);
     } else if (currentUser) {
       await loadUserRoles(currentUser.id);
+      permissionService.clearCache(currentUser.id);
     }
   };
 
@@ -224,6 +231,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return userRoles.includes(role);
   };
 
+  const hasPermission = async (permission: PermissionName): Promise<boolean> => {
+    if (!currentUser) return false;
+    return permissionService.hasPermission(currentUser.id, permission);
+  };
+
   const signOut = async () => {
     await logout();
   };
@@ -235,6 +247,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     userRoles,
     userProfile,
     hasRole,
+    hasPermission,
     signOut,
     login,
     logout,

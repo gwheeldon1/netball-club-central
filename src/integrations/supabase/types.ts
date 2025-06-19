@@ -776,6 +776,30 @@ export type Database = {
           },
         ]
       }
+      permissions: {
+        Row: {
+          category: string
+          created_at: string | null
+          description: string | null
+          id: string
+          name: string
+        }
+        Insert: {
+          category: string
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          name: string
+        }
+        Update: {
+          category?: string
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
       player_guardians: {
         Row: {
           guardian_id: string
@@ -1063,6 +1087,35 @@ export type Database = {
           title?: string
         }
         Relationships: []
+      }
+      role_permissions: {
+        Row: {
+          created_at: string | null
+          id: string
+          permission_id: string | null
+          role: Database["public"]["Enums"]["user_role"]
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          permission_id?: string | null
+          role: Database["public"]["Enums"]["user_role"]
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          permission_id?: string | null
+          role?: Database["public"]["Enums"]["user_role"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "role_permissions_permission_id_fkey"
+            columns: ["permission_id"]
+            isOneToOne: false
+            referencedRelation: "permissions"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       subscribers: {
         Row: {
@@ -1357,9 +1410,21 @@ export type Database = {
         Args: { team_id: string }
         Returns: boolean
       }
+      get_accessible_teams: {
+        Args: { user_id: string }
+        Returns: {
+          team_id: string
+        }[]
+      }
       get_team_performance_summary: {
         Args: { p_team_id: string; p_start_date?: string; p_end_date?: string }
         Returns: Json
+      }
+      get_user_permissions: {
+        Args: { user_id: string }
+        Returns: {
+          permission_name: string
+        }[]
       }
       get_user_roles: {
         Args: { user_id: string }
@@ -1368,6 +1433,10 @@ export type Database = {
       handle_guardian_forgot_password: {
         Args: { guardian_email: string }
         Returns: Json
+      }
+      has_permission: {
+        Args: { user_id: string; permission_name: string }
+        Returns: boolean
       }
       has_role: {
         Args: {
