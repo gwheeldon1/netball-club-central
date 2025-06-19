@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
@@ -21,7 +22,7 @@ import { ArrowLeft, Trash } from "lucide-react";
 import { logger } from "@/utils/logger";
 
 const EditEventPage = () => {
-  const { id } = useParams<{ id: string }>();
+  const { eventId } = useParams<{ eventId: string }>();
   const navigate = useNavigate();
   const { hasRole } = useAuth();
   const [event, setEvent] = useState<Event | null>(null);
@@ -31,14 +32,14 @@ const EditEventPage = () => {
 
   useEffect(() => {
     const loadEvent = async () => {
-      if (!id) {
+      if (!eventId) {
         toast.error("Event ID is missing");
         navigate("/events");
         return;
       }
 
       try {
-        const eventData = await api.getEventById(id);
+        const eventData = await api.getEventById(eventId);
 
         if (!eventData) {
           toast.error("Event not found");
@@ -57,15 +58,15 @@ const EditEventPage = () => {
     };
 
     loadEvent();
-  }, [id, navigate]);
+  }, [eventId, navigate]);
 
   const handleDeleteEvent = async () => {
-    if (!id) return;
+    if (!eventId) return;
 
     setIsDeleting(true);
 
     try {
-      await api.deleteEvent(id);
+      await api.deleteEvent(eventId);
       toast.success("Event deleted successfully");
       navigate("/events");
     } catch (error) {

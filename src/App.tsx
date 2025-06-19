@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -5,19 +6,19 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
 import { StoreProvider } from "./providers/StoreProvider";
 import Index from "./pages/Index";
-import Login from "./pages/Login";
-import Register from "./pages/Register";
-import ProfilePage from "./pages/ProfilePage";
+import LoginPage from "./pages/LoginPage";
+import RegistrationPage from "./pages/RegistrationPage";
+import UserProfilePage from "./pages/UserProfilePage";
 import ProtectedRoute from "./components/ProtectedRoute";
-import Unauthorized from "./pages/Unauthorized";
+import UnauthorizedPage from "./pages/UnauthorizedPage";
 import TeamsPage from "./pages/TeamsPage";
-import TeamDetailsPage from "./pages/TeamDetailsPage";
+import TeamDetailPage from "./pages/TeamDetailPage";
 import NewTeamPage from "./pages/NewTeamPage";
 import EditTeamPage from "./pages/EditTeamPage";
 import EventsPage from "./pages/EventsPage";
 import NewEventPage from "./pages/NewEventPage";
 import EditEventPage from "./pages/EditEventPage";
-import EventDetailsPage from "./pages/EventDetailsPage";
+import EventDetailPage from "./pages/EventDetailPage";
 import ChildrenPage from "./pages/ChildrenPage";
 import NewChildPage from "./pages/NewChildPage";
 import EditChildPage from "./pages/EditChildPage";
@@ -33,7 +34,7 @@ import ApprovalsPage from "./pages/ApprovalsPage";
 import MatchStatsPage from "./pages/MatchStatsPage";
 import NewMatchStatsPage from "./pages/NewMatchStatsPage";
 import EditMatchStatsPage from "./pages/EditMatchStatsPage";
-import { ScrollToTop } from "./components/ScrollToTop";
+import ScrollToTop from "./components/ScrollToTop";
 
 const queryClient = new QueryClient();
 
@@ -47,21 +48,21 @@ function App() {
             <AuthProvider>
               <Routes>
                 <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
-                <Route path="/login" element={<ProtectedRoute requireAuth={false}><Login /></ProtectedRoute>} />
-                <Route path="/register" element={<ProtectedRoute requireAuth={false}><Register /></ProtectedRoute>} />
-                <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
-                <Route path="/unauthorized" element={<Unauthorized />} />
+                <Route path="/login" element={<ProtectedRoute requireAuth={false}><LoginPage /></ProtectedRoute>} />
+                <Route path="/register" element={<ProtectedRoute requireAuth={false}><RegistrationPage /></ProtectedRoute>} />
+                <Route path="/profile" element={<ProtectedRoute><UserProfilePage /></ProtectedRoute>} />
+                <Route path="/unauthorized" element={<UnauthorizedPage />} />
 
                 {/* Teams routes */}
                 <Route path="/teams" element={<ProtectedRoute><TeamsPage /></ProtectedRoute>} />
-                <Route path="/teams/:teamId" element={<ProtectedRoute><TeamDetailsPage /></ProtectedRoute>} />
+                <Route path="/teams/:teamId" element={<ProtectedRoute><TeamDetailPage /></ProtectedRoute>} />
                 <Route path="/teams/new" element={<ProtectedRoute><NewTeamPage /></ProtectedRoute>} />
                 <Route path="/teams/:teamId/edit" element={<ProtectedRoute><EditTeamPage /></ProtectedRoute>} />
 
                 {/* Events routes */}
                 <Route path="/events" element={<ProtectedRoute><EventsPage /></ProtectedRoute>} />
                 <Route path="/events/new" element={<ProtectedRoute><NewEventPage /></ProtectedRoute>} />
-                <Route path="/events/:eventId" element={<ProtectedRoute><EventDetailsPage /></ProtectedRoute>} />
+                <Route path="/events/:eventId" element={<ProtectedRoute><EventDetailPage /></ProtectedRoute>} />
                 <Route path="/events/:eventId/edit" element={<ProtectedRoute><EditEventPage /></ProtectedRoute>} />
 
                 {/* Children routes */}

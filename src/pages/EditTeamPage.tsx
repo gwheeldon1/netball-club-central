@@ -22,7 +22,7 @@ import { Trash } from "lucide-react";
 import { logger } from "@/utils/logger";
 
 const EditTeamPage = () => {
-  const { id } = useParams<{ id: string }>();
+  const { teamId } = useParams<{ teamId: string }>();
   const navigate = useNavigate();
   const { hasRole } = useAuth();
   const [team, setTeam] = useState<Team | null>(null);
@@ -32,14 +32,14 @@ const EditTeamPage = () => {
   
   useEffect(() => {
     const loadTeam = async () => {
-      if (!id) {
+      if (!teamId) {
         toast.error("Team ID is missing");
         navigate("/teams");
         return;
       }
       
       try {
-        const teamData = await api.getTeamById(id);
+        const teamData = await api.getTeamById(teamId);
         
         if (!teamData) {
           toast.error("Team not found");
@@ -58,10 +58,10 @@ const EditTeamPage = () => {
     };
     
     loadTeam();
-  }, [id, navigate]);
+  }, [teamId, navigate]);
   
   const handleDeleteTeam = async () => {
-    if (!id) return;
+    if (!teamId) return;
     
     setIsDeleting(true);
     
@@ -77,7 +77,7 @@ const EditTeamPage = () => {
       }
       
       // Delete team using unified API
-      await api.deleteTeam(id);
+      await api.deleteTeam(teamId);
       toast.success("Team deleted successfully");
       navigate("/teams");
     } catch (error) {
