@@ -24,7 +24,8 @@ const ageGroups = [
   "U14", "U15", "U16", "U17", "U18", "Senior", "Mixed"
 ];
 
-const categories = ["Junior", "Senior", "Mixed"];
+const categories = ["Junior", "Senior", "Mixed"] as const;
+type CategoryType = typeof categories[number];
 
 export const TeamForm = ({ team, onSubmit, onCancel }: TeamFormProps) => {
   const navigate = useNavigate();
@@ -34,7 +35,7 @@ export const TeamForm = ({ team, onSubmit, onCancel }: TeamFormProps) => {
   const [formData, setFormData] = useState({
     name: team?.name || "",
     ageGroup: team?.ageGroup || "",
-    category: team?.category || "Junior",
+    category: (team?.category || "Junior") as CategoryType,
     description: team?.description || "",
     archived: team?.archived || false
   });
@@ -151,7 +152,7 @@ export const TeamForm = ({ team, onSubmit, onCancel }: TeamFormProps) => {
               <Label htmlFor="category">Category *</Label>
               <Select 
                 value={formData.category} 
-                onValueChange={(value) => setFormData({ ...formData, category: value })}
+                onValueChange={(value) => setFormData({ ...formData, category: value as CategoryType })}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Select category" />
