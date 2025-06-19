@@ -6,41 +6,22 @@ import { Suspense } from 'react';
 import { LazyDashboard, DashboardLoadingFallback } from '@/components/LazyLoadedComponents';
 
 const Index = () => {
-  const { currentUser, loading } = useAuth();
+  const { currentUser } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
-    console.log('Index: useEffect - loading:', loading, 'user:', currentUser?.email);
-    
-    if (loading) {
-      console.log('Index: Still loading auth state');
-      return;
-    }
-    
+    // If no user is logged in, redirect to login page
     if (!currentUser) {
-      console.log('Index: No user found, redirecting to login');
-      navigate('/login', { replace: true });
-    } else {
-      console.log('Index: User found, ready to load dashboard for:', currentUser.email);
+      navigate('/login');
     }
-  }, [currentUser, loading, navigate]);
+  }, [currentUser, navigate]);
 
-  if (loading) {
-    console.log('Index: Showing loading fallback');
-    return <DashboardLoadingFallback />;
-  }
-
-  if (!currentUser) {
-    console.log('Index: No user, returning null while redirect happens');
-    return null;
-  }
-
-  console.log('Index: Rendering dashboard with Suspense');
-  return (
+  // If user is logged in, show dashboard with proper lazy loading
+  return currentUser ? (
     <Suspense fallback={<DashboardLoadingFallback />}>
       <LazyDashboard />
     </Suspense>
-  );
+  ) : null;
 };
 
 export default Index;

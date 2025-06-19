@@ -1,4 +1,5 @@
 
+import { ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { 
@@ -16,7 +17,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
-import { useNavigate } from "react-router-dom";
 
 interface SidebarProps {
   isOpen: boolean;
@@ -25,21 +25,13 @@ interface SidebarProps {
 
 export const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
   const { currentUser, logout, hasRole, userProfile, userRoles } = useAuth();
-  const navigate = useNavigate();
 
-  const handleLogout = async () => {
-    try {
-      console.log('Sidebar logout initiated');
-      await logout();
-      toast.success("Logged out successfully");
-      console.log('Logout successful, redirecting to login');
-      navigate('/login', { replace: true });
-    } catch (error) {
-      console.error('Logout failed:', error);
-      toast.error("Failed to log out. Please try again.");
-    }
+  const handleLogout = () => {
+    logout();
+    toast.success("Logged out successfully");
   };
 
+  // Get the primary role to display (prioritize admin, then coach, manager, parent)
   const getPrimaryRole = () => {
     if (userRoles.includes('admin')) return 'Admin';
     if (userRoles.includes('coach')) return 'Coach';
@@ -48,6 +40,7 @@ export const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
     return 'Member';
   };
 
+  // Get display name from profile or fallback to email, properly capitalized
   const getDisplayName = () => {
     if (userProfile?.firstName && userProfile?.lastName) {
       const firstName = userProfile.firstName.charAt(0).toUpperCase() + userProfile.firstName.slice(1).toLowerCase();
@@ -70,12 +63,14 @@ export const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
       )}
     >
       <div className="flex h-full flex-col">
+        {/* Close button (mobile/tablet only) */}
         <div className="lg:hidden absolute top-4 right-4 z-10">
           <Button variant="ghost" size="icon" onClick={onClose} className="h-8 w-8 hover:bg-accent/50">
             <X className="h-4 w-4" />
           </Button>
         </div>
 
+        {/* Enhanced logo and app name */}
         <div className="flex items-center gap-3 px-6 py-6 border-b border-border/50">
           <div className="w-10 h-10 rounded-xl gradient-primary shadow-glow flex items-center justify-center">
             <img 
@@ -87,6 +82,7 @@ export const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
           <span className="text-xl font-bold text-gradient">Club Manager</span>
         </div>
 
+        {/* Enhanced user info */}
         {currentUser && (
           <div className="border-b border-border/50 p-6">
             <Link 
@@ -107,6 +103,7 @@ export const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
           </div>
         )}
 
+        {/* Enhanced navigation links */}
         <nav className="flex-1 overflow-y-auto p-4">
           <ul className="space-y-2">
             <li>
@@ -205,6 +202,7 @@ export const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
           </ul>
         </nav>
 
+        {/* Enhanced logout button */}
         {currentUser && (
           <div className="border-t border-border/50 p-4">
             <Button 
