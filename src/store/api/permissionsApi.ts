@@ -1,9 +1,24 @@
 
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 import { supabase } from '@/integrations/supabase/client';
-import { UserPermissions, Permission, PermissionCheck, PermissionContext } from '../types/permissions';
 
-const supabaseBaseQuery = fetchBaseQuery({
+// Simple type definitions
+export interface UserPermissions {
+  permissions: string[];
+  accessibleTeams: string[];
+  roles: string[];
+  lastUpdated: number;
+  expiresAt: number;
+}
+
+export interface PermissionCheck {
+  permission: string;
+  result: boolean;
+  timestamp: number;
+}
+
+// Simple base query
+const baseQuery = fetchBaseQuery({
   baseUrl: '/',
   prepareHeaders: async (headers) => {
     try {
@@ -12,30 +27,25 @@ const supabaseBaseQuery = fetchBaseQuery({
         headers.set('authorization', `Bearer ${session.access_token}`);
       }
     } catch (error) {
-      console.error('Error getting session for headers:', error);
+      console.error('Error getting session:', error);
     }
     return headers;
   },
 });
 
+// Simplified API definition
 export const permissionsApi = createApi({
   reducerPath: 'permissionsApi',
-  baseQuery: supabaseBaseQuery,
-  tagTypes: ['UserPermissions', 'AccessibleTeams'],
-  keepUnusedDataFor: 300,
-  refetchOnReconnect: true,
-  refetchOnFocus: true,
+  baseQuery,
+  tagTypes: ['UserPermissions'],
   endpoints: (builder) => ({
     getUserPermissions: builder.query<UserPermissions, string>({
       queryFn: async (userId: string) => {
         try {
-          console.log('🔍 RTK Query: Getting permissions for user:', userId);
-          
           const { data: permissionsData, error: permError } = await supabase
             .rpc('get_user_permissions', { user_id: userId });
 
           if (permError) {
-            console.error('Error fetching user permissions:', permError);
             throw permError;
           }
 
@@ -43,7 +53,6 @@ export const permissionsApi = createApi({
             .rpc('get_accessible_teams', { user_id: userId });
 
           if (teamsError) {
-            console.error('Error fetching accessible teams:', teamsError);
             throw teamsError;
           }
 
@@ -54,89 +63,25 @@ export const permissionsApi = createApi({
             .eq('is_active', true);
 
           if (rolesError) {
-            console.error('Error fetching user roles:', rolesError);
+            console.error('Error fetching roles:', rolesError);
           }
 
-          const permissions = (permissionsData?.map((p: any) => p.permission_name as Permission) || []);
-          const accessibleTeams = (teamsData?.map((t: any) => t.team_id) || []);
-          const roles = (rolesData?.map((r: any) => r.role) || []);
-
-          const userPermissions: UserPermissions = {
-            permissions,
-            accessibleTeams,
-            roles,
+          const result: UserPermissions = {
+            permissions: permissionsData?.map((p: any) => p.permission_name) || [],
+            accessibleTeams: teamsData?.map((t: any) => t.team_id) || [],
+            roles: rolesData?.map((r: any) => r.role) || [],
             lastUpdated: Date.now(),
             expiresAt: Date.now() + (5 * 60 * 1000),
           };
 
-          console.log('✅ RTK Query: Permissions loaded:', userPermissions);
-          return { data: userPermissions };
+          return { data: result };
         } catch (error) {
-          console.error('RTK Query: Error in getUserPermissions:', error);
           return { error: { status: 'FETCH_ERROR', error: String(error) } };
         }
       },
       providesTags: ['UserPermissions'],
     }),
-
-    checkPermission: builder.query<PermissionCheck, { userId: string; permission: Permission; context?: PermissionContext }>({
-      queryFn: async ({ userId, permission, context }) => {
-        try {
-          const { data, error } = await supabase
-            .rpc('has_permission', { 
-              user_id: userId, 
-              permission_name: permission 
-            });
-
-          if (error) {
-            throw error;
-          }
-
-          const check: PermissionCheck = {
-            permission,
-            context,
-            result: data || false,
-            timestamp: Date.now(),
-          };
-
-          console.log('🔐 Permission check:', check);
-          return { data: check };
-        } catch (error) {
-          return { 
-            error: { status: 'FETCH_ERROR', error: String(error) },
-          };
-        }
-      },
-    }),
-
-    getAccessibleTeams: builder.query<string[], string>({
-      queryFn: async (userId: string) => {
-        try {
-          const { data, error } = await supabase
-            .rpc('get_accessible_teams', { user_id: userId });
-
-          if (error) {
-            throw error;
-          }
-
-          return { data: data?.map((t: any) => t.team_id) || [] };
-        } catch (error) {
-          return { error: { status: 'FETCH_ERROR', error: String(error) } };
-        }
-      },
-      providesTags: ['AccessibleTeams'],
-    }),
-
-    invalidatePermissions: builder.mutation<void, string>({
-      queryFn: async () => ({ data: undefined }),
-      invalidatesTags: ['UserPermissions', 'AccessibleTeams'],
-    }),
   }),
 });
 
-export const {
-  useGetUserPermissionsQuery,
-  useCheckPermissionQuery,
-  useGetAccessibleTeamsQuery,
-  useInvalidatePermissionsMutation,
-} = permissionsApi;
+export const { useGetUserPermissionsQuery } = permissionsApi;

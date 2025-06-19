@@ -2,7 +2,6 @@
 import { useMemo, useCallback } from 'react';
 import { useAppSelector } from '@/store/hooks';
 import { useGetUserPermissionsQuery } from '@/store/api/permissionsApi';
-import { Permission, PermissionContext, TeamPermission, EventPermission } from '@/store/types/permissions';
 
 export const useEnterprisePermissions = () => {
   const user = useAppSelector(state => state.auth.user);
@@ -14,40 +13,15 @@ export const useEnterprisePermissions = () => {
     refetch: refetchPermissions,
   } = useGetUserPermissionsQuery(user?.id || '', {
     skip: !user?.id,
-    pollingInterval: 5 * 60 * 1000,
-    refetchOnMountOrArgChange: true,
   });
 
-  const hasPermission = useCallback((
-    permission: Permission, 
-    context?: PermissionContext
-  ): boolean => {
+  const hasPermission = useCallback((permission: string): boolean => {
     if (!userPermissions) return false;
-
-    const hasBasicPermission = userPermissions.permissions.includes(permission);
-    
-    if (context?.teamId) {
-      const canAccessTeam = userPermissions.accessibleTeams.includes(context.teamId);
-      
-      if (permission.includes('.view.') && userPermissions.permissions.includes(permission.replace('.assigned', '.all') as Permission)) {
-        return true;
-      }
-      
-      if (permission.includes('.assigned')) {
-        return hasBasicPermission && canAccessTeam;
-      }
-    }
-
-    return hasBasicPermission;
+    return userPermissions.permissions.includes(permission);
   }, [userPermissions]);
 
   const canAccessTeam = useCallback((teamId: string): boolean => {
     if (!userPermissions) return false;
-    
-    if (userPermissions.permissions.includes(TeamPermission.VIEW_ALL)) {
-      return true;
-    }
-    
     return userPermissions.accessibleTeams.includes(teamId);
   }, [userPermissions]);
 
@@ -56,11 +30,11 @@ export const useEnterprisePermissions = () => {
     return userPermissions.roles.includes(role);
   }, [userPermissions]);
 
-  const hasAnyPermission = useCallback((permissions: Permission[]): boolean => {
+  const hasAnyPermission = useCallback((permissions: string[]): boolean => {
     return permissions.some(permission => hasPermission(permission));
   }, [hasPermission]);
 
-  const hasAllPermissions = useCallback((permissions: Permission[]): boolean => {
+  const hasAllPermissions = useCallback((permissions: string[]): boolean => {
     return permissions.every(permission => hasPermission(permission));
   }, [hasPermission]);
 
@@ -78,6 +52,7 @@ export const useEnterprisePermissions = () => {
     };
   }, [userPermissions, user?.id]);
 
+  // Legacy compatibility
   const legacyPermissions = useMemo(() => {
     if (!userPermissions) {
       return {
@@ -89,10 +64,10 @@ export const useEnterprisePermissions = () => {
     }
 
     return {
-      isAdmin: hasPermission(TeamPermission.VIEW_ALL),
-      isCoach: hasPermission(EventPermission.CREATE) && !hasPermission(TeamPermission.VIEW_ALL),
-      isManager: hasPermission('approvals.manage' as Permission) && !hasPermission(TeamPermission.VIEW_ALL),
-      isParent: hasPermission(TeamPermission.VIEW_CHILDREN) && !hasPermission(EventPermission.CREATE),
+      isAdmin: hasPermission('teams.view.all'),
+      isCoach: hasPermission('events.create') && !hasPermission('teams.view.all'),
+      isManager: hasPermission('approvals.manage') && !hasPermission('teams.view.all'),
+      isParent: hasPermission('teams.view.children') && !hasPermission('events.create'),
     };
   }, [userPermissions, hasPermission]);
 

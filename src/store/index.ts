@@ -4,20 +4,18 @@ import { setupListeners } from '@reduxjs/toolkit/query';
 import { persistStore, persistReducer } from 'redux-persist';
 import storage from 'redux-persist/lib/storage';
 import { combineReducers } from '@reduxjs/toolkit';
-
-// Import slices and API
 import { authSlice } from './slices/authSlice';
 import { uiSlice } from './slices/uiSlice';
 import { permissionsApi } from './api/permissionsApi';
 
-// Persist configuration
+// Simple persist configuration
 const persistConfig = {
   key: 'root',
   storage,
-  whitelist: ['auth'], // Only persist auth state
+  whitelist: ['auth'],
 };
 
-// Root reducer
+// Root reducer without complex types
 const rootReducer = combineReducers({
   auth: authSlice.reducer,
   ui: uiSlice.reducer,
@@ -27,7 +25,7 @@ const rootReducer = combineReducers({
 // Persisted reducer
 const persistedReducer = persistReducer(persistConfig, rootReducer);
 
-// Configure store
+// Store configuration with simplified middleware
 export const store = configureStore({
   reducer: persistedReducer,
   middleware: (getDefaultMiddleware) =>
@@ -36,6 +34,7 @@ export const store = configureStore({
         ignoredActions: ['persist/PERSIST', 'persist/REHYDRATE'],
       },
     }).concat(permissionsApi.middleware),
+  devTools: process.env.NODE_ENV !== 'production',
 });
 
 // Setup listeners
@@ -44,6 +43,6 @@ setupListeners(store.dispatch);
 // Create persistor
 export const persistor = persistStore(store);
 
-// Export types
+// Simple type exports
 export type RootState = ReturnType<typeof store.getState>;
 export type AppDispatch = typeof store.dispatch;

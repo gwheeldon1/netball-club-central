@@ -1,17 +1,15 @@
 
 import React from 'react';
 import { useEnterprisePermissions } from '@/hooks/useEnterprisePermissions';
-import { Permission, PermissionContext } from '@/store/types/permissions';
 import { Skeleton } from '@/components/ui/skeleton';
 
 interface EnterprisePermissionGateProps {
-  permission: Permission;
+  permission: string;
   children: React.ReactNode;
   fallback?: React.ReactNode;
-  context?: PermissionContext;
   loadingFallback?: React.ReactNode;
   requireAll?: boolean;
-  permissions?: Permission[];
+  permissions?: string[];
 }
 
 export const EnterprisePermissionGate: React.FC<EnterprisePermissionGateProps> = ({
@@ -19,7 +17,6 @@ export const EnterprisePermissionGate: React.FC<EnterprisePermissionGateProps> =
   permissions,
   children,
   fallback = null,
-  context,
   loadingFallback,
   requireAll = false,
 }) => {
@@ -36,7 +33,7 @@ export const EnterprisePermissionGate: React.FC<EnterprisePermissionGateProps> =
       ? hasAllPermissions(permissions)
       : hasAnyPermission(permissions);
   } else {
-    hasRequiredPermission = hasPermission(permission, context);
+    hasRequiredPermission = hasPermission(permission);
   }
 
   if (!hasRequiredPermission) {
