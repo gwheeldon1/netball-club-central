@@ -4,13 +4,16 @@ import { supabase } from '@/integrations/supabase/client';
 import { UserPermissions, Permission, PermissionCheck, PermissionContext } from '../types/permissions';
 import { logger } from '@/utils/logger';
 
-// Custom base query that uses Supabase
 const supabaseBaseQuery = fetchBaseQuery({
-  baseUrl: '/', // Not used, but required
+  baseUrl: '/',
   prepareHeaders: async (headers) => {
-    const { data: { session } } = await supabase.auth.getSession();
-    if (session?.access_token) {
-      headers.set('authorization', `Bearer ${session.access_token}`);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.access_token) {
+        headers.set('authorization', `Bearer ${session.access_token}`);
+      }
+    } catch (error) {
+      logger.error('Error getting session for headers:', error);
     }
     return headers;
   },
@@ -20,16 +23,15 @@ export const permissionsApi = createApi({
   reducerPath: 'permissionsApi',
   baseQuery: supabaseBaseQuery,
   tagTypes: ['UserPermissions', 'AccessibleTeams'],
-  keepUnusedDataFor: 300, // 5 minutes
+  keepUnusedDataFor: 300,
   refetchOnReconnect: true,
   refetchOnFocus: true,
   endpoints: (builder) => ({
     getUserPermissions: builder.query<UserPermissions, string>({
-      queryFn: async (userId) => {
+      queryFn: async (userId: string) => {
         try {
           console.log('🔍 RTK Query: Getting permissions for user:', userId);
           
-          // Get user permissions
           const { data: permissionsData, error: permError } = await supabase
             .rpc('get_user_permissions', { user_id: userId });
 
@@ -38,7 +40,6 @@ export const permissionsApi = createApi({
             throw permError;
           }
 
-          // Get accessible teams
           const { data: teamsData, error: teamsError } = await supabase
             .rpc('get_accessible_teams', { user_id: userId });
 
@@ -47,7 +48,6 @@ export const permissionsApi = createApi({
             throw teamsError;
           }
 
-          // Get user roles
           const { data: rolesData, error: rolesError } = await supabase
             .from('user_roles')
             .select('role')
@@ -58,16 +58,16 @@ export const permissionsApi = createApi({
             logger.error('Error fetching user roles:', rolesError);
           }
 
-          const permissions = permissionsData?.map(p => p.permission_name as Permission) || [];
-          const accessibleTeams = teamsData?.map(t => t.team_id) || [];
-          const roles = rolesData?.map(r => r.role) || [];
+          const permissions = (permissionsData?.map((p: any) => p.permission_name as Permission) || []);
+          const accessibleTeams = (teamsData?.map((t: any) => t.team_id) || []);
+          const roles = (rolesData?.map((r: any) => r.role) || []);
 
           const userPermissions: UserPermissions = {
             permissions,
             accessibleTeams,
             roles,
             lastUpdated: Date.now(),
-            expiresAt: Date.now() + (5 * 60 * 1000), // 5 minutes
+            expiresAt: Date.now() + (5 * 60 * 1000),
           };
 
           console.log('✅ RTK Query: Permissions loaded:', userPermissions);
@@ -100,9 +100,7 @@ export const permissionsApi = createApi({
             timestamp: Date.now(),
           };
 
-          // Log the permission check for audit purposes
           console.log('🔐 Permission check:', check);
-
           return { data: check };
         } catch (error) {
           return { 
@@ -113,7 +111,7 @@ export const permissionsApi = createApi({
     }),
 
     getAccessibleTeams: builder.query<string[], string>({
-      queryFn: async (userId) => {
+      queryFn: async (userId: string) => {
         try {
           const { data, error } = await supabase
             .rpc('get_accessible_teams', { user_id: userId });
@@ -122,7 +120,7 @@ export const permissionsApi = createApi({
             throw error;
           }
 
-          return { data: data?.map(t => t.team_id) || [] };
+          return { data: data?.map((t: any) => t.team_id) || [] };
         } catch (error) {
           return { error: { status: 'FETCH_ERROR', error: String(error) } };
         }

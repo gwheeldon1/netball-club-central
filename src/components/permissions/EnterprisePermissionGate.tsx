@@ -10,8 +10,8 @@ interface EnterprisePermissionGateProps {
   fallback?: React.ReactNode;
   context?: PermissionContext;
   loadingFallback?: React.ReactNode;
-  requireAll?: boolean; // For multiple permissions
-  permissions?: Permission[]; // For multiple permissions
+  requireAll?: boolean;
+  permissions?: Permission[];
 }
 
 export const EnterprisePermissionGate: React.FC<EnterprisePermissionGateProps> = ({
@@ -26,18 +26,16 @@ export const EnterprisePermissionGate: React.FC<EnterprisePermissionGateProps> =
   const { hasPermission, hasAnyPermission, hasAllPermissions, loading } = useEnterprisePermissions();
 
   if (loading) {
-    return loadingFallback || <Skeleton className="h-8 w-full" />;
+    return <>{loadingFallback || <Skeleton className="h-8 w-full" />}</>;
   }
 
   let hasRequiredPermission = false;
 
   if (permissions && permissions.length > 0) {
-    // Multiple permissions
     hasRequiredPermission = requireAll 
       ? hasAllPermissions(permissions)
       : hasAnyPermission(permissions);
   } else {
-    // Single permission
     hasRequiredPermission = hasPermission(permission, context);
   }
 

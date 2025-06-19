@@ -12,7 +12,7 @@ import { uiSlice } from './slices/uiSlice';
 const persistConfig = {
   key: 'root',
   storage,
-  whitelist: ['auth'], // Only persist auth state
+  whitelist: ['auth'],
 };
 
 const rootReducer = combineReducers({
@@ -35,7 +35,6 @@ export const store = configureStore({
 
 export const persistor = persistStore(store);
 
-// Enable listener behavior for the store
 setupListeners(store.dispatch);
 
 export type RootState = ReturnType<typeof store.getState>;
