@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
-import { usePermissions } from "@/hooks/usePermissions";
+import { useEnterprisePermissions } from "@/hooks/useEnterprisePermissions";
 import Layout from "@/components/Layout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -10,23 +10,33 @@ import { Link } from "react-router-dom";
 import { toast } from "sonner";
 import { Team } from "@/types";
 import { api } from "@/services/api";
-import { PermissionGate } from "@/components/permissions/PermissionGate";
+import { EnterprisePermissionGate } from "@/components/permissions/EnterprisePermissionGate";
+import { PermissionDebugPanel } from "@/components/permissions/PermissionDebugPanel";
+import { TeamPermission } from "@/store/types/permissions";
 
 const TeamsPage = () => {
   const { currentUser } = useAuth();
-  const { hasPermission, accessibleTeams, canAccessTeam } = usePermissions();
+  const { 
+    hasPermission, 
+    canAccessTeam, 
+    accessibleTeams, 
+    loading: permissionsLoading 
+  } = useEnterprisePermissions();
+  
   const [teams, setTeams] = useState<Team[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
     const loadTeams = async () => {
+      if (permissionsLoading) return;
+
       try {
         const teamsData = await api.getTeams();
         
         // Filter teams based on user permissions
         let filteredTeams = teamsData;
         
-        if (!hasPermission('teams.view.all')) {
+        if (!hasPermission(TeamPermission.VIEW_ALL)) {
           // User can only see teams they have access to
           filteredTeams = teamsData.filter(team => canAccessTeam(team.id));
         }
@@ -41,9 +51,9 @@ const TeamsPage = () => {
     };
 
     loadTeams();
-  }, [hasPermission, canAccessTeam]);
+  }, [hasPermission, canAccessTeam, permissionsLoading]);
 
-  if (loading) {
+  if (loading || permissionsLoading) {
     return (
       <Layout>
         <div className="flex items-center justify-center h-64">
@@ -54,7 +64,7 @@ const TeamsPage = () => {
   }
 
   const getPageDescription = () => {
-    if (hasPermission('teams.view.all')) {
+    if (hasPermission(TeamPermission.VIEW_ALL)) {
       return "Manage all teams and their members";
     } else if (accessibleTeams.length > 0) {
       return "Teams you coach, manage, or have children in";
@@ -74,14 +84,14 @@ const TeamsPage = () => {
             </p>
           </div>
           
-          <PermissionGate permission="teams.create">
+          <EnterprisePermissionGate permission={TeamPermission.CREATE}>
             <Button className="bg-primary hover:bg-primary/90 w-full sm:w-auto" asChild>
               <Link to="/teams/new">
                 <Plus className="mr-2 h-4 w-4" />
                 Create Team
               </Link>
             </Button>
-          </PermissionGate>
+          </EnterprisePermissionGate>
         </div>
         
         {/* Teams grid */}
@@ -113,28 +123,20 @@ const TeamsPage = () => {
           ) : (
             <div className="col-span-full text-center py-8 sm:py-12">
               <p className="text-muted-foreground text-sm sm:text-base">No teams found.</p>
-              <PermissionGate permission="teams.create">
+              <EnterprisePermissionGate permission={TeamPermission.CREATE}>
                 <Button className="mt-4" asChild>
                   <Link to="/teams/new">
                     <Plus className="mr-2 h-4 w-4" />
                     Create First Team
                   </Link>
                 </Button>
-              </PermissionGate>
+              </EnterprisePermissionGate>
             </div>
           )}
         </div>
 
-        {/* Debug info for development */}
-        {process.env.NODE_ENV === 'development' && (
-          <div className="mt-8 p-4 bg-gray-100 rounded-lg text-sm">
-            <h3 className="font-semibold mb-2">Debug Info (Development Only):</h3>
-            <p>Current User ID: {currentUser?.id || 'Not logged in'}</p>
-            <p>Can view all teams: {hasPermission('teams.view.all') ? 'Yes' : 'No'}</p>
-            <p>Can create teams: {hasPermission('teams.create') ? 'Yes' : 'No'}</p>
-            <p>Accessible teams: {accessibleTeams.length}</p>
-          </div>
-        )}
+        {/* Enhanced Debug Panel */}
+        <PermissionDebugPanel />
       </div>
     </Layout>
   );

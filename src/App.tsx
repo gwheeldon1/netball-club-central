@@ -1,187 +1,104 @@
+import { Toaster } from "@/components/ui/sonner";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { AuthProvider } from "./context/AuthContext";
+import { StoreProvider } from "./providers/StoreProvider";
+import Index from "./pages/Index";
+import Login from "./pages/Login";
+import Register from "./pages/Register";
+import ProfilePage from "./pages/ProfilePage";
+import ProtectedRoute from "./components/ProtectedRoute";
+import Unauthorized from "./pages/Unauthorized";
+import TeamsPage from "./pages/TeamsPage";
+import TeamDetailsPage from "./pages/TeamDetailsPage";
+import NewTeamPage from "./pages/NewTeamPage";
+import EditTeamPage from "./pages/EditTeamPage";
+import EventsPage from "./pages/EventsPage";
+import NewEventPage from "./pages/NewEventPage";
+import EditEventPage from "./pages/EditEventPage";
+import EventDetailsPage from "./pages/EventDetailsPage";
+import ChildrenPage from "./pages/ChildrenPage";
+import NewChildPage from "./pages/NewChildPage";
+import EditChildPage from "./pages/EditChildPage";
+import AttendancePage from "./pages/AttendancePage";
+import UsersPage from "./pages/UsersPage";
+import UserDetailsPage from "./pages/UserDetailsPage";
+import GroupsPage from "./pages/GroupsPage";
+import GroupDetailsPage from "./pages/GroupDetailsPage";
+import NewGroupPage from "./pages/NewGroupPage";
+import EditGroupPage from "./pages/EditGroupPage";
+import SettingsPage from "./pages/SettingsPage";
+import ApprovalsPage from "./pages/ApprovalsPage";
+import MatchStatsPage from "./pages/MatchStatsPage";
+import NewMatchStatsPage from "./pages/NewMatchStatsPage";
+import EditMatchStatsPage from "./pages/EditMatchStatsPage";
+import { ScrollToTop } from "./components/ScrollToTop";
 
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { Toaster } from 'sonner';
-import { ThemeProvider } from '@/components/theme-provider';
-import { AuthProvider } from '@/context/AuthContext';
-import { ErrorBoundary } from '@/utils/errorBoundary';
-import ProtectedRoute from '@/components/ProtectedRoute';
-import { Suspense } from 'react';
-import {
-  LazyTeamsPage as TeamsPage,
-  LazyEventsPage as EventsPage,
-  LazyChildrenPage as ChildrenPage,
-  LazySettingsPage as SettingsPage,
-  LazyUserProfilePage as UserProfilePage,
-  LazyTeamDetailPage as TeamDetailPage,
-  LazyEventDetailPage as EventDetailPage,
-  LazyChildDetailPage as ChildDetailPage,
-  LazyNewTeamPage as NewTeamPage,
-  LazyEditTeamPage as EditTeamPage,
-  LazyNewChildPage as NewChildPage,
-  LazyRegistrationPage as RegistrationPage,
-  LazyApprovalsPage as ApprovalsPage,
-  LazySubscriptionSuccessPage as SubscriptionSuccessPage,
-  PageLoadingFallback,
-} from '@/components/LazyLoadedComponents';
-
-// Critical pages loaded immediately (no lazy loading for login/auth)
-import LoginPage from '@/pages/LoginPage';
-import NotFound from '@/pages/NotFound';
-import UnauthorizedPage from '@/pages/UnauthorizedPage';
-import DesignSystemPage from '@/pages/DesignSystemPage';
-import AnalyticsPage from '@/pages/AnalyticsPage';
-import GroupsPage from '@/pages/GroupsPage';
-import NewGroupPage from '@/pages/NewGroupPage';
-import EditGroupPage from '@/pages/EditGroupPage';
-import Index from '@/pages/Index';
-
-// Lazy load heavy components that aren't immediately needed
-import { lazy } from 'react';
-const NewEventPage = lazy(() => import('@/pages/NewEventPage'));
-const EditEventPage = lazy(() => import('@/pages/EditEventPage'));
-import './App.css';
+const queryClient = new QueryClient();
 
 function App() {
   return (
-    <ErrorBoundary>
-      <ThemeProvider defaultTheme="light" storageKey="netball-theme">
-      <AuthProvider>
-        <Router>
-          <Routes>
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/register" element={<RegistrationPage />} />
-            <Route path="/subscription-success" element={<SubscriptionSuccessPage />} />
-            <Route path="/unauthorized" element={<UnauthorizedPage />} />
-            
-            <Route path="/" element={
-              <ProtectedRoute>
-                <Index />
-              </ProtectedRoute>
-            } />
-            
-            <Route path="/analytics" element={
-              <ProtectedRoute requiredPermission="analytics.view.all">
-                <AnalyticsPage />
-              </ProtectedRoute>
-            } />
+    <StoreProvider>
+      <QueryClientProvider client={queryClient}>
+        <TooltipProvider>
+          <Toaster />
+          <BrowserRouter>
+            <AuthProvider>
+              <Routes>
+                <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
+                <Route path="/login" element={<ProtectedRoute requireAuth={false}><Login /></ProtectedRoute>} />
+                <Route path="/register" element={<ProtectedRoute requireAuth={false}><Register /></ProtectedRoute>} />
+                <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
+                <Route path="/unauthorized" element={<Unauthorized />} />
 
-            <Route path="/groups" element={
-              <ProtectedRoute requiredPermission="groups.view.all">
-                <GroupsPage />
-              </ProtectedRoute>
-            } />
+                {/* Teams routes */}
+                <Route path="/teams" element={<ProtectedRoute><TeamsPage /></ProtectedRoute>} />
+                <Route path="/teams/:teamId" element={<ProtectedRoute><TeamDetailsPage /></ProtectedRoute>} />
+                <Route path="/teams/new" element={<ProtectedRoute><NewTeamPage /></ProtectedRoute>} />
+                <Route path="/teams/:teamId/edit" element={<ProtectedRoute><EditTeamPage /></ProtectedRoute>} />
 
-            <Route path="/groups/new" element={
-              <ProtectedRoute requiredPermission="groups.create">
-                <NewGroupPage />
-              </ProtectedRoute>
-            } />
+                {/* Events routes */}
+                <Route path="/events" element={<ProtectedRoute><EventsPage /></ProtectedRoute>} />
+                <Route path="/events/new" element={<ProtectedRoute><NewEventPage /></ProtectedRoute>} />
+                <Route path="/events/:eventId" element={<ProtectedRoute><EventDetailsPage /></ProtectedRoute>} />
+                <Route path="/events/:eventId/edit" element={<ProtectedRoute><EditEventPage /></ProtectedRoute>} />
 
-            <Route path="/groups/:id/edit" element={
-              <ProtectedRoute requiredPermission="groups.edit.all">
-                <EditGroupPage />
-              </ProtectedRoute>
-            } />
-            
-            <Route path="/teams" element={
-              <ProtectedRoute>
-                <Suspense fallback={<PageLoadingFallback />}>
-                  <TeamsPage />
-                </Suspense>
-              </ProtectedRoute>
-            } />
-            
-            <Route path="/teams/:id" element={
-              <ProtectedRoute>
-                <TeamDetailPage />
-              </ProtectedRoute>
-            } />
-            
-            <Route path="/teams/new" element={
-              <ProtectedRoute requiredPermission="teams.create">
-                <NewTeamPage />
-              </ProtectedRoute>
-            } />
-            
-            <Route path="/teams/:id/edit" element={
-              <ProtectedRoute requiredPermission="teams.edit.all">
-                <EditTeamPage />
-              </ProtectedRoute>
-            } />
-            
-            <Route path="/children" element={
-              <ProtectedRoute allowedRoles={['parent']}>
-                <ChildrenPage />
-              </ProtectedRoute>
-            } />
-            
-            <Route path="/children/new" element={
-              <ProtectedRoute allowedRoles={['parent']}>
-                <NewChildPage />
-              </ProtectedRoute>
-            } />
-            
-            <Route path="/children/:id" element={
-              <ProtectedRoute>
-                <ChildDetailPage />
-              </ProtectedRoute>
-            } />
-            
-            <Route path="/events" element={
-              <ProtectedRoute>
-                <EventsPage />
-              </ProtectedRoute>
-            } />
-            
-            <Route path="/events/new" element={
-              <ProtectedRoute requiredPermission="events.create">
-                <Suspense fallback={<PageLoadingFallback />}>
-                  <NewEventPage />
-                </Suspense>
-              </ProtectedRoute>
-            } />
+                {/* Children routes */}
+                <Route path="/children" element={<ProtectedRoute><ChildrenPage /></ProtectedRoute>} />
+                <Route path="/children/new" element={<ProtectedRoute><NewChildPage /></ProtectedRoute>} />
+                <Route path="/children/:childId/edit" element={<ProtectedRoute><EditChildPage /></ProtectedRoute>} />
 
-            <Route path="/events/:id" element={
-              <ProtectedRoute>
-                <EventDetailPage />
-              </ProtectedRoute>
-            } />
-            
-            <Route path="/events/:id/edit" element={
-              <ProtectedRoute requiredPermission="events.edit.all">
-                <Suspense fallback={<PageLoadingFallback />}>
-                  <EditEventPage />
-                </Suspense>
-              </ProtectedRoute>
-            } />
+                {/* Attendance route */}
+                <Route path="/events/:eventId/attendance" element={<ProtectedRoute><AttendancePage /></ProtectedRoute>} />
 
-            <Route path="/approvals" element={
-              <ProtectedRoute requiredPermission="approvals.manage">
-                <ApprovalsPage />
-              </ProtectedRoute>
-            } />
-            
-            <Route path="/profile" element={
-              <ProtectedRoute>
-                <UserProfilePage />
-              </ProtectedRoute>
-            } />
-            
-            <Route path="/settings" element={
-              <ProtectedRoute requiredPermission="settings.manage">
-                <SettingsPage />
-              </ProtectedRoute>
-            } />
-            
-            <Route path="/design" element={<DesignSystemPage />} />
-            
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </Router>
-        <Toaster position="top-right" />
-      </AuthProvider>
-    </ThemeProvider>
-    </ErrorBoundary>
+                {/* Users routes */}
+                <Route path="/users" element={<ProtectedRoute><UsersPage /></ProtectedRoute>} />
+                <Route path="/users/:userId" element={<ProtectedRoute><UserDetailsPage /></ProtectedRoute>} />
+
+                {/* Groups routes */}
+                <Route path="/groups" element={<ProtectedRoute><GroupsPage /></ProtectedRoute>} />
+                <Route path="/groups/:groupId" element={<ProtectedRoute><GroupDetailsPage /></ProtectedRoute>} />
+                <Route path="/groups/new" element={<ProtectedRoute><NewGroupPage /></ProtectedRoute>} />
+                <Route path="/groups/:groupId/edit" element={<ProtectedRoute><EditGroupPage /></ProtectedRoute>} />
+
+                {/* Settings route */}
+                <Route path="/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
+
+                {/* Approvals route */}
+                <Route path="/approvals" element={<ProtectedRoute><ApprovalsPage /></ProtectedRoute>} />
+
+                {/* Match Stats routes */}
+                <Route path="/match-stats" element={<ProtectedRoute><MatchStatsPage /></ProtectedRoute>} />
+                <Route path="/match-stats/new" element={<ProtectedRoute><NewMatchStatsPage /></ProtectedRoute>} />
+                <Route path="/match-stats/:matchStatsId/edit" element={<ProtectedRoute><EditMatchStatsPage /></ProtectedRoute>} />
+              </Routes>
+              <ScrollToTop />
+            </AuthProvider>
+          </BrowserRouter>
+        </TooltipProvider>
+      </QueryClientProvider>
+    </StoreProvider>
   );
 }
 
