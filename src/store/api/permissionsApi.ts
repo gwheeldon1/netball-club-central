@@ -2,7 +2,6 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 import { supabase } from '@/integrations/supabase/client';
 import { UserPermissions, Permission, PermissionCheck, PermissionContext } from '../types/permissions';
-import { logger } from '@/utils/logger';
 
 const supabaseBaseQuery = fetchBaseQuery({
   baseUrl: '/',
@@ -13,7 +12,7 @@ const supabaseBaseQuery = fetchBaseQuery({
         headers.set('authorization', `Bearer ${session.access_token}`);
       }
     } catch (error) {
-      logger.error('Error getting session for headers:', error);
+      console.error('Error getting session for headers:', error);
     }
     return headers;
   },
@@ -36,7 +35,7 @@ export const permissionsApi = createApi({
             .rpc('get_user_permissions', { user_id: userId });
 
           if (permError) {
-            logger.error('Error fetching user permissions:', permError);
+            console.error('Error fetching user permissions:', permError);
             throw permError;
           }
 
@@ -44,7 +43,7 @@ export const permissionsApi = createApi({
             .rpc('get_accessible_teams', { user_id: userId });
 
           if (teamsError) {
-            logger.error('Error fetching accessible teams:', teamsError);
+            console.error('Error fetching accessible teams:', teamsError);
             throw teamsError;
           }
 
@@ -55,7 +54,7 @@ export const permissionsApi = createApi({
             .eq('is_active', true);
 
           if (rolesError) {
-            logger.error('Error fetching user roles:', rolesError);
+            console.error('Error fetching user roles:', rolesError);
           }
 
           const permissions = (permissionsData?.map((p: any) => p.permission_name as Permission) || []);
@@ -73,7 +72,7 @@ export const permissionsApi = createApi({
           console.log('✅ RTK Query: Permissions loaded:', userPermissions);
           return { data: userPermissions };
         } catch (error) {
-          logger.error('RTK Query: Error in getUserPermissions:', error);
+          console.error('RTK Query: Error in getUserPermissions:', error);
           return { error: { status: 'FETCH_ERROR', error: String(error) } };
         }
       },

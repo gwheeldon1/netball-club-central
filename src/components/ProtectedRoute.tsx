@@ -4,15 +4,15 @@ import { useAuth } from '@/context/AuthContext';
 import { Navigate } from 'react-router-dom';
 import { Skeleton } from '@/components/ui/skeleton';
 import { UserRole } from '@/types/unified';
-import { usePermissions } from '@/hooks/usePermissions';
-import { PermissionName } from '@/services/permissions/types';
+import { useEnterprisePermissions } from '@/hooks/useEnterprisePermissions';
+import { Permission } from '@/store/types/permissions';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
   requireAuth?: boolean;
   allowedRoles?: UserRole[];
-  requiredPermission?: PermissionName;
-  teamId?: string; // For team-specific access
+  requiredPermission?: Permission;
+  teamId?: string;
 }
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ 
@@ -23,7 +23,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   teamId
 }) => {
   const { currentUser, loading: authLoading, hasRole } = useAuth();
-  const { hasPermission, canAccessTeam, loading: permissionsLoading } = usePermissions();
+  const { hasPermission, canAccessTeam, loading: permissionsLoading } = useEnterprisePermissions();
 
   const loading = authLoading || permissionsLoading;
 
@@ -48,7 +48,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     return <Navigate to="/" replace />;
   }
 
-  // Check permission-based access (new system)
+  // Check permission-based access
   if (requiredPermission && currentUser) {
     const hasRequiredPermission = hasPermission(requiredPermission);
     if (!hasRequiredPermission) {

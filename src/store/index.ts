@@ -5,24 +5,29 @@ import { persistStore, persistReducer } from 'redux-persist';
 import storage from 'redux-persist/lib/storage';
 import { combineReducers } from '@reduxjs/toolkit';
 
-import { permissionsApi } from './api/permissionsApi';
+// Import slices and API
 import { authSlice } from './slices/authSlice';
 import { uiSlice } from './slices/uiSlice';
+import { permissionsApi } from './api/permissionsApi';
 
+// Persist configuration
 const persistConfig = {
   key: 'root',
   storage,
-  whitelist: ['auth'],
+  whitelist: ['auth'], // Only persist auth state
 };
 
+// Root reducer
 const rootReducer = combineReducers({
   auth: authSlice.reducer,
   ui: uiSlice.reducer,
   [permissionsApi.reducerPath]: permissionsApi.reducer,
 });
 
+// Persisted reducer
 const persistedReducer = persistReducer(persistConfig, rootReducer);
 
+// Configure store
 export const store = configureStore({
   reducer: persistedReducer,
   middleware: (getDefaultMiddleware) =>
@@ -33,9 +38,12 @@ export const store = configureStore({
     }).concat(permissionsApi.middleware),
 });
 
-export const persistor = persistStore(store);
-
+// Setup listeners
 setupListeners(store.dispatch);
 
+// Create persistor
+export const persistor = persistStore(store);
+
+// Export types
 export type RootState = ReturnType<typeof store.getState>;
 export type AppDispatch = typeof store.dispatch;

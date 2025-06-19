@@ -3,7 +3,6 @@ import { useMemo, useCallback } from 'react';
 import { useAppSelector } from '@/store/hooks';
 import { useGetUserPermissionsQuery } from '@/store/api/permissionsApi';
 import { Permission, PermissionContext, TeamPermission, EventPermission } from '@/store/types/permissions';
-import { logger } from '@/utils/logger';
 
 export const useEnterprisePermissions = () => {
   const user = useAppSelector(state => state.auth.user);
@@ -97,28 +96,12 @@ export const useEnterprisePermissions = () => {
     };
   }, [userPermissions, hasPermission]);
 
-  const logPermissionCheck = useCallback((permission: Permission, result: boolean, context?: PermissionContext) => {
-    if (process.env.NODE_ENV === 'development') {
-      console.log('🔐 Permission Check:', {
-        permission,
-        result,
-        context,
-        timestamp: new Date().toISOString(),
-      });
-    }
-  }, []);
-
   return {
     userPermissions,
     loading: permissionsLoading,
     error: permissionsError,
     
-    hasPermission: useCallback((permission: Permission, context?: PermissionContext) => {
-      const result = hasPermission(permission, context);
-      logPermissionCheck(permission, result, context);
-      return result;
-    }, [hasPermission, logPermissionCheck]),
-    
+    hasPermission,
     canAccessTeam,
     hasRole,
     hasAnyPermission,
