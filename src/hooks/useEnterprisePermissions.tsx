@@ -1,6 +1,6 @@
 
 import { useState, useEffect, useCallback } from 'react';
-import { useAppSelector } from '@/store/hooks';
+import { useAuth } from '@/context/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 
 interface UserPermissions {
@@ -12,7 +12,7 @@ interface UserPermissions {
 }
 
 export const useEnterprisePermissions = () => {
-  const user = useAppSelector(state => state.auth.user);
+  const { user } = useAuth();
   const [userPermissions, setUserPermissions] = useState<UserPermissions | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
