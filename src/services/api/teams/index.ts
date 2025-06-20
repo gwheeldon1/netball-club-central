@@ -1,28 +1,12 @@
 
-// Main teams API - combines all team operations
-import { TeamOperations } from './operations';
+// Team API exports
+export { TeamAPI } from './operations';
+export { TeamMembersAPI } from './members';
+export * from './types';
+
+// Create instances for backward compatibility
+import { TeamAPI } from './operations';
 import { TeamMembersAPI } from './members';
 
-class TeamAPI extends TeamOperations {
-  private membersAPI: TeamMembersAPI;
-
-  constructor() {
-    super();
-    this.membersAPI = new TeamMembersAPI();
-  }
-
-  // Delegate member operations to the members API
-  async getTeamPlayers(teamId: string) {
-    return this.membersAPI.getTeamPlayers(teamId);
-  }
-
-  async getTeamStaff(teamId: string) {
-    return this.membersAPI.getTeamStaff(teamId);
-  }
-
-  async getTeamParents(teamId: string) {
-    return this.membersAPI.getTeamParents(teamId);
-  }
-}
-
 export const teamApi = new TeamAPI();
+export const teamMembersApi = new TeamMembersAPI();
