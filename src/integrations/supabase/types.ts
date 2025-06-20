@@ -1275,6 +1275,68 @@ export type Database = {
         }
         Relationships: []
       }
+      team_members: {
+        Row: {
+          assigned_at: string
+          assigned_by: string | null
+          id: string
+          is_active: boolean
+          member_id: string
+          member_type: Database["public"]["Enums"]["team_member_type"]
+          player_id: string | null
+          team_id: string
+        }
+        Insert: {
+          assigned_at?: string
+          assigned_by?: string | null
+          id?: string
+          is_active?: boolean
+          member_id: string
+          member_type: Database["public"]["Enums"]["team_member_type"]
+          player_id?: string | null
+          team_id: string
+        }
+        Update: {
+          assigned_at?: string
+          assigned_by?: string | null
+          id?: string
+          is_active?: boolean
+          member_id?: string
+          member_type?: Database["public"]["Enums"]["team_member_type"]
+          player_id?: string | null
+          team_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "team_members_assigned_by_fkey"
+            columns: ["assigned_by"]
+            isOneToOne: false
+            referencedRelation: "guardians"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "team_members_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "guardians"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "team_members_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "team_members_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       teams: {
         Row: {
           age_group: string
@@ -1468,6 +1530,7 @@ export type Database = {
       }
     }
     Enums: {
+      team_member_type: "parent" | "coach" | "manager" | "admin"
       user_role: "parent" | "coach" | "manager" | "admin"
       user_role_enum: "Admin" | "Coach" | "Manager" | "Member" | "Guardian"
     }
@@ -1585,6 +1648,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      team_member_type: ["parent", "coach", "manager", "admin"],
       user_role: ["parent", "coach", "manager", "admin"],
       user_role_enum: ["Admin", "Coach", "Manager", "Member", "Guardian"],
     },

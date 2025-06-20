@@ -111,6 +111,18 @@ export interface DatabaseUserRole {
   assigned_by?: string;
 }
 
+// New unified team members table
+export interface DatabaseTeamMember {
+  id: string;
+  team_id: string;
+  member_id: string;
+  member_type: 'parent' | 'coach' | 'manager' | 'admin';
+  player_id?: string; // Required for parents, null for staff
+  is_active: boolean;
+  assigned_at: string;
+  assigned_by?: string;
+}
+
 export interface DatabaseMatchStatistic {
   id: string;
   event_id: string;
@@ -135,6 +147,7 @@ export interface DatabaseMatchStatistic {
 // Combined types with relationships
 export interface GuardianWithRoles extends DatabaseGuardian {
   user_roles: DatabaseUserRole[];
+  team_memberships?: DatabaseTeamMember[];
 }
 
 export interface PlayerWithGuardian extends DatabasePlayer {
@@ -144,6 +157,13 @@ export interface PlayerWithGuardian extends DatabasePlayer {
 
 export interface EventWithResponses extends DatabaseEvent {
   event_responses: DatabaseEventResponse[];
+}
+
+export interface TeamWithMembers extends DatabaseTeam {
+  team_members: (DatabaseTeamMember & {
+    member: DatabaseGuardian;
+    player?: DatabasePlayer;
+  })[];
 }
 
 // Payment and subscription types

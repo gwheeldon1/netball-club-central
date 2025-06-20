@@ -1,5 +1,5 @@
 
-// Team members (players and staff) operations
+// Team members (players and staff) operations using unified team_members table
 import { supabase } from '@/integrations/supabase/client';
 import { logger } from '@/utils/logger';
 import { TeamPlayer, TeamStaff } from './types';
@@ -7,13 +7,14 @@ import { TeamPlayer, TeamStaff } from './types';
 export class TeamMembersAPI {
   async getTeamPlayers(teamId: string): Promise<TeamPlayer[]> {
     try {
-      console.log('🔍 Getting players for team:', teamId);
+      console.log('🔍 Getting players for team via team_members:', teamId);
       
-      // Get players assigned to the team
+      // Get players via the new team_members table
       const { data, error } = await supabase
-        .from('player_teams')
+        .from('team_members')
         .select(`
-          player:players!player_teams_player_id_fkey (
+          player_id,
+          player:players!team_members_player_id_fkey (
             id,
             first_name,
             last_name,
@@ -21,44 +22,57 @@ export class TeamMembersAPI {
             date_of_birth
           )
         `)
-        .eq('team_id', teamId);
+        .eq('team_id', teamId)
+        .eq('member_type', 'parent')
+        .eq('is_active', true);
       
-      console.log('📊 Player teams query result:', { data, error, teamId });
+      console.log('📊 Team members (parents) query result:', { data, error, teamId });
       
       if (error) {
-        logger.error('Error fetching team players:', error);
+        logger.error('Error fetching team players via team_members:', error);
         throw error;
       }
       
-      const players = data?.map(pt => ({
-        id: (pt.player as any).id,
-        name: `${(pt.player as any).first_name} ${(pt.player as any).last_name}`,
-        profileImage: (pt.player as any).profile_image,
-        ageGroup: '', // We'll calculate this from date_of_birth if needed
-        dateOfBirth: (pt.player as any).date_of_birth,
-        teamId: teamId,
-        parentId: '',
-        status: 'approved' as const
-      })) || [];
+      // Process and deduplicate players (multiple parents can have same child)
+      const playerMap = new Map<string, TeamPlayer>();
       
-      console.log('👥 Processed players:', players);
+      data?.forEach(tm => {
+        if (tm.player && tm.player_id) {
+          const player = tm.player as any;
+          if (!playerMap.has(player.id)) {
+            playerMap.set(player.id, {
+              id: player.id,
+              name: `${player.first_name} ${player.last_name}`,
+              profileImage: player.profile_image,
+              ageGroup: '', // We'll calculate this from date_of_birth if needed
+              dateOfBirth: player.date_of_birth,
+              teamId: teamId,
+              parentId: '',
+              status: 'approved' as const
+            });
+          }
+        }
+      });
+      
+      const players = Array.from(playerMap.values());
+      console.log('👥 Processed players via team_members:', players);
       return players;
     } catch (error) {
-      logger.warn('Failed to get team players:', error);
+      logger.warn('Failed to get team players via team_members:', error);
       return [];
     }
   }
 
   async getTeamStaff(teamId: string): Promise<{ coaches: TeamStaff[]; managers: TeamStaff[] }> {
     try {
-      console.log('🔍 Getting staff for team:', teamId);
+      console.log('🔍 Getting staff for team via team_members:', teamId);
       
-      // Get staff assigned to this specific team
+      // Get staff via the new team_members table
       const { data, error } = await supabase
-        .from('user_roles')
+        .from('team_members')
         .select(`
-          role,
-          guardian:guardians!user_roles_guardian_id_fkey (
+          member_type,
+          member:guardians!team_members_member_id_fkey (
             id,
             first_name,
             last_name,
@@ -68,120 +82,158 @@ export class TeamMembersAPI {
         `)
         .eq('team_id', teamId)
         .eq('is_active', true)
-        .in('role', ['coach', 'manager']);
+        .in('member_type', ['coach', 'manager']);
       
-      console.log('📊 Staff query result:', { data, error, teamId });
+      console.log('📊 Team staff query result:', { data, error, teamId });
       
       if (error) {
-        logger.error('Error fetching team staff:', error);
+        logger.error('Error fetching team staff via team_members:', error);
         console.error('Staff fetch error details:', error);
       }
       
       const coaches: TeamStaff[] = [];
       const managers: TeamStaff[] = [];
       
-      data?.forEach(ur => {
-        if (ur.guardian) {
+      data?.forEach(tm => {
+        if (tm.member) {
+          const member = tm.member as any;
           const user: TeamStaff = {
-            id: (ur.guardian as any).id,
-            name: `${(ur.guardian as any).first_name} ${(ur.guardian as any).last_name}`,
-            email: (ur.guardian as any).email,
-            profileImage: (ur.guardian as any).profile_image,
-            roles: [ur.role]
+            id: member.id,
+            name: `${member.first_name} ${member.last_name}`,
+            email: member.email || '',
+            profileImage: member.profile_image,
+            roles: [tm.member_type as string]
           };
           
-          if (ur.role === 'coach') {
+          if (tm.member_type === 'coach') {
             coaches.push(user);
-          } else if (ur.role === 'manager') {
+          } else if (tm.member_type === 'manager') {
             managers.push(user);
           }
         }
       });
       
-      console.log('👨‍🏫 Processed staff:', { coaches, managers });
+      console.log('👨‍🏫 Processed staff via team_members:', { coaches, managers });
       return { coaches, managers };
     } catch (error) {
-      logger.warn('Failed to get team staff:', error);
+      logger.warn('Failed to get team staff via team_members:', error);
       return { coaches: [], managers: [] };
     }
   }
 
   async getTeamParents(teamId: string): Promise<TeamStaff[]> {
     try {
-      console.log('🔍 Getting parents for team:', teamId);
+      console.log('🔍 Getting parents for team via team_members:', teamId);
       
-      // Get parents whose children are in this team
-      // First get all players in the team, then get their guardians
+      // Get parents via the new team_members table
       const { data, error } = await supabase
-        .from('player_teams')
+        .from('team_members')
         .select(`
-          player_id
+          member:guardians!team_members_member_id_fkey (
+            id,
+            first_name,
+            last_name,
+            email,
+            profile_image
+          )
         `)
-        .eq('team_id', teamId);
+        .eq('team_id', teamId)
+        .eq('member_type', 'parent')
+        .eq('is_active', true);
       
-      console.log('📊 Player teams for parents query:', { data, error, teamId });
+      console.log('📊 Team parents query result:', { data, error, teamId });
       
       if (error) {
-        logger.error('Error fetching team players for parents:', error);
-        return [];
-      }
-
-      if (!data || data.length === 0) {
-        console.log('⚠️ No players found in team for parents lookup');
-        return [];
-      }
-
-      const playerIds = data.map(pt => pt.player_id).filter(Boolean);
-      console.log('👶 Player IDs to look up parents for:', playerIds);
-      
-      if (playerIds.length === 0) {
-        console.log('⚠️ No valid player IDs found');
-        return [];
-      }
-
-      // Now get guardians for these players
-      const { data: guardiansData, error: guardiansError } = await supabase
-        .from('guardians')
-        .select(`
-          id,
-          first_name,
-          last_name,
-          email,
-          profile_image,
-          player_id
-        `)
-        .in('player_id', playerIds)
-        .eq('approval_status', 'approved');
-      
-      console.log('📊 Guardians query result:', { guardiansData, guardiansError, playerIds });
-      
-      if (guardiansError) {
-        logger.error('Error fetching guardians:', guardiansError);
+        logger.error('Error fetching team parents via team_members:', error);
         return [];
       }
       
-      const parents: TeamStaff[] = [];
-      const seenParentIds = new Set<string>();
+      // Deduplicate parents (same parent might have multiple children on team)
+      const parentMap = new Map<string, TeamStaff>();
       
-      guardiansData?.forEach(guardian => {
-        if (!seenParentIds.has(guardian.id)) {
-          seenParentIds.add(guardian.id);
-          parents.push({
-            id: guardian.id,
-            name: `${guardian.first_name} ${guardian.last_name}`,
-            email: guardian.email || '',
-            profileImage: guardian.profile_image,
-            roles: ['parent']
-          });
+      data?.forEach(tm => {
+        if (tm.member) {
+          const member = tm.member as any;
+          if (!parentMap.has(member.id)) {
+            parentMap.set(member.id, {
+              id: member.id,
+              name: `${member.first_name} ${member.last_name}`,
+              email: member.email || '',
+              profileImage: member.profile_image,
+              roles: ['parent']
+            });
+          }
         }
       });
       
-      console.log('👨‍👩‍👧‍👦 Processed parents:', parents);
+      const parents = Array.from(parentMap.values());
+      console.log('👨‍👩‍👧‍👦 Processed parents via team_members:', parents);
       return parents;
     } catch (error) {
-      logger.warn('Failed to get team parents:', error);
+      logger.warn('Failed to get team parents via team_members:', error);
       console.error('Parents fetch error:', error);
       return [];
+    }
+  }
+
+  // New methods for managing team membership
+  async addTeamMember(teamId: string, memberId: string, memberType: 'coach' | 'manager' | 'admin', assignedBy?: string): Promise<void> {
+    try {
+      const { error } = await supabase
+        .from('team_members')
+        .insert({
+          team_id: teamId,
+          member_id: memberId,
+          member_type: memberType,
+          assigned_by: assignedBy,
+          is_active: true
+        });
+
+      if (error) throw error;
+      
+      logger.info(`Added ${memberType} to team`, { teamId, memberId });
+    } catch (error) {
+      logger.error('Error adding team member:', error);
+      throw error;
+    }
+  }
+
+  async removeTeamMember(teamId: string, memberId: string, memberType: string): Promise<void> {
+    try {
+      const { error } = await supabase
+        .from('team_members')
+        .update({ is_active: false })
+        .eq('team_id', teamId)
+        .eq('member_id', memberId)
+        .eq('member_type', memberType);
+
+      if (error) throw error;
+      
+      logger.info(`Removed ${memberType} from team`, { teamId, memberId });
+    } catch (error) {
+      logger.error('Error removing team member:', error);
+      throw error;
+    }
+  }
+
+  async addParentToTeam(teamId: string, parentId: string, playerId: string): Promise<void> {
+    try {
+      const { error } = await supabase
+        .from('team_members')
+        .insert({
+          team_id: teamId,
+          member_id: parentId,
+          member_type: 'parent',
+          player_id: playerId,
+          is_active: true
+        });
+
+      if (error) throw error;
+      
+      logger.info('Added parent to team', { teamId, parentId, playerId });
+    } catch (error) {
+      logger.error('Error adding parent to team:', error);
+      throw error;
     }
   }
 }
