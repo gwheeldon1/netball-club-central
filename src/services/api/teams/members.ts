@@ -2,7 +2,7 @@
 // Team members (players and staff) operations using unified team_members table
 import { supabase } from '@/integrations/supabase/client';
 import { logger } from '@/utils/logger';
-import { TeamPlayer, TeamStaff } from './types';
+import { TeamPlayer, TeamStaff, TeamMemberType } from './types';
 
 export class TeamMembersAPI {
   async getTeamPlayers(teamId: string): Promise<TeamPlayer[]> {
@@ -198,7 +198,7 @@ export class TeamMembersAPI {
     }
   }
 
-  async removeTeamMember(teamId: string, memberId: string, memberType: string): Promise<void> {
+  async removeTeamMember(teamId: string, memberId: string, memberType: TeamMemberType): Promise<void> {
     try {
       const { error } = await supabase
         .from('team_members')
