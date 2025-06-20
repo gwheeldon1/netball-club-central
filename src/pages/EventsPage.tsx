@@ -245,7 +245,7 @@ const EventsPage = () => {
     );
   }
 
-  const upcomingEvents =er Events = filterEvents(events, "upcoming");
+  const upcomingEvents = filterEvents(events, "upcoming");
   const pastEvents = filterEvents(events, "past");
 
   return (
