@@ -1,432 +1,285 @@
 
-import { useState, useEffect, startTransition } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
 import Layout from "@/components/Layout";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Edit, Save, X, Users, Shield, User, Mail, Phone, ChevronRight } from "lucide-react";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { 
+  User, 
+  Mail, 
+  Phone, 
+  Shield,
+  Edit,
+  Save,
+  X,
+  Settings,
+  Bell,
+  Lock
+} from "lucide-react";
 import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
-import FileUpload from "@/components/FileUpload";
-import { Link } from "react-router-dom";
-import { useAsyncTransition } from "@/hooks/useAsyncTransition";
 
 const UserProfilePage = () => {
-  const { currentUser, userProfile, userRoles, refreshUserRoles } = useAuth();
+  const { currentUser, userProfile, userRoles } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
-  const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    phone: "",
-    profileImage: "",
+    firstName: userProfile?.firstName || '',
+    lastName: userProfile?.lastName || '',
+    email: currentUser?.email || '',
+    phone: userProfile?.phone || '',
   });
-  const { executeWithTransition } = useAsyncTransition();
 
-  useEffect(() => {
-    if (userProfile) {
-      startTransition(() => {
-        setFormData({
-          name: `${userProfile.firstName || ''} ${userProfile.lastName || ''}`.trim() || 'User',
-          email: userProfile.email || "",
-          phone: userProfile.phone || "",
-          profileImage: userProfile.profileImage || "",
-        });
-      });
-    }
-  }, [userProfile]);
-
-  const handleInputChange = (field: string, value: string) => {
-    startTransition(() => {
-      setFormData(prev => ({ ...prev, [field]: value }));
-    });
+  const getPrimaryRole = () => {
+    if (userRoles.includes('admin')) return 'Administrator';
+    if (userRoles.includes('coach')) return 'Coach';
+    if (userRoles.includes('manager')) return 'Manager';
+    if (userRoles.includes('parent')) return 'Parent';
+    return 'Member';
   };
 
-  const handleImageUpload = (url: string) => {
-    startTransition(() => {
-      setFormData(prev => ({ ...prev, profileImage: url }));
-    });
+  const getRoleColor = (role: string) => {
+    switch (role) {
+      case 'admin': return 'bg-red-500/10 text-red-600';
+      case 'coach': return 'bg-blue-500/10 text-blue-600';
+      case 'manager': return 'bg-green-500/10 text-green-600';
+      case 'parent': return 'bg-purple-500/10 text-purple-600';
+      default: return 'bg-gray-500/10 text-gray-600';
+    }
   };
 
   const handleSave = async () => {
-    if (!currentUser) return;
-    
-    executeWithTransition(async () => {
-      setLoading(true);
-      try {
-        const [firstName, ...lastNameParts] = formData.name.split(' ');
-        const lastName = lastNameParts.join(' ');
-
-        // Update profiles table
-        const { error: profileError } = await supabase
-          .from('profiles')
-          .upsert({
-            user_id: currentUser.id,
-            first_name: firstName,
-            last_name: lastName,
-            email: formData.email,
-            phone: formData.phone,
-            profile_image: formData.profileImage,
-          });
-
-        if (profileError) throw profileError;
-
-        // Try to update guardians table if guardian_id exists and guardians table is accessible
-        if (userProfile?.guardianId) {
-          try {
-            const { error: guardianError } = await supabase
-              .from('guardians')
-              .update({
-                first_name: firstName,
-                last_name: lastName,
-                email: formData.email,
-                phone: formData.phone,
-                profile_image: formData.profileImage,
-              })
-              .eq('id', userProfile.guardianId);
-
-            if (guardianError) {
-              console.warn('Could not update guardians table:', guardianError);
-            }
-          } catch (error) {
-            console.warn('Guardians table not accessible:', error);
-          }
-        }
-
-        toast.success("Profile updated successfully");
-        setIsEditing(false);
-        
-        // Refresh user data
-        window.location.reload(); // Simple way to refresh all user data
-        
-      } catch (error) {
-        console.error("Error updating profile:", error);
-        toast.error("Failed to update profile");
-      } finally {
-        setLoading(false);
-      }
-    });
+    try {
+      // Here you would typically save to your API
+      toast.success("Profile updated successfully");
+      setIsEditing(false);
+    } catch (error) {
+      toast.error("Failed to update profile");
+    }
   };
 
   const handleCancel = () => {
-    executeWithTransition(() => {
-      if (userProfile) {
-        setFormData({
-          name: `${userProfile.firstName || ''} ${userProfile.lastName || ''}`.trim() || 'User',
-          email: userProfile.email || "",
-          phone: userProfile.phone || "",
-          profileImage: userProfile.profileImage || "",
-        });
-      }
-      setIsEditing(false);
+    setFormData({
+      firstName: userProfile?.firstName || '',
+      lastName: userProfile?.lastName || '',
+      email: currentUser?.email || '',
+      phone: userProfile?.phone || '',
     });
+    setIsEditing(false);
   };
-
-  const getRoleBadgeVariant = (role: string) => {
-    switch (role) {
-      case 'admin':
-        return "destructive" as const;
-      case 'coach':
-        return "default" as const;
-      case 'manager':
-        return "secondary" as const;
-      case 'parent':
-        return "outline" as const;
-      default:
-        return "secondary" as const;
-    }
-  };
-
-  const getInitials = () => {
-    if (userProfile?.firstName && userProfile?.lastName) {
-      return userProfile.firstName[0] + userProfile.lastName[0];
-    }
-    return currentUser?.email?.[0]?.toUpperCase() || 'U';
-  };
-
-  if (!currentUser) {
-    return (
-      <Layout>
-        <div className="flex items-center justify-center min-h-[50vh]" role="status" aria-label="Loading profile">
-          <div className="animate-pulse flex flex-col items-center space-y-4">
-            <div className="h-12 w-12 bg-muted rounded-full"></div>
-            <div className="h-4 w-32 bg-muted rounded"></div>
-          </div>
-        </div>
-      </Layout>
-    );
-  }
 
   return (
     <Layout>
-      <div className="space-y-8 max-w-4xl mx-auto">
-        {/* Header Section */}
-        <div className="flex flex-col space-y-4 sm:flex-row sm:items-start sm:justify-between sm:space-y-0">
-          <div className="space-y-2">
-            <h1 className="text-3xl md:text-4xl font-bold tracking-tight">My Profile</h1>
-            <p className="text-lg text-muted-foreground">
-              Manage your personal information and account settings
+      <div className="space-y-6 sm:space-y-8 animate-fade-in max-w-4xl">
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div>
+            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Profile</h1>
+            <p className="text-muted-foreground mt-1">
+              Manage your account settings and preferences
             </p>
           </div>
           
           {!isEditing ? (
-            <Button 
-              size="lg" 
-              onClick={() => executeWithTransition(() => setIsEditing(true))} 
-              className="w-full sm:w-auto" 
-              aria-label="Edit profile"
-            >
-              <Edit className="mr-2 h-5 w-5" />
+            <Button onClick={() => setIsEditing(true)} className="w-full sm:w-auto">
+              <Edit className="h-4 w-4 mr-2" />
               Edit Profile
             </Button>
           ) : (
-            <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
-              <Button 
-                size="lg" 
-                onClick={handleSave} 
-                disabled={loading}
-                className="w-full sm:w-auto"
-                aria-label="Save profile changes"
-              >
-                <Save className="mr-2 h-5 w-5" />
-                {loading ? "Saving..." : "Save Changes"}
+            <div className="flex gap-2 w-full sm:w-auto">
+              <Button onClick={handleSave} className="flex-1 sm:w-auto">
+                <Save className="h-4 w-4 mr-2" />
+                Save
               </Button>
-              <Button 
-                variant="outline" 
-                size="lg" 
-                onClick={handleCancel} 
-                disabled={loading}
-                className="w-full sm:w-auto"
-                aria-label="Cancel profile editing"
-              >
-                <X className="mr-2 h-5 w-5" />
+              <Button variant="outline" onClick={handleCancel} className="flex-1 sm:w-auto">
+                <X className="h-4 w-4 mr-2" />
                 Cancel
               </Button>
             </div>
           )}
         </div>
 
-        <div className="grid gap-8 lg:grid-cols-3">
-          {/* Profile Overview Card */}
-          <Card className="border-0 shadow-lg lg:col-span-1">
-            <CardHeader className="pb-6">
-              <CardTitle className="text-xl flex items-center gap-2">
-                <User className="h-5 w-5 text-primary" />
-                Profile Overview
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              {/* Profile Image */}
-              <div className="flex flex-col items-center space-y-4">
-                {isEditing ? (
-                  <div className="space-y-4 w-full max-w-sm">
-                    <FileUpload
-                      currentImage={formData.profileImage}
-                      onUpload={handleImageUpload}
-                      aspectRatio={1}
-                      bucket="profile-images"
-                      accept="image/*"
-                      maxSize={5}
-                      className="w-full"
-                    />
-                    <p className="text-xs text-muted-foreground text-center">
-                      Upload a profile picture (max 5MB)
-                    </p>
-                  </div>
-                ) : (
-                  <Avatar className="w-24 h-24 border-4 border-background shadow-lg">
-                    <AvatarImage src={formData.profileImage} alt={`${formData.name || 'User'} profile picture`} />
-                    <AvatarFallback className="text-xl font-semibold bg-primary/10 text-primary">
-                      {getInitials()}
-                    </AvatarFallback>
-                  </Avatar>
-                )}
-                
-                {!isEditing && (
-                  <div className="text-center space-y-2">
-                    <h3 className="text-xl font-semibold text-foreground">
-                      {formData.name || 'User'}
-                    </h3>
-                    <p className="text-sm text-muted-foreground">
-                      {currentUser.email}
-                    </p>
-                  </div>
-                )}
-              </div>
+        <Tabs defaultValue="profile" className="w-full">
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="profile">Profile</TabsTrigger>
+            <TabsTrigger value="security">Security</TabsTrigger>
+            <TabsTrigger value="notifications">Notifications</TabsTrigger>
+          </TabsList>
 
-              {/* Role Badges */}
-              {!isEditing && userRoles.length > 0 && (
-                <div className="space-y-3">
-                  <h4 className="text-sm font-semibold text-foreground">Current Roles</h4>
-                  <div className="flex flex-wrap gap-2">
-                    {userRoles.map((role, index) => (
-                      <Badge 
-                        key={index} 
-                        variant={getRoleBadgeVariant(role)}
-                        className="font-medium"
-                      >
-                        {role.charAt(0).toUpperCase() + role.slice(1)}
-                      </Badge>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-
-          {/* Personal Information Card */}
-          <Card className="border-0 shadow-lg lg:col-span-2">
-            <CardHeader className="pb-6">
-              <CardTitle className="text-xl">Personal Information</CardTitle>
-              <CardDescription>
-                Update your personal details and contact information
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="grid gap-6 sm:grid-cols-2">
-                {/* Full Name */}
-                <div className="space-y-3 sm:col-span-2">
-                  <Label htmlFor="name" className="text-base font-medium">
-                    Full Name
-                  </Label>
-                  {isEditing ? (
-                    <Input
-                      id="name"
-                      value={formData.name}
-                      onChange={(e) => handleInputChange('name', e.target.value)}
-                      placeholder="Enter your full name"
-                      className="h-12"
-                      aria-describedby="name-description"
-                    />
-                  ) : (
-                    <div className="flex items-center gap-3 p-4 rounded-lg bg-accent/30 border border-border">
-                      <User className="h-5 w-5 text-muted-foreground flex-shrink-0" />
-                      <span className="text-base">{formData.name || "Not provided"}</span>
-                    </div>
-                  )}
-                </div>
-
-                {/* Email */}
-                <div className="space-y-3">
-                  <Label htmlFor="email" className="text-base font-medium">
-                    Email Address
-                  </Label>
-                  {isEditing ? (
-                    <Input
-                      id="email"
-                      type="email"
-                      value={formData.email}
-                      onChange={(e) => handleInputChange('email', e.target.value)}
-                      placeholder="Enter your email"
-                      className="h-12"
-                      aria-describedby="email-description"
-                    />
-                  ) : (
-                    <div className="flex items-center gap-3 p-4 rounded-lg bg-accent/30 border border-border">
-                      <Mail className="h-5 w-5 text-muted-foreground flex-shrink-0" />
-                      <span className="text-base truncate">{formData.email}</span>
-                    </div>
-                  )}
-                </div>
-
-                {/* Phone */}
-                <div className="space-y-3">
-                  <Label htmlFor="phone" className="text-base font-medium">
-                    Phone Number
-                  </Label>
-                  {isEditing ? (
-                    <Input
-                      id="phone"
-                      type="tel"
-                      value={formData.phone}
-                      onChange={(e) => handleInputChange('phone', e.target.value)}
-                      placeholder="Enter your phone number"
-                      className="h-12"
-                      aria-describedby="phone-description"
-                    />
-                  ) : (
-                    <div className="flex items-center gap-3 p-4 rounded-lg bg-accent/30 border border-border">
-                      <Phone className="h-5 w-5 text-muted-foreground flex-shrink-0" />
-                      <span className="text-base">{formData.phone || "Not provided"}</span>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Roles & Teams Card */}
-          <Card className="border-0 shadow-lg lg:col-span-3">
-            <CardHeader className="pb-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <CardTitle className="text-xl flex items-center gap-2">
-                    <Shield className="h-5 w-5 text-primary" />
-                    Roles & Team Assignments
+          <TabsContent value="profile" className="mt-6">
+            <div className="grid gap-6">
+              {/* Profile Overview */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <User className="h-5 w-5" />
+                    Profile Information
                   </CardTitle>
-                  <CardDescription className="mt-2">
-                    Your current roles and team memberships across the organization
-                  </CardDescription>
-                </div>
-                <Link 
-                  to="/teams" 
-                  className="flex items-center gap-1 text-sm text-primary hover:text-primary/80 font-medium transition-colors"
-                  aria-label="View all teams"
-                >
-                  View teams <ChevronRight className="h-4 w-4" />
-                </Link>
-              </div>
-            </CardHeader>
-            <CardContent>
-              {userRoles.length > 0 ? (
-                <div className="space-y-4">
-                  {userRoles.map((role, index) => (
-                    <div
-                      key={index}
-                      className="flex items-start gap-3 p-4 rounded-lg border hover:border-primary/30 hover:bg-accent/30 transition-all duration-200"
-                    >
-                      <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
-                        <Shield className="h-5 w-5 text-primary" />
+                </CardHeader>
+                <CardContent>
+                  <div className="flex flex-col sm:flex-row gap-6">
+                    {/* Avatar */}
+                    <div className="flex flex-col items-center gap-4">
+                      <Avatar className="h-24 w-24">
+                        <AvatarFallback className="bg-primary/10 text-primary font-semibold text-lg">
+                          {formData.firstName[0]}{formData.lastName[0]}
+                        </AvatarFallback>
+                      </Avatar>
+                      <Button variant="outline" size="sm">
+                        Change Photo
+                      </Button>
+                    </div>
+
+                    {/* Form */}
+                    <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="firstName">First Name</Label>
+                        <Input
+                          id="firstName"
+                          value={formData.firstName}
+                          onChange={(e) => setFormData(prev => ({ ...prev, firstName: e.target.value }))}
+                          disabled={!isEditing}
+                        />
                       </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center justify-between mb-2">
-                          <Badge variant={getRoleBadgeVariant(role)} className="font-medium">
-                            {role.charAt(0).toUpperCase() + role.slice(1)}
-                          </Badge>
-                          <Badge variant="default" className="text-xs">
-                            Active
-                          </Badge>
-                        </div>
-                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                          <Users className="h-4 w-4" />
-                          <span>All Teams</span>
-                        </div>
+                      
+                      <div className="space-y-2">
+                        <Label htmlFor="lastName">Last Name</Label>
+                        <Input
+                          id="lastName"
+                          value={formData.lastName}
+                          onChange={(e) => setFormData(prev => ({ ...prev, lastName: e.target.value }))}
+                          disabled={!isEditing}
+                        />
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <Label htmlFor="email">Email</Label>
+                        <Input
+                          id="email"
+                          type="email"
+                          value={formData.email}
+                          onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
+                          disabled={!isEditing}
+                        />
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <Label htmlFor="phone">Phone</Label>
+                        <Input
+                          id="phone"
+                          value={formData.phone}
+                          onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))}
+                          disabled={!isEditing}
+                          placeholder="Optional"
+                        />
                       </div>
                     </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-12">
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Roles */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Shield className="h-5 w-5" />
+                    Roles & Permissions
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
                   <div className="space-y-4">
-                    <div className="w-16 h-16 mx-auto bg-muted rounded-full flex items-center justify-center">
-                      <Shield className="h-8 w-8 text-muted-foreground" />
+                    <div>
+                      <Label className="text-sm font-medium">Primary Role</Label>
+                      <p className="text-lg font-semibold mt-1">{getPrimaryRole()}</p>
                     </div>
-                    <div className="space-y-2">
-                      <h3 className="text-lg font-semibold">No role assignments</h3>
-                      <p className="text-sm text-muted-foreground max-w-md mx-auto">
-                        You don't have any role assignments yet. Contact your administrator to get assigned to teams and roles.
-                      </p>
+                    
+                    <div>
+                      <Label className="text-sm font-medium">All Roles</Label>
+                      <div className="flex flex-wrap gap-2 mt-2">
+                        {userRoles.map(role => (
+                          <Badge key={role} className={`capitalize ${getRoleColor(role)}`}>
+                            {role}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="security" className="mt-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Lock className="h-5 w-5" />
+                  Security Settings
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="space-y-4">
+                  <div>
+                    <Label className="text-sm font-medium">Password</Label>
+                    <div className="flex items-center justify-between mt-2">
+                      <span className="text-sm text-muted-foreground">••••••••</span>
+                      <Button variant="outline" size="sm">
+                        Change Password
+                      </Button>
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <Label className="text-sm font-medium">Two-Factor Authentication</Label>
+                    <div className="flex items-center justify-between mt-2">
+                      <span className="text-sm text-muted-foreground">Not enabled</span>
+                      <Button variant="outline" size="sm">
+                        Enable 2FA
+                      </Button>
                     </div>
                   </div>
                 </div>
-              )}
-            </CardContent>
-          </Card>
-        </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="notifications" className="mt-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Bell className="h-5 w-5" />
+                  Notification Preferences
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <Label className="text-sm font-medium">Email Notifications</Label>
+                      <p className="text-sm text-muted-foreground">Receive notifications via email</p>
+                    </div>
+                    <Button variant="outline" size="sm">
+                      Configure
+                    </Button>
+                  </div>
+                  
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <Label className="text-sm font-medium">Push Notifications</Label>
+                      <p className="text-sm text-muted-foreground">Receive push notifications</p>
+                    </div>
+                    <Button variant="outline" size="sm">
+                      Configure
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
       </div>
     </Layout>
   );

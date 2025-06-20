@@ -1,281 +1,297 @@
-import { useState, useEffect, startTransition } from "react";
+
+import { useState, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
 import Layout from "@/components/Layout";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Calendar, Award, Users, User, MapPin, Clock, ChevronRight, Plus } from "lucide-react";
-import { Link, useNavigate } from "react-router-dom";
-import { api } from '@/services/api';
-import { Team, Event } from "@/types";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Suspense, lazy } from "react";
+import { 
+  Users, 
+  Calendar, 
+  Trophy, 
+  TrendingUp, 
+  Bell,
+  Plus,
+  Activity,
+  Target,
+  Award,
+  Clock
+} from "lucide-react";
+import { Link } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
 
-// Lazy load heavy components to avoid circular dependencies
-const LazyAnalyticsDashboard = lazy(() => import("@/components/analytics/AnalyticsDashboard").then(module => ({
-  default: module.AnalyticsDashboard
-})));
-const LazyRoleManagement = lazy(() => import("@/components/RoleManagement").then(module => ({
-  default: module.RoleManagement
-})));
+interface DashboardStats {
+  totalPlayers: number;
+  totalTeams: number;
+  upcomingEvents: number;
+  pendingApprovals: number;
+}
+
 const Dashboard = () => {
-  const {
-    hasRole
-  } = useAuth();
-  const navigate = useNavigate();
-  const [upcomingEvents, setUpcomingEvents] = useState<Event[]>([]);
-  const [playerCount, setPlayerCount] = useState(0);
-  const [pendingApprovals, setPendingApprovals] = useState(0);
-  const [teamCount, setTeamCount] = useState(0);
-  const [teams, setTeams] = useState<Team[]>([]);
+  const { hasRole, userProfile } = useAuth();
+  const [stats, setStats] = useState<DashboardStats>({
+    totalPlayers: 0,
+    totalTeams: 0,
+    upcomingEvents: 0,
+    pendingApprovals: 0
+  });
   const [loading, setLoading] = useState(true);
-  const handleTeamNavigation = (teamId: string) => {
-    startTransition(() => {
-      navigate(`/teams/${teamId}`);
-    });
-  };
+
   useEffect(() => {
-    const loadDashboardData = async () => {
-      try {
-        const teamsData = await api.getTeams();
-        const activeTeams = teamsData.filter(team => team.active !== false);
-        setTeams(activeTeams);
-        setTeamCount(activeTeams.length);
-        setUpcomingEvents([]);
-        const allChildren = await api.getChildren();
-        const pending = allChildren.filter(child => child.status === 'pending').length;
-        setPendingApprovals(pending);
-        const approved = allChildren.filter(child => child.status === 'approved').length;
-        setPlayerCount(approved);
-      } catch (error) {
-        console.error("Error loading dashboard data:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
     loadDashboardData();
   }, []);
-  if (loading) {
-    return <Layout>
-        <div className="flex items-center justify-center h-64">
-          <p className="text-muted-foreground">Loading dashboard...</p>
-        </div>
-      </Layout>;
-  }
-  return <Layout>
-      <div className="space-y-8 animate-fade-in">
-        <Tabs defaultValue="overview" className="w-full">
-          
-          
-          <TabsContent value="overview" className="space-y-8 mt-8">
-            <div className="grid gap-8 lg:grid-cols-2">
-              {/* Enhanced upcoming events card */}
-              <Card className="glass-card card-hover animate-scale-in">
-                <CardHeader className="pb-4 px-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <CardTitle className="text-xl">Upcoming Events</CardTitle>
-                      <CardDescription>Stay on top of your schedule</CardDescription>
-                    </div>
-                    <Link to="/events" className="flex items-center gap-1 text-sm text-primary hover:text-primary/80 font-medium transition-colors">
-                      View all <ChevronRight className="h-4 w-4" />
-                    </Link>
-                  </div>
-                </CardHeader>
-                <CardContent className="px-6">
-                  {upcomingEvents.length > 0 ? <div className="space-y-4">
-                      {upcomingEvents.map(event => <div key={event.id} className="group p-4 rounded-xl border hover:border-primary/30 hover:bg-accent/30 transition-all duration-300 card-hover">
-                          <div className="flex items-start gap-4">
-                            <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0 shadow-glow">
-                              <Calendar className="h-5 w-5 text-primary" />
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <div className="flex items-start justify-between gap-2 mb-2">
-                                <h4 className="font-semibold text-base leading-tight truncate">{event.name}</h4>
-                                <span className="px-3 py-1 text-xs font-medium bg-muted text-muted-foreground rounded-full whitespace-nowrap">
-                                  {event.eventType}
-                                </span>
-                              </div>
-                              <div className="space-y-1">
-                                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                                  <Clock className="h-4 w-4 flex-shrink-0" />
-                                  <span className="truncate">
-                                    {new Date(`${event.date}T${event.time}`).toLocaleString('en-GB', {
-                                weekday: 'short',
-                                month: 'short',
-                                day: 'numeric',
-                                hour: '2-digit',
-                                minute: '2-digit'
-                              })}
-                                  </span>
-                                </div>
-                                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                                  <MapPin className="h-4 w-4 flex-shrink-0" />
-                                  <span className="truncate">{event.location}</span>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        </div>)}
-                    </div> : <div className="text-center py-8">
-                      <Calendar className="h-12 w-12 text-muted-foreground/50 mx-auto mb-4" />
-                      <p className="text-muted-foreground text-base font-medium">No upcoming events</p>
-                      <p className="text-sm text-muted-foreground/70">Events will appear here when scheduled</p>
-                    </div>}
-                </CardContent>
-              </Card>
 
-              {/* Enhanced teams card */}
-              <Card className="glass-card card-hover animate-scale-in" style={{
-              animationDelay: '200ms'
-            }}>
-                <CardHeader className="pb-4 px-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <CardTitle className="text-xl">Active Teams</CardTitle>
-                      <CardDescription>Teams currently in operation</CardDescription>
-                    </div>
-                    <Link to="/teams" className="flex items-center gap-1 text-sm text-primary hover:text-primary/80 font-medium transition-colors">
-                      View all <ChevronRight className="h-4 w-4" />
-                    </Link>
-                  </div>
-                </CardHeader>
-                <CardContent className="px-6">
-                  {teams.length > 0 ? <div className="space-y-3">
-                      {teams.slice(0, 4).map(team => <button key={team.id} onClick={() => handleTeamNavigation(team.id)} className="group w-full text-left p-4 rounded-xl border-2 border-border/50 hover:border-primary/40 hover:bg-accent/30 transition-all duration-300 card-hover shadow-sm hover:shadow-elevation-medium">
-                          <div className="flex items-start gap-4">
-                            <div className="w-12 h-12 rounded-xl overflow-hidden flex-shrink-0 bg-gradient-to-br from-primary/20 to-primary/10 border-2 border-primary/20 shadow-glow group-hover:shadow-primary/20">
-                              {team.icon || team.profileImage ? <img src={team.icon || team.profileImage} alt={team.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" /> : <div className="w-full h-full flex items-center justify-center">
-                                  <Award className="h-6 w-6 text-primary group-hover:scale-110 transition-transform duration-300" />
-                                </div>}
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <div className="flex items-start justify-between gap-2 mb-2">
-                                <h4 className="font-semibold text-base leading-tight truncate group-hover:text-primary transition-colors duration-200">{team.name}</h4>
-                                <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all duration-200 flex-shrink-0" />
-                              </div>
-                              <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
-                                <span className="font-medium">{team.ageGroup}</span>
-                                <span className="w-1 h-1 bg-muted-foreground/50 rounded-full"></span>
-                                <span>{team.category}</span>
-                              </div>
-                              <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                                <Users className="h-3 w-3" />
-                                <span>{team.players?.length || 0} players</span>
-                              </div>
-                            </div>
-                          </div>
-                        </button>)}
-                    </div> : <div className="text-center py-8">
-                      <Users className="h-12 w-12 text-muted-foreground/50 mx-auto mb-4" />
-                      <p className="text-muted-foreground text-base font-medium">No active teams</p>
-                      <p className="text-sm text-muted-foreground/70">Create or activate teams to get started</p>
-                    </div>}
-                </CardContent>
-              </Card>
+  const loadDashboardData = async () => {
+    try {
+      setLoading(true);
+      
+      // Get players count
+      const { count: playersCount } = await supabase
+        .from('players')
+        .select('*', { count: 'exact', head: true });
+
+      // Get teams count
+      const { count: teamsCount } = await supabase
+        .from('teams')
+        .select('*', { count: 'exact', head: true })
+        .eq('archived', false);
+
+      // Get upcoming events count
+      const { count: eventsCount } = await supabase
+        .from('events')
+        .select('*', { count: 'exact', head: true })
+        .gte('event_date', new Date().toISOString());
+
+      // Get pending approvals count (if admin/manager)
+      let approvalsCount = 0;
+      if (hasRole('admin') || hasRole('manager')) {
+        const { count } = await supabase
+          .from('players')
+          .select('*', { count: 'exact', head: true })
+          .eq('approval_status', 'pending');
+        approvalsCount = count || 0;
+      }
+
+      setStats({
+        totalPlayers: playersCount || 0,
+        totalTeams: teamsCount || 0,
+        upcomingEvents: eventsCount || 0,
+        pendingApprovals: approvalsCount
+      });
+    } catch (error) {
+      console.error('Error loading dashboard data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const StatCard = ({ 
+    title, 
+    value, 
+    icon: Icon, 
+    trend, 
+    color = "primary",
+    href 
+  }: {
+    title: string;
+    value: number | string;
+    icon: any;
+    trend?: string;
+    color?: string;
+    href?: string;
+  }) => {
+    const CardContent = (
+      <Card className="transition-all duration-300 hover:shadow-elevation-medium hover:-translate-y-1 cursor-pointer">
+        <CardContent className="p-6">
+          <div className="flex items-center justify-between">
+            <div className="space-y-2">
+              <p className="text-sm font-medium text-muted-foreground">{title}</p>
+              <p className="text-3xl font-bold">{value}</p>
+              {trend && (
+                <p className="text-xs text-muted-foreground">{trend}</p>
+              )}
             </div>
+            <div className={`p-3 rounded-xl bg-${color}/10`}>
+              <Icon className={`h-6 w-6 text-${color}`} />
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    );
 
-            {/* Enhanced quick actions */}
-            {(hasRole("admin") || hasRole("coach") || hasRole("manager")) && <Card className="glass-card animate-slide-in" style={{
-            animationDelay: '400ms'
-          }}>
-                <CardHeader className="px-6">
-                  <CardTitle className="text-xl">Quick Actions</CardTitle>
-                  <CardDescription>Common tasks and management</CardDescription>
-                </CardHeader>
-                <CardContent className="px-6">
-                  <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-                    <Button variant="default" className="h-auto p-4 flex-col items-start gap-2 shadow-glow card-hover" asChild>
-                      <Link to="/approvals">
-                        <div className="flex items-center gap-3 w-full">
-                          <User className="h-5 w-5 flex-shrink-0" />
-                          <div className="text-left flex-1 min-w-0">
-                            <div className="font-semibold text-base">Review Approvals</div>
-                            <div className="text-xs opacity-90">{pendingApprovals} pending review</div>
-                          </div>
-                        </div>
-                      </Link>
-                    </Button>
-                    
-                    <Button variant="outline" className="h-auto p-4 flex-col items-start gap-2 card-hover" asChild>
-                      <Link to="/events/new">
-                        <div className="flex items-center gap-3 w-full">
-                          <Plus className="h-5 w-5 flex-shrink-0" />
-                          <div className="text-left flex-1 min-w-0">
-                            <div className="font-semibold text-base">Create Event</div>
-                            <div className="text-xs text-muted-foreground">Schedule training or match</div>
-                          </div>
-                        </div>
-                      </Link>
-                    </Button>
+    return href ? <Link to={href}>{CardContent}</Link> : CardContent;
+  };
 
-                    {hasRole("admin") && <Button variant="outline" className="h-auto p-4 flex-col items-start gap-2 card-hover" asChild>
-                        <Link to="/teams/new">
-                          <div className="flex items-center gap-3 w-full">
-                            <Award className="h-5 w-5 flex-shrink-0" />
-                            <div className="text-left flex-1 min-w-0">
-                              <div className="font-semibold text-base">Create Team</div>
-                              <div className="text-xs text-muted-foreground">Add new team</div>
-                            </div>
-                          </div>
-                        </Link>
-                      </Button>}
+  const QuickActions = () => (
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <Activity className="h-5 w-5" />
+          Quick Actions
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          {hasRole('admin') && (
+            <>
+              <Button asChild className="justify-start h-auto py-3">
+                <Link to="/teams/new">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Create Team
+                </Link>
+              </Button>
+              <Button asChild variant="outline" className="justify-start h-auto py-3">
+                <Link to="/events/new">
+                  <Calendar className="h-4 w-4 mr-2" />
+                  New Event
+                </Link>
+              </Button>
+            </>
+          )}
+          {(hasRole('coach') || hasRole('manager')) && (
+            <Button asChild variant="outline" className="justify-start h-auto py-3">
+              <Link to="/attendance">
+                <Clock className="h-4 w-4 mr-2" />
+                Mark Attendance
+              </Link>
+            </Button>
+          )}
+          <Button asChild variant="outline" className="justify-start h-auto py-3">
+            <Link to="/analytics">
+              <TrendingUp className="h-4 w-4 mr-2" />
+              View Analytics
+            </Link>
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
+  );
+
+  if (loading) {
+    return (
+      <Layout>
+        <div className="space-y-6 animate-fade-in">
+          <div>
+            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Dashboard</h1>
+            <p className="text-muted-foreground mt-1">Welcome back to Club Manager</p>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <Card key={i} className="animate-pulse">
+                <CardContent className="p-6">
+                  <div className="space-y-3">
+                    <div className="h-4 bg-muted rounded"></div>
+                    <div className="h-8 bg-muted rounded"></div>
                   </div>
                 </CardContent>
-              </Card>}
+              </Card>
+            ))}
+          </div>
+        </div>
+      </Layout>
+    );
+  }
 
-            {/* Enhanced parent dashboard */}
-            {hasRole("parent") && <Card className="glass-card animate-slide-in" style={{
-            animationDelay: '600ms'
-          }}>
-                <CardHeader className="px-6">
-                  <CardTitle className="text-xl">Parent Dashboard</CardTitle>
-                  <CardDescription>Manage your children's registrations</CardDescription>
-                </CardHeader>
-                <CardContent className="px-6">
-                  <div className="grid gap-4 grid-cols-1 sm:grid-cols-2">
-                    <Button variant="default" className="h-auto p-4 flex-col items-start gap-2 shadow-glow card-hover" asChild>
-                      <Link to="/children">
-                        <div className="flex items-center gap-3 w-full">
-                          <Users className="h-5 w-5 flex-shrink-0" />
-                          <div className="text-left flex-1 min-w-0">
-                            <div className="font-semibold text-base">My Children</div>
-                            <div className="text-xs opacity-90">View registrations & status</div>
-                          </div>
-                        </div>
-                      </Link>
-                    </Button>
-                    
-                    <Button variant="outline" className="h-auto p-4 flex-col items-start gap-2 card-hover" asChild>
-                      <Link to="/children/new">
-                        <div className="flex items-center gap-3 w-full">
-                          <Plus className="h-5 w-5 flex-shrink-0" />
-                          <div className="text-left flex-1 min-w-0">
-                            <div className="font-semibold text-base">Register Child</div>
-                            <div className="text-xs text-muted-foreground">Add new player</div>
-                          </div>
-                        </div>
-                      </Link>
-                    </Button>
+  return (
+    <Layout>
+      <div className="space-y-6 sm:space-y-8 animate-fade-in">
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div>
+            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
+              Welcome back{userProfile?.firstName && `, ${userProfile.firstName}`}!
+            </h1>
+            <p className="text-muted-foreground mt-1">
+              Here's what's happening with your club today
+            </p>
+          </div>
+          {stats.pendingApprovals > 0 && (
+            <Badge variant="destructive" className="w-fit">
+              <Bell className="h-3 w-3 mr-1" />
+              {stats.pendingApprovals} pending approvals
+            </Badge>
+          )}
+        </div>
+
+        {/* Stats Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+          <StatCard
+            title="Total Players"
+            value={stats.totalPlayers}
+            icon={Users}
+            trend="Active members"
+            href="/players"
+          />
+          <StatCard
+            title="Active Teams"
+            value={stats.totalTeams}
+            icon={Trophy}
+            trend="This season"
+            color="chart-2"
+            href="/teams"
+          />
+          <StatCard
+            title="Upcoming Events"
+            value={stats.upcomingEvents}
+            icon={Calendar}
+            trend="Next 30 days"
+            color="chart-3"
+            href="/events"
+          />
+          <StatCard
+            title="Performance Score"
+            value="94%"
+            icon={Target}
+            trend="Club average"
+            color="chart-success"
+            href="/analytics"
+          />
+        </div>
+
+        {/* Quick Actions and Recent Activity */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <QuickActions />
+          
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Award className="h-5 w-5" />
+                Recent Activity
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div className="flex items-center gap-3 p-3 rounded-lg bg-accent/50">
+                  <div className="w-2 h-2 rounded-full bg-primary"></div>
+                  <div className="flex-1">
+                    <p className="text-sm font-medium">New player registered</p>
+                    <p className="text-xs text-muted-foreground">Sarah Johnson joined U12 team</p>
                   </div>
-                </CardContent>
-              </Card>}
-          </TabsContent>
-          
-          <TabsContent value="analytics" className="mt-8">
-            <Suspense fallback={<div className="flex items-center justify-center h-64"><p className="text-muted-foreground">Loading analytics...</p></div>}>
-              <LazyAnalyticsDashboard />
-            </Suspense>
-          </TabsContent>
-          
-          {hasRole("admin") && <TabsContent value="management" className="mt-8">
-              <Suspense fallback={<div className="flex items-center justify-center h-64"><p className="text-muted-foreground">Loading management...</p></div>}>
-                <LazyRoleManagement />
-              </Suspense>
-            </TabsContent>}
-        </Tabs>
+                  <span className="text-xs text-muted-foreground">2h ago</span>
+                </div>
+                <div className="flex items-center gap-3 p-3 rounded-lg bg-accent/50">
+                  <div className="w-2 h-2 rounded-full bg-chart-3"></div>
+                  <div className="flex-1">
+                    <p className="text-sm font-medium">Training session completed</p>
+                    <p className="text-xs text-muted-foreground">U14 team training</p>
+                  </div>
+                  <span className="text-xs text-muted-foreground">5h ago</span>
+                </div>
+                <div className="flex items-center gap-3 p-3 rounded-lg bg-accent/50">
+                  <div className="w-2 h-2 rounded-full bg-chart-2"></div>
+                  <div className="flex-1">
+                    <p className="text-sm font-medium">Match statistics recorded</p>
+                    <p className="text-xs text-muted-foreground">U16 vs Riverside Netball</p>
+                  </div>
+                  <span className="text-xs text-muted-foreground">1d ago</span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
       </div>
-    </Layout>;
+    </Layout>
+  );
 };
 
-// Ensure proper default export for lazy loading
 export default Dashboard;

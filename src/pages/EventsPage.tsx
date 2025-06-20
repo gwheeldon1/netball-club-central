@@ -1,357 +1,371 @@
 
-import { useState, useEffect, startTransition } from "react";
-import Layout from "@/components/Layout";
-import { Event, Team } from "@/types";
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Calendar, Search, Filter, Plus, MapPin, Clock } from "lucide-react";
-import { Input } from "@/components/ui/input";
-import { Link } from "react-router-dom";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
-import { api } from '@/services/api';
-import { logger } from '@/utils/logger';
+import Layout from "@/components/Layout";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { 
+  Calendar, 
+  Clock, 
+  MapPin, 
+  Users, 
+  Plus, 
+  Search,
+  Filter,
+  Play,
+  Trophy,
+  Target
+} from "lucide-react";
+import { Link } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { format, isToday, isTomorrow, isPast } from "date-fns";
+
+interface Event {
+  id: string;
+  title: string;
+  event_type: string;
+  event_date: string;
+  location?: string;
+  description?: string;
+  team_id?: string;
+  is_home?: boolean;
+  teams?: {
+    name: string;
+    age_group: string;
+  };
+  rsvp_count?: number;
+}
 
 const EventsPage = () => {
   const { hasRole } = useAuth();
   const [events, setEvents] = useState<Event[]>([]);
-  const [teams, setTeams] = useState<Team[]>([]);
-  const [filteredEvents, setFilteredEvents] = useState<Event[]>([]);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [showFilters, setShowFilters] = useState(false);
   const [loading, setLoading] = useState(true);
-  
-  // Filters
-  const [teamFilter, setTeamFilter] = useState<string>("all");
-  const [typeFilter, setTypeFilter] = useState<string>("all");
-  
-  // Load events and teams data
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedType, setSelectedType] = useState<string>("all");
+  const [activeTab, setActiveTab] = useState("upcoming");
+
+  const eventTypes = ["Training", "Match", "Tournament", "Social"];
+
   useEffect(() => {
-    const loadData = async () => {
-      try {
-        const eventsData = await api.getEvents();
-        const teamsData = await api.getTeams();
-        
-        startTransition(() => {
-          setEvents(eventsData);
-          setFilteredEvents(eventsData);
-          setTeams(teamsData);
-          setLoading(false);
-        });
-      } catch (error) {
-        logger.error("Error loading events data:", error);
-        startTransition(() => {
-          setLoading(false);
-        });
-      }
-    };
-    
-    loadData();
+    loadEvents();
   }, []);
-  
-  useEffect(() => {
-    // Apply filters
-    let filtered = [...events];
-    
-    // Apply search filter
-    if (searchTerm) {
-      filtered = filtered.filter(
-        event => 
-          event.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          event.location.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-    }
-    
-    // Apply team filter
-    if (teamFilter !== "all") {
-      filtered = filtered.filter(event => event.teamId === teamFilter);
-    }
-    
-    // Apply event type filter
-    if (typeFilter !== "all") {
-      filtered = filtered.filter(event => event.eventType === typeFilter);
-    }
-    
-    startTransition(() => {
-      setFilteredEvents(filtered);
-    });
-  }, [searchTerm, teamFilter, typeFilter, events]);
-  
-  // Get event team name
-  const getTeamName = (teamId: string) => {
-    const team = teams.find(t => t.id === teamId);
-    return team ? team.name : "Unknown Team";
-  };
-  
-  // Format event date and time
-  const formatDateTime = (date: string, time: string) => {
-    return new Date(`${date}T${time}`).toLocaleString('en-GB', { 
-      dateStyle: 'medium', 
-      timeStyle: 'short' 
-    });
-  };
-  
-  // Get event type styling
-  const getEventTypeStyle = (eventType: string) => {
-    switch (eventType) {
-      case 'match':
-        return {
-          badge: 'bg-primary/10 text-primary border border-primary/20',
-          dot: 'bg-primary',
-          icon: Calendar
-        };
-      case 'training':
-        return {
-          badge: 'bg-muted text-muted-foreground border border-border',
-          dot: 'bg-muted-foreground',
-          icon: Clock
-        };
-      default:
-        return {
-          badge: 'bg-muted text-muted-foreground border border-border',
-          dot: 'bg-muted-foreground',
-          icon: Calendar
-        };
+
+  const loadEvents = async () => {
+    try {
+      setLoading(true);
+      
+      const { data, error } = await supabase
+        .from('events')
+        .select(`
+          *,
+          teams(name, age_group),
+          event_responses(count)
+        `)
+        .order('event_date', { ascending: true });
+
+      if (error) throw error;
+
+      // Transform data to include RSVP count
+      const eventsWithRSVP = data?.map(event => ({
+        ...event,
+        rsvp_count: event.event_responses?.length || 0
+      })) || [];
+
+      setEvents(eventsWithRSVP);
+    } catch (error) {
+      console.error('Error loading events:', error);
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    startTransition(() => {
-      setSearchTerm(e.target.value);
-    });
+  const getEventTypeIcon = (type: string) => {
+    switch (type.toLowerCase()) {
+      case 'training': return Play;
+      case 'match': return Trophy;
+      case 'tournament': return Target;
+      default: return Calendar;
+    }
   };
 
-  const handleTeamFilterChange = (value: string) => {
-    startTransition(() => {
-      setTeamFilter(value);
-    });
+  const getEventTypeColor = (type: string) => {
+    switch (type.toLowerCase()) {
+      case 'training': return 'bg-blue-500/10 text-blue-600';
+      case 'match': return 'bg-green-500/10 text-green-600';
+      case 'tournament': return 'bg-purple-500/10 text-purple-600';
+      default: return 'bg-gray-500/10 text-gray-600';
+    }
   };
 
-  const handleTypeFilterChange = (value: string) => {
-    startTransition(() => {
-      setTypeFilter(value);
-    });
+  const getDateBadge = (dateString: string) => {
+    const date = new Date(dateString);
+    if (isToday(date)) return { text: "Today", variant: "default" as const };
+    if (isTomorrow(date)) return { text: "Tomorrow", variant: "secondary" as const };
+    if (isPast(date)) return { text: "Past", variant: "outline" as const };
+    return null;
   };
 
-  const handleClearFilters = () => {
-    startTransition(() => {
-      setSearchTerm("");
-      setTeamFilter("all");
-      setTypeFilter("all");
+  const filterEvents = (events: Event[], tab: string) => {
+    const now = new Date();
+    let filtered = events;
+
+    // Filter by tab
+    if (tab === "upcoming") {
+      filtered = events.filter(event => new Date(event.event_date) >= now);
+    } else if (tab === "past") {
+      filtered = events.filter(event => new Date(event.event_date) < now);
+    }
+
+    // Filter by search and type
+    filtered = filtered.filter(event => {
+      const matchesSearch = searchTerm === "" || 
+        event.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        event.teams?.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        event.location?.toLowerCase().includes(searchTerm.toLowerCase());
+      
+      const matchesType = selectedType === "all" || 
+        event.event_type.toLowerCase() === selectedType.toLowerCase();
+      
+      return matchesSearch && matchesType;
     });
+
+    return filtered;
+  };
+
+  const EventCard = ({ event }: { event: Event }) => {
+    const EventIcon = getEventTypeIcon(event.event_type);
+    const dateBadge = getDateBadge(event.event_date);
+    
+    return (
+      <Card className="transition-all duration-300 hover:shadow-elevation-medium hover:-translate-y-1 cursor-pointer group">
+        <Link to={`/events/${event.id}`}>
+          <CardHeader className="pb-3">
+            <div className="flex items-start justify-between">
+              <div className="flex items-center gap-3 flex-1">
+                <div className={`p-2 rounded-lg ${getEventTypeColor(event.event_type)}`}>
+                  <EventIcon className="h-4 w-4" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <CardTitle className="text-lg group-hover:text-primary transition-colors truncate">
+                    {event.title}
+                  </CardTitle>
+                  <div className="flex items-center gap-2 mt-1">
+                    <Badge variant="outline" className="text-xs">
+                      {event.event_type}
+                    </Badge>
+                    {event.teams && (
+                      <span className="text-xs text-muted-foreground">
+                        {event.teams.name}
+                      </span>
+                    )}
+                    {dateBadge && (
+                      <Badge variant={dateBadge.variant} className="text-xs">
+                        {dateBadge.text}
+                      </Badge>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent className="pt-0">
+            <div className="space-y-3">
+              <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                <div className="flex items-center gap-1">
+                  <Clock className="h-4 w-4" />
+                  <span>{format(new Date(event.event_date), 'MMM dd, HH:mm')}</span>
+                </div>
+                {event.location && (
+                  <div className="flex items-center gap-1 min-w-0">
+                    <MapPin className="h-4 w-4 flex-shrink-0" />
+                    <span className="truncate">{event.location}</span>
+                  </div>
+                )}
+              </div>
+              
+              {event.description && (
+                <p className="text-sm text-muted-foreground line-clamp-2">
+                  {event.description}
+                </p>
+              )}
+              
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                  <Users className="h-4 w-4" />
+                  <span>{event.rsvp_count || 0} responses</span>
+                </div>
+                
+                {event.is_home !== null && (
+                  <Badge variant={event.is_home ? "default" : "secondary"} className="text-xs">
+                    {event.is_home ? "Home" : "Away"}
+                  </Badge>
+                )}
+              </div>
+            </div>
+          </CardContent>
+        </Link>
+      </Card>
+    );
   };
 
   if (loading) {
     return (
       <Layout>
-        <div className="flex items-center justify-center min-h-[50vh]">
-          <div className="animate-pulse flex flex-col items-center space-y-4">
-            <div className="h-8 w-8 bg-muted rounded-full"></div>
-            <div className="h-4 w-32 bg-muted rounded"></div>
+        <div className="space-y-6 animate-fade-in">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div>
+              <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Events</h1>
+              <p className="text-muted-foreground mt-1">Manage club events and activities</p>
+            </div>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <Card key={i} className="animate-pulse">
+                <CardHeader>
+                  <div className="space-y-2">
+                    <div className="h-5 bg-muted rounded w-3/4"></div>
+                    <div className="h-4 bg-muted rounded w-1/2"></div>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-2">
+                    <div className="h-4 bg-muted rounded"></div>
+                    <div className="h-4 bg-muted rounded w-2/3"></div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
           </div>
         </div>
       </Layout>
     );
   }
 
+  const upcomingEvents =er Events = filterEvents(events, "upcoming");
+  const pastEvents = filterEvents(events, "past");
+
   return (
     <Layout>
-      <div className="space-y-6">
-        {/* Header Section */}
-        <div className="flex flex-col space-y-4 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
-          <div className="space-y-1">
-            <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">Events</h1>
-            <p className="text-sm text-muted-foreground sm:text-base">
-              View and manage all upcoming events and matches
+      <div className="space-y-6 sm:space-y-8 animate-fade-in">
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div>
+            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Events</h1>
+            <p className="text-muted-foreground mt-1">
+              Manage your club's {events.length} events
             </p>
           </div>
           
-          {(hasRole("admin") || hasRole("coach") || hasRole("manager")) && (
-            <Button 
-              className="w-full sm:w-auto" 
-              asChild
-            >
+          {(hasRole('admin') || hasRole('coach') || hasRole('manager')) && (
+            <Button asChild className="w-full sm:w-auto">
               <Link to="/events/new">
-                <Plus className="mr-2 h-4 w-4" />
+                <Plus className="h-4 w-4 mr-2" />
                 Create Event
               </Link>
             </Button>
           )}
         </div>
-        
-        <div className="space-y-4">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+
+        {/* Filters */}
+        <div className="flex flex-col sm:flex-row gap-4">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Search events or locations..."
-              className="pl-10"
+              placeholder="Search events..."
               value={searchTerm}
-              onChange={handleSearchChange}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10"
             />
           </div>
           
-          <Collapsible open={showFilters} onOpenChange={setShowFilters}>
-            <div className="flex items-center justify-between py-3 border-b border-border">
-              <div>
-                <p className="text-sm font-medium">
-                  {filteredEvents.length} event{filteredEvents.length !== 1 ? 's' : ''} found
-                </p>
-              </div>
-              <CollapsibleTrigger asChild>
-                <Button variant="outline" size="sm">
-                  <Filter className="mr-2 h-4 w-4" />
-                  Filters
-                </Button>
-              </CollapsibleTrigger>
-            </div>
-            
-            <CollapsibleContent className="pt-4">
-              <div className="grid gap-4 sm:grid-cols-2">
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Team</label>
-                  <Select value={teamFilter} onValueChange={handleTeamFilterChange}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="All teams" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All Teams</SelectItem>
-                      {teams.map((team) => (
-                        <SelectItem key={team.id} value={team.id}>
-                          {team.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Type</label>
-                  <Select value={typeFilter} onValueChange={handleTypeFilterChange}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="All types" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All Types</SelectItem>
-                      <SelectItem value="training">Training</SelectItem>
-                      <SelectItem value="match">Match</SelectItem>
-                      <SelectItem value="other">Other</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-              
-              {(teamFilter !== "all" || typeFilter !== "all" || searchTerm) && (
-                <div className="mt-4">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={handleClearFilters}
-                  >
-                    Clear Filters
-                  </Button>
-                </div>
-              )}
-            </CollapsibleContent>
-          </Collapsible>
+          <div className="flex gap-2">
+            <Button
+              variant={selectedType === "all" ? "default" : "outline"}
+              onClick={() => setSelectedType("all")}
+              size="sm"
+            >
+              All
+            </Button>
+            {eventTypes.map(type => (
+              <Button
+                key={type}
+                variant={selectedType === type ? "default" : "outline"}
+                onClick={() => setSelectedType(type)}
+                size="sm"
+                className="hidden sm:inline-flex"
+              >
+                {type}
+              </Button>
+            ))}
+          </div>
         </div>
-        
-        {/* Events List */}
-        <div className="space-y-3">
-          {filteredEvents.length > 0 ? (
-            filteredEvents.map((event) => {
-              const eventStyle = getEventTypeStyle(event.eventType);
-              const IconComponent = eventStyle.icon;
-              
-              return (
-                <Link key={event.id} to={`/events/${event.id}`} className="block">
-                  <Card className="transition-all duration-200 hover:shadow-md border-border hover:border-primary/20">
-                    <CardContent className="p-4">
-                      <div className="flex flex-col space-y-3 md:flex-row md:items-center md:space-y-0 md:space-x-4">
-                        <div className="flex items-center space-x-3 md:flex-col md:items-center md:space-x-0 md:space-y-2 md:w-20 md:flex-shrink-0">
-                          <div className="w-10 h-10 rounded-full flex items-center justify-center bg-primary/10 text-primary">
-                            <IconComponent className="h-5 w-5" />
-                          </div>
-                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${eventStyle.badge} md:text-center`}>
-                            {event.eventType}
-                          </span>
-                        </div>
-                        
-                        <div className="flex-1 space-y-2">
-                          <div className="flex flex-col space-y-1 md:flex-row md:items-start md:justify-between md:space-y-0">
-                            <div className="space-y-1">
-                              <h3 className="font-semibold text-foreground text-base leading-tight">
-                                {event.name}
-                              </h3>
-                              {event.eventType === 'match' && event.opponent && (
-                                <p className="text-sm text-muted-foreground">
-                                  vs {event.opponent}
-                                </p>
-                              )}
-                            </div>
-                            
-                            <div className="flex-shrink-0 self-start">
-                              <span className="inline-block px-2 py-1 bg-muted text-muted-foreground text-xs rounded-md">
-                                {getTeamName(event.teamId)}
-                              </span>
-                            </div>
-                          </div>
-                          
-                          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 text-sm text-muted-foreground">
-                            <div className="flex items-center gap-2">
-                              <Calendar className="h-4 w-4 flex-shrink-0" />
-                              <span className="truncate">{formatDateTime(event.date, event.time)}</span>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <MapPin className="h-4 w-4 flex-shrink-0" />
-                              <span className="truncate">{event.location}</span>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </Link>
-              );
-            })
-          ) : (
-            <div className="text-center py-12">
-              <div className="space-y-3">
-                <div className="w-12 h-12 mx-auto bg-muted rounded-full flex items-center justify-center">
-                  <Calendar className="h-6 w-6 text-muted-foreground" />
-                </div>
-                <div className="space-y-1">
-                  <h3 className="font-medium">No events found</h3>
-                  <p className="text-sm text-muted-foreground">
-                    {searchTerm || teamFilter !== "all" || typeFilter !== "all" 
-                      ? "Try adjusting your search or filter criteria."
-                      : "There are no events scheduled at the moment."
+
+        {/* Events Tabs */}
+        <Tabs value={activeTab} onValueChange={setActiveTab}>
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="upcoming">
+              Upcoming ({upcomingEvents.length})
+            </TabsTrigger>
+            <TabsTrigger value="past">
+              Past ({pastEvents.length})
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="upcoming" className="mt-6">
+            {upcomingEvents.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {upcomingEvents.map(event => (
+                  <EventCard key={event.id} event={event} />
+                ))}
+              </div>
+            ) : (
+              <Card>
+                <CardContent className="flex flex-col items-center justify-center py-12">
+                  <Calendar className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                  <p className="text-lg font-medium mb-2">No upcoming events</p>
+                  <p className="text-muted-foreground text-center mb-6">
+                    {searchTerm || selectedType !== "all" 
+                      ? "Try adjusting your search or filters"
+                      : "Get started by creating your first event"
                     }
                   </p>
-                </div>
-                {(searchTerm || teamFilter !== "all" || typeFilter !== "all") && (
-                  <Button 
-                    variant="outline" 
-                    size="sm"
-                    onClick={handleClearFilters}
-                  >
-                    Clear all filters
-                  </Button>
-                )}
+                  {(hasRole('admin') || hasRole('coach') || hasRole('manager')) && (
+                    <Button asChild>
+                      <Link to="/events/new">
+                        <Plus className="h-4 w-4 mr-2" />
+                        Create Your First Event
+                      </Link>
+                    </Button>
+                  )}
+                </CardContent>
+              </Card>
+            )}
+          </TabsContent>
+
+          <TabsContent value="past" className="mt-6">
+            {pastEvents.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {pastEvents.map(event => (
+                  <EventCard key={event.id} event={event} />
+                ))}
               </div>
-            </div>
-          )}
-        </div>
+            ) : (
+              <Card>
+                <CardContent className="flex flex-col items-center justify-center py-12">
+                  <Calendar className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                  <p className="text-lg font-medium mb-2">No past events</p>
+                  <p className="text-muted-foreground text-center">
+                    Past events will appear here once they're completed
+                  </p>
+                </CardContent>
+              </Card>
+            )}
+          </TabsContent>
+        </Tabs>
       </div>
     </Layout>
   );
