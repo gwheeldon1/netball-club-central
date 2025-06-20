@@ -39,10 +39,28 @@ interface Player {
   }>;
 }
 
+interface DatabasePlayer {
+  id: string;
+  first_name: string;
+  last_name: string;
+  email: string | null;
+  phone: string | null;
+  date_of_birth: string | null;
+  approval_status: string;
+  created_at: string;
+}
+
+interface DatabaseTeam {
+  id: string;
+  name: string;
+  age_group: string;
+}
+
 const PlayersPage = () => {
   const { hasRole } = useAuth();
   const [players, setPlayers] = useState<Player[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedStatus, setSelectedStatus] = useState<string>("all");
   const [activeTab, setActiveTab] = useState("all");
@@ -61,9 +79,10 @@ const PlayersPage = () => {
   const loadPlayers = async () => {
     try {
       setLoading(true);
+      setError(null);
       
-      // Get players with team information
-      const { data: playersData, error } = await supabase
+      // Get all players
+      const { data: playersData, error: playersError } = await supabase
         .from('players')
         .select(`
           id,
@@ -77,28 +96,61 @@ const PlayersPage = () => {
         `)
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
+      if (playersError) throw playersError;
 
-      // Get team information for each player
-      const playersWithTeams = await Promise.all(
-        (playersData || []).map(async (player) => {
-          const { data: teamData } = await supabase
-            .from('player_teams')
-            .select(`
-              teams!inner(name, age_group)
-            `)
-            .eq('player_id', player.id);
+      if (!playersData) {
+        setPlayers([]);
+        return;
+      }
 
-          return {
-            ...player,
-            teams: teamData?.map(pt => pt.teams) || []
-          };
-        })
-      );
+      // Get all player-team relationships
+      const { data: playerTeamsData, error: playerTeamsError } = await supabase
+        .from('player_teams')
+        .select('player_id, team_id')
+        .in('player_id', playersData.map(p => p.id));
 
-      setPlayers(playersWithTeams as Player[]);
+      if (playerTeamsError) {
+        console.warn('Error loading player teams:', playerTeamsError);
+      }
+
+      // Get all unique team IDs
+      const teamIds = [...new Set((playerTeamsData || []).map(pt => pt.team_id))];
+      
+      // Get team information
+      let teamsData: DatabaseTeam[] = [];
+      if (teamIds.length > 0) {
+        const { data: teams, error: teamsError } = await supabase
+          .from('teams')
+          .select('id, name, age_group')
+          .in('id', teamIds);
+        
+        if (teamsError) {
+          console.warn('Error loading teams:', teamsError);
+        } else {
+          teamsData = teams || [];
+        }
+      }
+
+      // Combine player data with team information
+      const playersWithTeams: Player[] = playersData.map(player => {
+        const playerTeamIds = (playerTeamsData || [])
+          .filter(pt => pt.player_id === player.id)
+          .map(pt => pt.team_id);
+        
+        const playerTeams = teamsData
+          .filter(team => playerTeamIds.includes(team.id))
+          .map(team => ({ name: team.name, age_group: team.age_group }));
+
+        return {
+          ...player,
+          teams: playerTeams
+        };
+      });
+
+      setPlayers(playersWithTeams);
     } catch (error) {
       console.error('Error loading players:', error);
+      setError('Failed to load players. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -235,7 +287,7 @@ const PlayersPage = () => {
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
               <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Players</h1>
-              <p className="text-muted-foreground mt-1">Manage club players</p>
+              <p className="text-muted-foreground mt-1">Loading club players...</p>
             </div>
           </div>
           
@@ -259,6 +311,23 @@ const PlayersPage = () => {
                 </CardContent>
               </Card>
             ))}
+          </div>
+        </div>
+      </Layout>
+    );
+  }
+
+  if (error) {
+    return (
+      <Layout>
+        <div className="space-y-6 animate-fade-in">
+          <div className="flex flex-col items-center justify-center py-12">
+            <Users className="h-12 w-12 mx-auto mb-4 opacity-50 text-destructive" />
+            <p className="text-lg font-medium mb-2">Failed to Load Players</p>
+            <p className="text-muted-foreground text-center mb-6">{error}</p>
+            <Button onClick={loadPlayers}>
+              Try Again
+            </Button>
           </div>
         </div>
       </Layout>

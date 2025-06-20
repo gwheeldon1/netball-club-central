@@ -38,10 +38,28 @@ interface Event {
   rsvp_count?: number;
 }
 
+interface DatabaseEvent {
+  id: string;
+  title: string;
+  event_type: string;
+  event_date: string;
+  location: string | null;
+  description: string | null;
+  team_id: string | null;
+  is_home: boolean | null;
+}
+
+interface DatabaseTeam {
+  id: string;
+  name: string;
+  age_group: string;
+}
+
 const EventsPage = () => {
   const { hasRole } = useAuth();
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedType, setSelectedType] = useState<string>("all");
   const [activeTab, setActiveTab] = useState("upcoming");
@@ -55,8 +73,10 @@ const EventsPage = () => {
   const loadEvents = async () => {
     try {
       setLoading(true);
+      setError(null);
       
-      const { data, error } = await supabase
+      // First, get all events
+      const { data: eventsData, error: eventsError } = await supabase
         .from('events')
         .select(`
           id,
@@ -66,31 +86,65 @@ const EventsPage = () => {
           location,
           description,
           team_id,
-          is_home,
-          teams!inner(name, age_group)
+          is_home
         `)
         .order('event_date', { ascending: true });
 
-      if (error) throw error;
+      if (eventsError) throw eventsError;
 
-      // Get RSVP counts separately
-      const eventsWithRSVP = await Promise.all(
-        (data || []).map(async (event) => {
-          const { count } = await supabase
-            .from('event_responses')
-            .select('*', { count: 'exact', head: true })
-            .eq('event_id', event.id);
+      if (!eventsData) {
+        setEvents([]);
+        return;
+      }
 
-          return {
-            ...event,
-            rsvp_count: count || 0
-          };
-        })
-      );
+      // Get all unique team IDs
+      const teamIds = [...new Set(eventsData.map(event => event.team_id).filter(Boolean))];
+      
+      // Get team information
+      let teamsData: DatabaseTeam[] = [];
+      if (teamIds.length > 0) {
+        const { data: teams, error: teamsError } = await supabase
+          .from('teams')
+          .select('id, name, age_group')
+          .in('id', teamIds);
+        
+        if (teamsError) {
+          console.warn('Error loading teams:', teamsError);
+        } else {
+          teamsData = teams || [];
+        }
+      }
 
-      setEvents(eventsWithRSVP);
+      // Get RSVP counts for all events
+      const { data: rsvpData, error: rsvpError } = await supabase
+        .from('event_responses')
+        .select('event_id')
+        .in('event_id', eventsData.map(e => e.id));
+
+      if (rsvpError) {
+        console.warn('Error loading RSVP data:', rsvpError);
+      }
+
+      // Count RSVPs per event
+      const rsvpCounts = (rsvpData || []).reduce((acc, rsvp) => {
+        acc[rsvp.event_id] = (acc[rsvp.event_id] || 0) + 1;
+        return acc;
+      }, {} as Record<string, number>);
+
+      // Combine all data
+      const eventsWithDetails: Event[] = eventsData.map(event => {
+        const team = teamsData.find(t => t.id === event.team_id);
+        return {
+          ...event,
+          teams: team ? { name: team.name, age_group: team.age_group } : null,
+          rsvp_count: rsvpCounts[event.id] || 0
+        };
+      });
+
+      setEvents(eventsWithDetails);
     } catch (error) {
       console.error('Error loading events:', error);
+      setError('Failed to load events. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -232,7 +286,7 @@ const EventsPage = () => {
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
               <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Events</h1>
-              <p className="text-muted-foreground mt-1">Manage club events and activities</p>
+              <p className="text-muted-foreground mt-1">Loading club events...</p>
             </div>
           </div>
           
@@ -253,6 +307,23 @@ const EventsPage = () => {
                 </CardContent>
               </Card>
             ))}
+          </div>
+        </div>
+      </Layout>
+    );
+  }
+
+  if (error) {
+    return (
+      <Layout>
+        <div className="space-y-6 animate-fade-in">
+          <div className="flex flex-col items-center justify-center py-12">
+            <Calendar className="h-12 w-12 mx-auto mb-4 opacity-50 text-destructive" />
+            <p className="text-lg font-medium mb-2">Failed to Load Events</p>
+            <p className="text-muted-foreground text-center mb-6">{error}</p>
+            <Button onClick={loadEvents}>
+              Try Again
+            </Button>
           </div>
         </div>
       </Layout>

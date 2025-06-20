@@ -36,6 +36,7 @@ const Dashboard = () => {
     pendingApprovals: 0
   });
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     loadDashboardData();
@@ -44,6 +45,7 @@ const Dashboard = () => {
   const loadDashboardData = async () => {
     try {
       setLoading(true);
+      setError(null);
       
       // Get players count
       const { count: playersCount } = await supabase
@@ -80,6 +82,7 @@ const Dashboard = () => {
       });
     } catch (error) {
       console.error('Error loading dashboard data:', error);
+      setError('Failed to load dashboard data');
     } finally {
       setLoading(false);
     }
@@ -100,7 +103,7 @@ const Dashboard = () => {
     color?: string;
     href?: string;
   }) => {
-    const CardWrapper = ({ children }: { children: React.ReactNode }) => (
+    const cardContent = (
       <Card className="transition-all duration-300 hover:shadow-elevation-medium hover:-translate-y-1 cursor-pointer">
         <CardContent className="p-6">
           <div className="flex items-center justify-between">
@@ -121,10 +124,10 @@ const Dashboard = () => {
 
     return href ? (
       <Link to={href}>
-        <CardWrapper>{null}</CardWrapper>
+        {cardContent}
       </Link>
     ) : (
-      <CardWrapper>{null}</CardWrapper>
+      cardContent
     );
   };
 
@@ -179,7 +182,7 @@ const Dashboard = () => {
         <div className="space-y-6 animate-fade-in">
           <div>
             <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Dashboard</h1>
-            <p className="text-muted-foreground mt-1">Welcome back to Club Manager</p>
+            <p className="text-muted-foreground mt-1">Loading your dashboard...</p>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
             {Array.from({ length: 4 }).map((_, i) => (
@@ -192,6 +195,23 @@ const Dashboard = () => {
                 </CardContent>
               </Card>
             ))}
+          </div>
+        </div>
+      </Layout>
+    );
+  }
+
+  if (error) {
+    return (
+      <Layout>
+        <div className="space-y-6 animate-fade-in">
+          <div className="flex flex-col items-center justify-center py-12">
+            <TrendingUp className="h-12 w-12 mx-auto mb-4 opacity-50 text-destructive" />
+            <p className="text-lg font-medium mb-2">Failed to Load Dashboard</p>
+            <p className="text-muted-foreground text-center mb-6">{error}</p>
+            <Button onClick={loadDashboardData}>
+              Try Again
+            </Button>
           </div>
         </div>
       </Layout>
