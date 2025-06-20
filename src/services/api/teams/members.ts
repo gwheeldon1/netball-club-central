@@ -125,6 +125,14 @@ export class TeamMembersAPI {
     try {
       console.log('🔍 Getting parents for team via team_members:', teamId);
       
+      // First, let's check if there are any team_members records for this team
+      const { data: allMembers, error: membersError } = await supabase
+        .from('team_members')
+        .select('*')
+        .eq('team_id', teamId);
+      
+      console.log('📊 All team members for debugging:', { allMembers, membersError, teamId });
+      
       // Get parents via the new team_members table
       const { data, error } = await supabase
         .from('team_members')
@@ -145,7 +153,56 @@ export class TeamMembersAPI {
       
       if (error) {
         logger.error('Error fetching team parents via team_members:', error);
-        return [];
+        console.error('Parents fetch error details:', error);
+        
+        // Fallback: try to get parents through player_teams and guardians
+        console.log('🔄 Trying fallback method for parents...');
+        const { data: fallbackData, error: fallbackError } = await supabase
+          .from('player_teams')
+          .select(`
+            players!inner (
+              id,
+              guardians!guardians_player_id_fkey (
+                id,
+                first_name,
+                last_name,
+                email,
+                profile_image
+              )
+            )
+          `)
+          .eq('team_id', teamId);
+        
+        console.log('📊 Fallback parents query result:', { fallbackData, fallbackError });
+        
+        if (fallbackError) {
+          console.error('Fallback also failed:', fallbackError);
+          return [];
+        }
+        
+        // Process fallback data
+        const parentMap = new Map<string, TeamStaff>();
+        fallbackData?.forEach(pt => {
+          const player = pt.players as any;
+          if (player?.guardians) {
+            const guardians = Array.isArray(player.guardians) ? player.guardians : [player.guardians];
+            guardians.forEach((guardian: any) => {
+              if (guardian && !parentMap.has(guardian.id)) {
+                parentMap.set(guardian.id, {
+                  id: guardian.id,
+                  name: `${guardian.first_name} ${guardian.last_name}`,
+                  email: guardian.email || '',
+                  profileImage: guardian.profile_image,
+                  roles: ['parent']
+                });
+              }
+            });
+          }
+        });
+        
+        const fallbackParents = Array.from(parentMap.values());
+        console.log('👨‍👩‍👧‍👦 Processed fallback parents:', fallbackParents);
+        return fallbackParents;
       }
       
       // Deduplicate parents (same parent might have multiple children on team)
