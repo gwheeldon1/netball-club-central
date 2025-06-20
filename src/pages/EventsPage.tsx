@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
 import Layout from "@/components/Layout";
@@ -28,14 +27,14 @@ interface Event {
   title: string;
   event_type: string;
   event_date: string;
-  location?: string;
-  description?: string;
-  team_id?: string;
-  is_home?: boolean;
+  location?: string | null;
+  description?: string | null;
+  team_id?: string | null;
+  is_home?: boolean | null;
   teams?: {
     name: string;
     age_group: string;
-  };
+  } | null;
   rsvp_count?: number;
 }
 
@@ -60,19 +59,34 @@ const EventsPage = () => {
       const { data, error } = await supabase
         .from('events')
         .select(`
-          *,
-          teams(name, age_group),
-          event_responses(count)
+          id,
+          title,
+          event_type,
+          event_date,
+          location,
+          description,
+          team_id,
+          is_home,
+          teams!inner(name, age_group)
         `)
         .order('event_date', { ascending: true });
 
       if (error) throw error;
 
-      // Transform data to include RSVP count
-      const eventsWithRSVP = data?.map(event => ({
-        ...event,
-        rsvp_count: event.event_responses?.length || 0
-      })) || [];
+      // Get RSVP counts separately
+      const eventsWithRSVP = await Promise.all(
+        (data || []).map(async (event) => {
+          const { count } = await supabase
+            .from('event_responses')
+            .select('*', { count: 'exact', head: true })
+            .eq('event_id', event.id);
+
+          return {
+            ...event,
+            rsvp_count: count || 0
+          };
+        })
+      );
 
       setEvents(eventsWithRSVP);
     } catch (error) {

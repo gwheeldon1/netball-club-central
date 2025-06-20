@@ -100,7 +100,7 @@ const Dashboard = () => {
     color?: string;
     href?: string;
   }) => {
-    const CardContent = (
+    const CardWrapper = ({ children }: { children: React.ReactNode }) => (
       <Card className="transition-all duration-300 hover:shadow-elevation-medium hover:-translate-y-1 cursor-pointer">
         <CardContent className="p-6">
           <div className="flex items-center justify-between">
@@ -119,7 +119,13 @@ const Dashboard = () => {
       </Card>
     );
 
-    return href ? <Link to={href}>{CardContent}</Link> : CardContent;
+    return href ? (
+      <Link to={href}>
+        <CardWrapper>{null}</CardWrapper>
+      </Link>
+    ) : (
+      <CardWrapper>{null}</CardWrapper>
+    );
   };
 
   const QuickActions = () => (

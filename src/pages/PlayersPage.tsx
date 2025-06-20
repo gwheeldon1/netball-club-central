@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
 import Layout from "@/components/Layout";
@@ -29,9 +28,9 @@ interface Player {
   id: string;
   first_name: string;
   last_name: string;
-  email?: string;
-  phone?: string;
-  date_of_birth?: string;
+  email?: string | null;
+  phone?: string | null;
+  date_of_birth?: string | null;
   approval_status: string;
   created_at: string;
   teams?: Array<{
@@ -63,25 +62,41 @@ const PlayersPage = () => {
     try {
       setLoading(true);
       
-      const { data, error } = await supabase
+      // Get players with team information
+      const { data: playersData, error } = await supabase
         .from('players')
         .select(`
-          *,
-          player_teams!inner(
-            teams!inner(name, age_group)
-          )
+          id,
+          first_name,
+          last_name,
+          email,
+          phone,
+          date_of_birth,
+          approval_status,
+          created_at
         `)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
 
-      // Transform data to include teams
-      const playersWithTeams = data?.map(player => ({
-        ...player,
-        teams: player.player_teams?.map(pt => pt.teams) || []
-      })) || [];
+      // Get team information for each player
+      const playersWithTeams = await Promise.all(
+        (playersData || []).map(async (player) => {
+          const { data: teamData } = await supabase
+            .from('player_teams')
+            .select(`
+              teams!inner(name, age_group)
+            `)
+            .eq('player_id', player.id);
 
-      setPlayers(playersWithTeams);
+          return {
+            ...player,
+            teams: teamData?.map(pt => pt.teams) || []
+          };
+        })
+      );
+
+      setPlayers(playersWithTeams as Player[]);
     } catch (error) {
       console.error('Error loading players:', error);
     } finally {
