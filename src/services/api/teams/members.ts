@@ -113,22 +113,20 @@ export class TeamMembersAPI {
 
   async getTeamParents(teamId: string): Promise<TeamStaff[]> {
     try {
-      console.log('🔍 Getting parents for team:', teamId);
+      console.log('🔍 Getting parents for team via guardians_teams:', teamId);
       
-      // Get parents through player_teams -> players -> guardians relationship
+      // Get parents through the new guardians_teams table
       const { data, error } = await supabase
-        .from('player_teams')
+        .from('guardians_teams')
         .select(`
-          players!inner (
+          guardian_id,
+          guardians!inner (
             id,
-            guardians!guardians_player_id_fkey (
-              id,
-              first_name,
-              last_name,
-              email,
-              profile_image,
-              approval_status
-            )
+            first_name,
+            last_name,
+            email,
+            profile_image,
+            approval_status
           )
         `)
         .eq('team_id', teamId);
@@ -143,20 +141,15 @@ export class TeamMembersAPI {
       // Deduplicate parents (same parent might have multiple children on team)
       const parentMap = new Map<string, TeamStaff>();
       
-      data?.forEach(pt => {
-        const player = pt.players as any;
-        if (player?.guardians) {
-          const guardians = Array.isArray(player.guardians) ? player.guardians : [player.guardians];
-          guardians.forEach((guardian: any) => {
-            if (guardian && guardian.approval_status === 'approved' && !parentMap.has(guardian.id)) {
-              parentMap.set(guardian.id, {
-                id: guardian.id,
-                name: `${guardian.first_name} ${guardian.last_name}`,
-                email: guardian.email || '',
-                profileImage: guardian.profile_image,
-                roles: ['parent']
-              });
-            }
+      data?.forEach(gt => {
+        const guardian = gt.guardians as any;
+        if (guardian && guardian.approval_status === 'approved' && !parentMap.has(guardian.id)) {
+          parentMap.set(guardian.id, {
+            id: guardian.id,
+            name: `${guardian.first_name} ${guardian.last_name}`,
+            email: guardian.email || '',
+            profileImage: guardian.profile_image,
+            roles: ['parent']
           });
         }
       });

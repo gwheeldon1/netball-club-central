@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -382,7 +383,7 @@ const TeamDetailPage = () => {
               <CardHeader>
                 <CardTitle>Parent Contacts</CardTitle>
                 <CardDescription>
-                  Parents and guardians of team players. If no parents appear, try clicking "Sync Parents" above.
+                  Parents and guardians of team players
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -391,7 +392,7 @@ const TeamDetailPage = () => {
                     <Users className="mx-auto h-12 w-12 text-muted-foreground" />
                     <h3 className="mt-2 text-sm font-semibold">No parent contacts</h3>
                     <p className="mt-1 text-sm text-muted-foreground">
-                      Parent contacts will appear here once players are assigned to this team. Try clicking "Sync Parents" above.
+                      Parent contacts will appear here automatically when players are assigned to this team.
                     </p>
                   </div>
                 ) : (

@@ -508,6 +508,52 @@ export type Database = {
           },
         ]
       }
+      guardians_teams: {
+        Row: {
+          created_at: string
+          guardian_id: string
+          id: string
+          player_id: string
+          team_id: string
+        }
+        Insert: {
+          created_at?: string
+          guardian_id: string
+          id?: string
+          player_id: string
+          team_id: string
+        }
+        Update: {
+          created_at?: string
+          guardian_id?: string
+          id?: string
+          player_id?: string
+          team_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "guardians_teams_guardian_id_fkey"
+            columns: ["guardian_id"]
+            isOneToOne: false
+            referencedRelation: "guardians"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "guardians_teams_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "guardians_teams_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       match_statistics: {
         Row: {
           contacts: number
