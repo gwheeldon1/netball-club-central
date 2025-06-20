@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -15,12 +14,14 @@ import {
   AlertCircle,
   ArrowLeft,
   UserCheck,
-  UserX
+  UserX,
+  RefreshCw
 } from "lucide-react";
 import Layout from "@/components/Layout";
 import { TeamForm } from "@/components/teams/TeamForm";
 import { useEnterprisePermissions } from "@/hooks/useEnterprisePermissions";
 import { api } from "@/services/api";
+import { teamMembersApi } from "@/services/api/teams";
 import { Team, TeamPlayer, TeamStaff } from "@/types/core";
 import { Permission } from "@/store/types/permissions";
 import { toast } from "@/hooks/use-toast";
@@ -38,6 +39,7 @@ const TeamDetailPage = () => {
   const [error, setError] = useState<string | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [syncing, setSyncing] = useState(false);
 
   const canEditTeam = hasPermission('teams.edit' as Permission);
   const canDeleteTeam = hasPermission('teams.delete' as Permission);
@@ -72,11 +74,34 @@ const TeamDetailPage = () => {
       setPlayers(playersData);
       setStaff(staffData);
       setParents(parentsData);
+      
+      console.log('Team data loaded:', { team: teamData, players: playersData, staff: staffData, parents: parentsData });
     } catch (error) {
       console.error("Error loading team data:", error);
       setError(error instanceof Error ? error.message : "Failed to load team");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleSyncParents = async () => {
+    setSyncing(true);
+    try {
+      await teamMembersApi.syncParentMemberships();
+      toast({
+        title: "Success",
+        description: "Parent memberships synced successfully",
+      });
+      // Reload the team data to see updated parents
+      await loadTeamData();
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to sync parent memberships",
+        variant: "destructive",
+      });
+    } finally {
+      setSyncing(false);
     }
   };
 
@@ -201,6 +226,14 @@ const TeamDetailPage = () => {
           </div>
 
           <div className="flex gap-2">
+            <Button
+              variant="outline"
+              onClick={handleSyncParents}
+              disabled={syncing}
+            >
+              <RefreshCw className={`mr-2 h-4 w-4 ${syncing ? 'animate-spin' : ''}`} />
+              {syncing ? "Syncing..." : "Sync Parents"}
+            </Button>
             {canEditTeam && (
               <Button
                 variant="outline"
@@ -381,7 +414,7 @@ const TeamDetailPage = () => {
               <CardHeader>
                 <CardTitle>Parent Contacts</CardTitle>
                 <CardDescription>
-                  Parents and guardians of team players
+                  Parents and guardians of team players. If no parents appear, try clicking "Sync Parents" above.
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -390,7 +423,7 @@ const TeamDetailPage = () => {
                     <Users className="mx-auto h-12 w-12 text-muted-foreground" />
                     <h3 className="mt-2 text-sm font-semibold">No parent contacts</h3>
                     <p className="mt-1 text-sm text-muted-foreground">
-                      Parent contacts will appear here once players are assigned to this team.
+                      Parent contacts will appear here once players are assigned to this team. Try clicking "Sync Parents" above.
                     </p>
                   </div>
                 ) : (

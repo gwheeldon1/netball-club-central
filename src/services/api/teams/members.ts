@@ -1,4 +1,3 @@
-
 // Team members (players and staff) operations using unified team_members table
 import { supabase } from '@/integrations/supabase/client';
 import { logger } from '@/utils/logger';
@@ -125,14 +124,6 @@ export class TeamMembersAPI {
     try {
       console.log('🔍 Getting parents for team via team_members:', teamId);
       
-      // First, let's check if there are any team_members records for this team
-      const { data: allMembers, error: membersError } = await supabase
-        .from('team_members')
-        .select('*')
-        .eq('team_id', teamId);
-      
-      console.log('📊 All team members for debugging:', { allMembers, membersError, teamId });
-      
       // Get parents via the new team_members table
       const { data, error } = await supabase
         .from('team_members')
@@ -151,12 +142,14 @@ export class TeamMembersAPI {
       
       console.log('📊 Team parents query result:', { data, error, teamId });
       
-      if (error) {
-        logger.error('Error fetching team parents via team_members:', error);
-        console.error('Parents fetch error details:', error);
+      if (error || !data || data.length === 0) {
+        if (error) {
+          logger.error('Error fetching team parents via team_members:', error);
+          console.error('Parents fetch error details:', error);
+        }
         
         // Fallback: try to get parents through player_teams and guardians
-        console.log('🔄 Trying fallback method for parents...');
+        console.log('🔄 Using fallback method for parents...');
         const { data: fallbackData, error: fallbackError } = await supabase
           .from('player_teams')
           .select(`
@@ -291,6 +284,75 @@ export class TeamMembersAPI {
     } catch (error) {
       logger.error('Error adding parent to team:', error);
       throw error;
+    }
+  }
+
+  // Helper method to populate team_members table from existing data
+  async syncParentMemberships(): Promise<void> {
+    try {
+      console.log('🔄 Syncing parent memberships to team_members table...');
+      
+      // Get all parent-player-team relationships from existing data
+      const { data: relationships, error } = await supabase
+        .from('player_teams')
+        .select(`
+          team_id,
+          player_id,
+          players!inner (
+            id,
+            guardians!guardians_player_id_fkey (
+              id
+            )
+          )
+        `);
+      
+      if (error) {
+        console.error('Error fetching relationships:', error);
+        return;
+      }
+      
+      // Prepare inserts for team_members table
+      const insertsToMake: Array<{
+        team_id: string;
+        member_id: string;
+        member_type: 'parent';
+        player_id: string;
+        is_active: boolean;
+      }> = [];
+      
+      relationships?.forEach(rel => {
+        const player = rel.players as any;
+        if (player?.guardians) {
+          const guardians = Array.isArray(player.guardians) ? player.guardians : [player.guardians];
+          guardians.forEach((guardian: any) => {
+            if (guardian?.id) {
+              insertsToMake.push({
+                team_id: rel.team_id,
+                member_id: guardian.id,
+                member_type: 'parent',
+                player_id: rel.player_id,
+                is_active: true
+              });
+            }
+          });
+        }
+      });
+      
+      if (insertsToMake.length > 0) {
+        const { error: insertError } = await supabase
+          .from('team_members')
+          .upsert(insertsToMake, {
+            onConflict: 'team_id,member_id,member_type,player_id'
+          });
+        
+        if (insertError) {
+          console.error('Error syncing parent memberships:', insertError);
+        } else {
+          console.log(`✅ Synced ${insertsToMake.length} parent memberships`);
+        }
+      }
+    } catch (error) {
+      console.error('Error in syncParentMemberships:', error);
     }
   }
 }
