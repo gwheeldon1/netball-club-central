@@ -6,7 +6,7 @@ import { BaseAPI } from '../base';
 import { Team } from '@/types/unified';
 import { TeamData, TeamCreateData, TeamUpdateData } from './types';
 
-export class TeamOperations extends BaseAPI {
+export class TeamAPI extends BaseAPI {
   async getTeams(): Promise<Team[]> {
     return this.withOfflineFallback(
       async () => {
@@ -151,3 +151,6 @@ export class TeamOperations extends BaseAPI {
     };
   }
 }
+
+// Export class with both names for backward compatibility
+export { TeamAPI as TeamOperations };
