@@ -1,4 +1,3 @@
-
 import { lazy, Suspense } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { FormSkeleton } from '@/components/ui/FormSkeleton';
@@ -24,7 +23,7 @@ export const LazySubscriptionSuccessPage = lazy(() => import('@/pages/Subscripti
 // Lazy loaded complex components
 export const LazyPlayerPerformanceDashboard = lazy(() => import('@/components/PlayerPerformanceDashboard'));
 export const LazyAnalyticsDashboard = lazy(() => import('@/components/AnalyticsDashboard'));
-export const LazyAdminUserManagement = lazy(() => import('@/components/AdminUserManagement'));
+export const LazyAdminUserManagement = lazy(() => import('@/components/AdminUserManagement').then(module => ({ default: module.default })));
 export const LazySystemMonitoring = lazy(() => import('@/components/SystemMonitoring'));
 export const LazyCalendarView = lazy(() => import('@/components/CalendarView'));
 

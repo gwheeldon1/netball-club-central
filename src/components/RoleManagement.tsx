@@ -47,7 +47,7 @@ export const RoleManagement = () => {
           .from('user_roles')
           .select(`
             guardian_id,
-            guardians!inner(id, first_name, last_name, email)
+            guardians!guardian_id(id, first_name, last_name, email)
           `)
           .eq('role', role.value)
           .eq('is_active', true);

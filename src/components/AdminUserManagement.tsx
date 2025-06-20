@@ -351,3 +351,6 @@ export const AdminUserManagement = () => {
     </Card>
   );
 };
+
+// Add default export for lazy loading compatibility
+export default AdminUserManagement;

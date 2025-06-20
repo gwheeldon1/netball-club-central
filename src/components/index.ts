@@ -1,3 +1,4 @@
+
 // Components barrel export
 export { default as Layout } from './Layout';
 export { TeamCard } from './TeamCard';
