@@ -34,6 +34,7 @@ const TeamsPage = () => {
   const { hasRole } = useAuth();
   const [teams, setTeams] = useState<Team[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedAgeGroup, setSelectedAgeGroup] = useState<string>("all");
 
@@ -46,27 +47,53 @@ const TeamsPage = () => {
   const loadTeams = async () => {
     try {
       setLoading(true);
+      setError(null);
       
-      const { data, error } = await supabase
+      // Get teams data
+      const { data: teamsData, error: teamsError } = await supabase
         .from('teams')
-        .select(`
-          *,
-          player_teams!inner(count)
-        `)
+        .select('*')
         .eq('archived', false)
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
+      if (teamsError) throw teamsError;
 
-      // Transform data to include player count
-      const teamsWithCounts = data?.map(team => ({
+      if (!teamsData) {
+        setTeams([]);
+        return;
+      }
+
+      // Get player counts for each team
+      const teamIds = teamsData.map(team => team.id);
+      let playerCounts: Record<string, number> = {};
+
+      if (teamIds.length > 0) {
+        const { data: playerTeamsData, error: playerTeamsError } = await supabase
+          .from('player_teams')
+          .select('team_id')
+          .in('team_id', teamIds);
+
+        if (playerTeamsError) {
+          console.warn('Error loading player counts:', playerTeamsError);
+        } else if (playerTeamsData) {
+          // Count players per team
+          playerCounts = playerTeamsData.reduce((acc, pt) => {
+            acc[pt.team_id] = (acc[pt.team_id] || 0) + 1;
+            return acc;
+          }, {} as Record<string, number>);
+        }
+      }
+
+      // Combine teams with player counts
+      const teamsWithCounts: Team[] = teamsData.map(team => ({
         ...team,
-        player_count: team.player_teams?.length || 0
-      })) || [];
+        player_count: playerCounts[team.id] || 0
+      }));
 
       setTeams(teamsWithCounts);
     } catch (error) {
       console.error('Error loading teams:', error);
+      setError('Failed to load teams. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -128,11 +155,6 @@ const TeamsPage = () => {
                 <span>Active</span>
               </div>
             </div>
-            
-            <div className="flex items-center gap-1">
-              <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-              <span className="text-sm font-medium">4.8</span>
-            </div>
           </div>
         </CardContent>
       </Link>
@@ -146,7 +168,7 @@ const TeamsPage = () => {
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
               <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Teams</h1>
-              <p className="text-muted-foreground mt-1">Manage your club's teams</p>
+              <p className="text-muted-foreground mt-1">Loading teams...</p>
             </div>
           </div>
           
@@ -170,6 +192,23 @@ const TeamsPage = () => {
                 </CardContent>
               </Card>
             ))}
+          </div>
+        </div>
+      </Layout>
+    );
+  }
+
+  if (error) {
+    return (
+      <Layout>
+        <div className="space-y-6 animate-fade-in">
+          <div className="flex flex-col items-center justify-center py-12">
+            <Trophy className="h-12 w-12 mx-auto mb-4 opacity-50 text-destructive" />
+            <p className="text-lg font-medium mb-2">Failed to Load Teams</p>
+            <p className="text-muted-foreground text-center mb-6">{error}</p>
+            <Button onClick={loadTeams}>
+              Try Again
+            </Button>
           </div>
         </div>
       </Layout>

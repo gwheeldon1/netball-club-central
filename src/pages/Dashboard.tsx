@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
 import Layout from "@/components/Layout";
@@ -27,6 +26,14 @@ interface DashboardStats {
   pendingApprovals: number;
 }
 
+interface RecentActivity {
+  id: string;
+  type: string;
+  title: string;
+  description: string;
+  timestamp: string;
+}
+
 const Dashboard = () => {
   const { hasRole, userProfile } = useAuth();
   const [stats, setStats] = useState<DashboardStats>({
@@ -35,6 +42,7 @@ const Dashboard = () => {
     upcomingEvents: 0,
     pendingApprovals: 0
   });
+  const [recentActivities, setRecentActivities] = useState<RecentActivity[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -50,7 +58,8 @@ const Dashboard = () => {
       // Get players count
       const { count: playersCount } = await supabase
         .from('players')
-        .select('*', { count: 'exact', head: true });
+        .select('*', { count: 'exact', head: true })
+        .eq('approval_status', 'approved');
 
       // Get teams count
       const { count: teamsCount } = await supabase
@@ -74,6 +83,9 @@ const Dashboard = () => {
         approvalsCount = count || 0;
       }
 
+      // Load recent activities from actual events and registrations
+      await loadRecentActivities();
+
       setStats({
         totalPlayers: playersCount || 0,
         totalTeams: teamsCount || 0,
@@ -86,6 +98,89 @@ const Dashboard = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const loadRecentActivities = async () => {
+    try {
+      const activities: RecentActivity[] = [];
+
+      // Get recent player registrations
+      const { data: recentPlayers } = await supabase
+        .from('players')
+        .select('id, first_name, last_name, created_at')
+        .order('created_at', { ascending: false })
+        .limit(3);
+
+      if (recentPlayers) {
+        recentPlayers.forEach(player => {
+          activities.push({
+            id: `player-${player.id}`,
+            type: 'registration',
+            title: 'New player registered',
+            description: `${player.first_name} ${player.last_name} joined the club`,
+            timestamp: player.created_at
+          });
+        });
+      }
+
+      // Get recent events
+      const { data: recentEvents } = await supabase
+        .from('events')
+        .select('id, title, event_type, event_date, created_at')
+        .order('created_at', { ascending: false })
+        .limit(2);
+
+      if (recentEvents) {
+        recentEvents.forEach(event => {
+          const isPast = new Date(event.event_date) < new Date();
+          activities.push({
+            id: `event-${event.id}`,
+            type: isPast ? 'completed' : 'upcoming',
+            title: isPast ? `${event.event_type} completed` : `${event.event_type} scheduled`,
+            description: event.title,
+            timestamp: event.created_at
+          });
+        });
+      }
+
+      // Sort activities by timestamp and take the most recent 5
+      activities.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+      setRecentActivities(activities.slice(0, 5));
+    } catch (error) {
+      console.error('Error loading recent activities:', error);
+    }
+  };
+
+  const getActivityIcon = (type: string) => {
+    switch (type) {
+      case 'registration': return Users;
+      case 'completed': return Trophy;
+      case 'upcoming': return Calendar;
+      default: return Activity;
+    }
+  };
+
+  const getActivityColor = (type: string) => {
+    switch (type) {
+      case 'registration': return 'bg-primary';
+      case 'completed': return 'bg-green-500';
+      case 'upcoming': return 'bg-blue-500';
+      default: return 'bg-gray-500';
+    }
+  };
+
+  const getRelativeTime = (timestamp: string) => {
+    const now = new Date();
+    const time = new Date(timestamp);
+    const diffInHours = Math.floor((now.getTime() - time.getTime()) / (1000 * 60 * 60));
+    
+    if (diffInHours < 1) return 'Just now';
+    if (diffInHours < 24) return `${diffInHours}h ago`;
+    
+    const diffInDays = Math.floor(diffInHours / 24);
+    if (diffInDays < 7) return `${diffInDays}d ago`;
+    
+    return time.toLocaleDateString();
   };
 
   const StatCard = ({ 
@@ -245,7 +340,7 @@ const Dashboard = () => {
             title="Total Players"
             value={stats.totalPlayers}
             icon={Users}
-            trend="Active members"
+            trend="Approved members"
             href="/players"
           />
           <StatCard
@@ -260,17 +355,17 @@ const Dashboard = () => {
             title="Upcoming Events"
             value={stats.upcomingEvents}
             icon={Calendar}
-            trend="Next 30 days"
+            trend="Scheduled ahead"
             color="chart-3"
             href="/events"
           />
           <StatCard
-            title="Performance Score"
-            value="94%"
+            title="Pending Approvals"
+            value={stats.pendingApprovals}
             icon={Target}
-            trend="Club average"
-            color="chart-success"
-            href="/analytics"
+            trend="Requires attention"
+            color="destructive"
+            href="/approvals"
           />
         </div>
 
@@ -287,30 +382,30 @@ const Dashboard = () => {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                <div className="flex items-center gap-3 p-3 rounded-lg bg-accent/50">
-                  <div className="w-2 h-2 rounded-full bg-primary"></div>
-                  <div className="flex-1">
-                    <p className="text-sm font-medium">New player registered</p>
-                    <p className="text-xs text-muted-foreground">Sarah Johnson joined U12 team</p>
+                {recentActivities.length > 0 ? (
+                  recentActivities.map((activity) => {
+                    const Icon = getActivityIcon(activity.type);
+                    const colorClass = getActivityColor(activity.type);
+                    
+                    return (
+                      <div key={activity.id} className="flex items-center gap-3 p-3 rounded-lg bg-accent/50">
+                        <div className={`w-2 h-2 rounded-full ${colorClass}`}></div>
+                        <div className="flex-1">
+                          <p className="text-sm font-medium">{activity.title}</p>
+                          <p className="text-xs text-muted-foreground">{activity.description}</p>
+                        </div>
+                        <span className="text-xs text-muted-foreground">
+                          {getRelativeTime(activity.timestamp)}
+                        </span>
+                      </div>
+                    );
+                  })
+                ) : (
+                  <div className="text-center py-6">
+                    <Activity className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                    <p className="text-sm text-muted-foreground">No recent activity</p>
                   </div>
-                  <span className="text-xs text-muted-foreground">2h ago</span>
-                </div>
-                <div className="flex items-center gap-3 p-3 rounded-lg bg-accent/50">
-                  <div className="w-2 h-2 rounded-full bg-chart-3"></div>
-                  <div className="flex-1">
-                    <p className="text-sm font-medium">Training session completed</p>
-                    <p className="text-xs text-muted-foreground">U14 team training</p>
-                  </div>
-                  <span className="text-xs text-muted-foreground">5h ago</span>
-                </div>
-                <div className="flex items-center gap-3 p-3 rounded-lg bg-accent/50">
-                  <div className="w-2 h-2 rounded-full bg-chart-2"></div>
-                  <div className="flex-1">
-                    <p className="text-sm font-medium">Match statistics recorded</p>
-                    <p className="text-xs text-muted-foreground">U16 vs Riverside Netball</p>
-                  </div>
-                  <span className="text-xs text-muted-foreground">1d ago</span>
-                </div>
+                )}
               </div>
             </CardContent>
           </Card>
