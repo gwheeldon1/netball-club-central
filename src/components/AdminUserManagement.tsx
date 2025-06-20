@@ -1,27 +1,16 @@
+
 import { useState, useEffect } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Search, Filter, UserPlus, Edit, Trash2, Shield, Users, MoreHorizontal } from "lucide-react";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { toast } from "sonner";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Users, Search, Plus, Edit, Trash2, Shield } from "lucide-react";
+import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-
-interface UserRole {
-  role: string;
-  is_active: boolean;
-}
-
-interface Player {
-  id: string;
-}
 
 interface Guardian {
   id: string;
@@ -30,515 +19,335 @@ interface Guardian {
   email: string;
   phone?: string;
   approval_status: string;
-  registration_date: string;
-  profile_image?: string;
-  user_roles?: UserRole[];
-  players?: Player[];
+  created_at: string;
 }
 
-interface UserWithMetadata {
+interface UserRole {
   id: string;
-  first_name: string;
-  last_name: string;
-  email: string;
-  phone?: string;
-  approval_status: string;
-  registration_date: string;
-  profile_image?: string;
-  roles: string[];
-  children_count: number;
-  last_active?: string;
+  role: 'admin' | 'manager' | 'coach' | 'parent';
+  is_active: boolean;
+  assigned_at: string;
 }
 
-interface BulkAction {
-  type: 'approve' | 'reject' | 'activate' | 'deactivate' | 'assign_role' | 'remove_role';
-  label: string;
-  variant?: 'default' | 'destructive';
-}
-
-const AdminUserManagement = () => {
-  const [users, setUsers] = useState<UserWithMetadata[]>([]);
-  const [filteredUsers, setFilteredUsers] = useState<UserWithMetadata[]>([]);
-  const [selectedUsers, setSelectedUsers] = useState<Set<string>>(new Set());
-  const [searchTerm, setSearchTerm] = useState("");
-  const [statusFilter, setStatusFilter] = useState("all");
-  const [roleFilter, setRoleFilter] = useState("all");
-  const [showBulkDialog, setShowBulkDialog] = useState(false);
-  const [selectedBulkAction, setSelectedBulkAction] = useState<BulkAction | null>(null);
+export const AdminUserManagement = () => {
+  const [users, setUsers] = useState<Guardian[]>([]);
+  const [userRoles, setUserRoles] = useState<{ [userId: string]: UserRole[] }>({});
   const [loading, setLoading] = useState(true);
-  const [processing, setProcessing] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<Guardian | null>(null);
 
-  const bulkActions: BulkAction[] = [
-    { type: 'approve', label: 'Approve Selected Users' },
-    { type: 'reject', label: 'Reject Selected Users', variant: 'destructive' },
-    { type: 'activate', label: 'Activate Selected Users' },
-    { type: 'deactivate', label: 'Deactivate Selected Users', variant: 'destructive' },
-    { type: 'assign_role', label: 'Assign Role to Selected Users' },
-    { type: 'remove_role', label: 'Remove Role from Selected Users' },
+  const roles = ['admin', 'manager', 'coach', 'parent'] as const;
+  const statusOptions = [
+    { value: 'all', label: 'All Users' },
+    { value: 'pending', label: 'Pending Approval' },
+    { value: 'approved', label: 'Approved' },
+    { value: 'rejected', label: 'Rejected' }
   ];
 
   useEffect(() => {
     loadUsers();
   }, []);
 
-  useEffect(() => {
-    filterUsers();
-  }, [users, searchTerm, statusFilter, roleFilter]);
-
   const loadUsers = async () => {
     try {
       setLoading(true);
       
-      // Get all guardians with their roles and player count
+      // Load guardians
       const { data: guardiansData, error: guardiansError } = await supabase
         .from('guardians')
-        .select(`
-          *,
-          user_roles(role, is_active),
-          players!guardians_player_id_fkey(id)
-        `)
-        .order('registration_date', { ascending: false });
+        .select('*')
+        .order('created_at', { ascending: false });
 
       if (guardiansError) throw guardiansError;
 
-      const usersWithMetadata: UserWithMetadata[] = guardiansData?.map((guardian: any) => ({
-        id: guardian.id,
-        first_name: guardian.first_name,
-        last_name: guardian.last_name,
-        email: guardian.email,
-        phone: guardian.phone,
-        approval_status: guardian.approval_status,
-        registration_date: guardian.registration_date,
-        profile_image: guardian.profile_image,
-        roles: guardian.user_roles?.filter((r: any) => r.is_active).map((r: any) => r.role) || [],
-        children_count: Array.isArray(guardian.players) ? guardian.players.length : 0,
-        last_active: guardian.registration_date, // Mock data - in real app would track actual activity
-      })) || [];
+      // Load user roles
+      const { data: rolesData, error: rolesError } = await supabase
+        .from('user_roles')
+        .select('*')
+        .eq('is_active', true);
 
-      setUsers(usersWithMetadata);
+      if (rolesError) throw rolesError;
+
+      // Group roles by user
+      const rolesByUser: { [userId: string]: UserRole[] } = {};
+      rolesData?.forEach(role => {
+        if (!rolesByUser[role.guardian_id]) {
+          rolesByUser[role.guardian_id] = [];
+        }
+        rolesByUser[role.guardian_id].push(role);
+      });
+
+      setUsers(guardiansData || []);
+      setUserRoles(rolesByUser);
     } catch (error) {
-      toast.error("Failed to load users");
+      toast({
+        title: "Error",
+        description: "Failed to load users",
+        variant: "destructive"
+      });
     } finally {
       setLoading(false);
     }
   };
 
-  const filterUsers = () => {
-    let filtered = users;
-
-    // Search filter
-    if (searchTerm) {
-      const term = searchTerm.toLowerCase();
-      filtered = filtered.filter(user =>
-        user.first_name.toLowerCase().includes(term) ||
-        user.last_name.toLowerCase().includes(term) ||
-        user.email.toLowerCase().includes(term)
-      );
-    }
-
-    // Status filter
-    if (statusFilter !== "all") {
-      filtered = filtered.filter(user => user.approval_status === statusFilter);
-    }
-
-    // Role filter
-    if (roleFilter !== "all") {
-      filtered = filtered.filter(user => user.roles.includes(roleFilter));
-    }
-
-    setFilteredUsers(filtered);
-  };
-
-  const handleSelectUser = (userId: string, checked: boolean) => {
-    const newSelected = new Set(selectedUsers);
-    if (checked) {
-      newSelected.add(userId);
-    } else {
-      newSelected.delete(userId);
-    }
-    setSelectedUsers(newSelected);
-  };
-
-  const handleSelectAll = (checked: boolean) => {
-    if (checked) {
-      setSelectedUsers(new Set(filteredUsers.map(user => user.id)));
-    } else {
-      setSelectedUsers(new Set());
-    }
-  };
-
-  const handleBulkAction = (action: BulkAction) => {
-    if (selectedUsers.size === 0) {
-      toast.error("Please select users to perform bulk action");
-      return;
-    }
-    setSelectedBulkAction(action);
-    setShowBulkDialog(true);
-  };
-
-  const processBulkAction = async () => {
-    if (!selectedBulkAction) return;
-
-    setProcessing(true);
+  const updateUserStatus = async (userId: string, status: string) => {
     try {
-      const userIds = Array.from(selectedUsers);
+      const { error } = await supabase
+        .from('guardians')
+        .update({ approval_status: status })
+        .eq('id', userId);
 
-      switch (selectedBulkAction.type) {
-        case 'approve':
-          await supabase
-            .from('guardians')
-            .update({
-              approval_status: 'approved',
-              approved_at: new Date().toISOString(),
-              approved_by: (await supabase.auth.getUser()).data.user?.id
-            })
-            .in('id', userIds);
-          break;
+      if (error) throw error;
 
-        case 'reject':
-          await supabase
-            .from('guardians')
-            .update({
-              approval_status: 'rejected',
-              rejection_reason: 'Bulk rejection by admin'
-            })
-            .in('id', userIds);
-          break;
+      setUsers(prev => prev.map(user => 
+        user.id === userId ? { ...user, approval_status: status } : user
+      ));
 
-        case 'activate':
-          // Update user_roles to set is_active = true
-          await supabase
-            .from('user_roles')
-            .update({ is_active: true })
-            .in('guardian_id', userIds);
-          break;
-
-        case 'deactivate':
-          // Update user_roles to set is_active = false
-          await supabase
-            .from('user_roles')
-            .update({ is_active: false })
-            .in('guardian_id', userIds);
-          break;
-
-        default:
-          toast.error("Action not implemented yet");
-          return;
-      }
-
-      toast.success(`${selectedBulkAction.label} completed successfully`);
-      setSelectedUsers(new Set());
-      setShowBulkDialog(false);
-      await loadUsers();
+      toast({
+        title: "Success",
+        description: `User status updated to ${status}`
+      });
     } catch (error) {
-      toast.error(`Failed to ${selectedBulkAction.label.toLowerCase()}`);
-    } finally {
-      setProcessing(false);
+      toast({
+        title: "Error",
+        description: "Failed to update user status",
+        variant: "destructive"
+      });
     }
   };
 
-  const getUserStatusBadge = (status: string) => {
+  const assignRole = async (userId: string, role: typeof roles[number]) => {
+    try {
+      const { error } = await supabase
+        .from('user_roles')
+        .insert({
+          guardian_id: userId,
+          role: role,
+          is_active: true
+        });
+
+      if (error) throw error;
+
+      // Reload users to get updated roles
+      await loadUsers();
+
+      toast({
+        title: "Success",
+        description: `Role ${role} assigned successfully`
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to assign role",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const removeRole = async (roleId: string) => {
+    try {
+      const { error } = await supabase
+        .from('user_roles')
+        .update({ is_active: false })
+        .eq('id', roleId);
+
+      if (error) throw error;
+
+      // Reload users to get updated roles
+      await loadUsers();
+
+      toast({
+        title: "Success",
+        description: "Role removed successfully"
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to remove role",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const filteredUsers = users.filter(user => {
+    const matchesSearch = searchTerm === "" || 
+      user.first_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      user.last_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      user.email.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    const matchesStatus = statusFilter === "all" || user.approval_status === statusFilter;
+    
+    return matchesSearch && matchesStatus;
+  });
+
+  const getStatusBadgeVariant = (status: string) => {
     switch (status) {
-      case 'approved':
-        return <Badge variant="default">Approved</Badge>;
-      case 'pending':
-        return <Badge variant="outline">Pending</Badge>;
-      case 'rejected':
-        return <Badge variant="destructive">Rejected</Badge>;
-      default:
-        return <Badge variant="secondary">{status}</Badge>;
+      case 'approved': return 'default';
+      case 'pending': return 'secondary';
+      case 'rejected': return 'destructive';
+      default: return 'outline';
     }
-  };
-
-  const getRoleBadges = (roles: string[]) => {
-    return roles.map(role => (
-      <Badge key={role} variant="outline" className="text-xs">
-        {role.charAt(0).toUpperCase() + role.slice(1)}
-      </Badge>
-    ));
   };
 
   if (loading) {
     return (
-      <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <div className="h-8 bg-muted rounded w-64"></div>
-          <div className="h-10 bg-muted rounded w-32"></div>
-        </div>
-        <Card>
-          <CardContent className="p-6">
-            <div className="space-y-4">
-              {[1, 2, 3, 4, 5].map((i) => (
-                <div key={i} className="flex items-center space-x-4">
-                  <div className="rounded-full bg-muted h-10 w-10"></div>
-                  <div className="flex-1 space-y-2">
-                    <div className="h-4 bg-muted rounded w-1/4"></div>
-                    <div className="h-3 bg-muted rounded w-1/2"></div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+      <Card>
+        <CardContent className="flex items-center justify-center py-8">
+          <p className="text-muted-foreground">Loading users...</p>
+        </CardContent>
+      </Card>
     );
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-3xl font-bold tracking-tight">User Management</h2>
-          <p className="text-muted-foreground">Manage users, roles, and permissions</p>
-        </div>
-        <Button>
-          <UserPlus className="mr-2 h-4 w-4" />
-          Add User
-        </Button>
-      </div>
-
-      {/* Filters and Search */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Filter className="h-5 w-5" />
-            Filters & Search
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid gap-4 md:grid-cols-4">
-            <div>
-              <Label htmlFor="search">Search Users</Label>
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  id="search"
-                  placeholder="Search by name or email..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
-                />
-              </div>
-            </div>
-
-            <div>
-              <Label>Status</Label>
-              <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Statuses</SelectItem>
-                  <SelectItem value="approved">Approved</SelectItem>
-                  <SelectItem value="pending">Pending</SelectItem>
-                  <SelectItem value="rejected">Rejected</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div>
-              <Label>Role</Label>
-              <Select value={roleFilter} onValueChange={setRoleFilter}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Roles</SelectItem>
-                  <SelectItem value="admin">Admin</SelectItem>
-                  <SelectItem value="coach">Coach</SelectItem>
-                  <SelectItem value="manager">Manager</SelectItem>
-                  <SelectItem value="parent">Parent</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="flex items-end">
-              <Button variant="outline" onClick={() => {
-                setSearchTerm("");
-                setStatusFilter("all");
-                setRoleFilter("all");
-              }}>
-                Clear Filters
-              </Button>
-            </div>
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <Users className="h-5 w-5" />
+          User Management
+        </CardTitle>
+        <div className="flex flex-col sm:flex-row gap-4">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Search users..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10"
+            />
           </div>
-        </CardContent>
-      </Card>
-
-      {/* Bulk Actions */}
-      {selectedUsers.size > 0 && (
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <span className="text-sm font-medium">
-                {selectedUsers.size} user{selectedUsers.size !== 1 ? 's' : ''} selected
-              </span>
-              <div className="flex gap-2">
-                {bulkActions.map((action) => (
-                  <Button
-                    key={action.type}
-                    variant={action.variant || "outline"}
-                    size="sm"
-                    onClick={() => handleBulkAction(action)}
-                  >
-                    {action.label}
-                  </Button>
-                ))}
+          <Select value={statusFilter} onValueChange={setStatusFilter}>
+            <SelectTrigger className="w-full sm:w-[200px]">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {statusOptions.map(option => (
+                <SelectItem key={option.value} value={option.value}>
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-4">
+          {filteredUsers.map(user => (
+            <div key={user.id} className="flex items-center justify-between p-4 border rounded-lg">
+              <div className="flex items-center gap-4">
+                <Avatar>
+                  <AvatarFallback>
+                    {user.first_name[0]}{user.last_name[0]}
+                  </AvatarFallback>
+                </Avatar>
+                <div>
+                  <h3 className="font-medium">{user.first_name} {user.last_name}</h3>
+                  <p className="text-sm text-muted-foreground">{user.email}</p>
+                  <div className="flex items-center gap-2 mt-1">
+                    <Badge variant={getStatusBadgeVariant(user.approval_status)}>
+                      {user.approval_status}
+                    </Badge>
+                    {userRoles[user.id]?.map(role => (
+                      <Badge key={role.id} variant="outline" className="capitalize">
+                        {role.role}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
               </div>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Users Table */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Users className="h-5 w-5" />
-            Users ({filteredUsers.length})
-          </CardTitle>
-          <CardDescription>
-            Manage user accounts, roles, and permissions
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="w-12">
-                  <Checkbox
-                    checked={selectedUsers.size === filteredUsers.length && filteredUsers.length > 0}
-                    onCheckedChange={handleSelectAll}
-                  />
-                </TableHead>
-                <TableHead>User</TableHead>
-                <TableHead>Contact</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Roles</TableHead>
-                <TableHead>Children</TableHead>
-                <TableHead>Last Active</TableHead>
-                <TableHead className="w-12"></TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredUsers.map((user) => (
-                <TableRow key={user.id}>
-                  <TableCell>
-                    <Checkbox
-                      checked={selectedUsers.has(user.id)}
-                      onCheckedChange={(checked) => handleSelectUser(user.id, checked as boolean)}
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center space-x-3">
-                      <Avatar className="h-8 w-8">
-                        <AvatarImage src={user.profile_image} />
-                        <AvatarFallback>
-                          {user.first_name[0]}{user.last_name[0]}
-                        </AvatarFallback>
-                      </Avatar>
+              
+              <div className="flex items-center gap-2">
+                {user.approval_status === 'pending' && (
+                  <>
+                    <Button 
+                      size="sm" 
+                      onClick={() => updateUserStatus(user.id, 'approved')}
+                    >
+                      Approve
+                    </Button>
+                    <Button 
+                      size="sm" 
+                      variant="destructive"
+                      onClick={() => updateUserStatus(user.id, 'rejected')}
+                    >
+                      Reject
+                    </Button>
+                  </>
+                )}
+                
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <Button size="sm" variant="outline">
+                      <Shield className="h-4 w-4 mr-1" />
+                      Roles
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>Manage Roles - {user.first_name} {user.last_name}</DialogTitle>
+                    </DialogHeader>
+                    <div className="space-y-4">
                       <div>
-                        <div className="font-medium">
-                          {user.first_name} {user.last_name}
+                        <Label>Current Roles</Label>
+                        <div className="flex flex-wrap gap-2 mt-2">
+                          {userRoles[user.id]?.map(role => (
+                            <div key={role.id} className="flex items-center gap-1">
+                              <Badge variant="outline" className="capitalize">
+                                {role.role}
+                              </Badge>
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                onClick={() => removeRole(role.id)}
+                                className="h-5 w-5 p-0"
+                              >
+                                <Trash2 className="h-3 w-3" />
+                              </Button>
+                            </div>
+                          ))}
+                          {(!userRoles[user.id] || userRoles[user.id].length === 0) && (
+                            <p className="text-sm text-muted-foreground">No roles assigned</p>
+                          )}
                         </div>
-                        <div className="text-sm text-muted-foreground">
-                          Registered {new Date(user.registration_date).toLocaleDateString()}
+                      </div>
+                      
+                      <div>
+                        <Label>Assign New Role</Label>
+                        <div className="flex flex-wrap gap-2 mt-2">
+                          {roles.map(role => {
+                            const hasRole = userRoles[user.id]?.some(ur => ur.role === role);
+                            return (
+                              <Button
+                                key={role}
+                                size="sm"
+                                variant={hasRole ? "secondary" : "outline"}
+                                onClick={() => !hasRole && assignRole(user.id, role)}
+                                disabled={hasRole}
+                                className="capitalize"
+                              >
+                                {role}
+                              </Button>
+                            );
+                          })}
                         </div>
                       </div>
                     </div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="space-y-1">
-                      <div className="text-sm">{user.email}</div>
-                      {user.phone && (
-                        <div className="text-sm text-muted-foreground">{user.phone}</div>
-                      )}
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    {getUserStatusBadge(user.approval_status)}
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex flex-wrap gap-1">
-                      {user.roles.length > 0 ? getRoleBadges(user.roles) : (
-                        <span className="text-sm text-muted-foreground">No roles assigned</span>
-                      )}
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant="outline">
-                      {user.children_count} child{user.children_count !== 1 ? 'ren' : ''}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <div className="text-sm text-muted-foreground">
-                      {user.last_active ? new Date(user.last_active).toLocaleDateString() : 'Never'}
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="sm">
-                          <MoreHorizontal className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem>
-                          <Edit className="mr-2 h-4 w-4" />
-                          Edit User
-                        </DropdownMenuItem>
-                        <DropdownMenuItem>
-                          <Shield className="mr-2 h-4 w-4" />
-                          Manage Roles
-                        </DropdownMenuItem>
-                        <DropdownMenuItem className="text-destructive">
-                          <Trash2 className="mr-2 h-4 w-4" />
-                          Delete User
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-
+                  </DialogContent>
+                </Dialog>
+              </div>
+            </div>
+          ))}
+          
           {filteredUsers.length === 0 && (
             <div className="text-center py-8 text-muted-foreground">
               <Users className="h-12 w-12 mx-auto mb-4 opacity-50" />
-              <p>No users found matching the current filters.</p>
+              <p>No users found matching your criteria</p>
             </div>
           )}
-        </CardContent>
-      </Card>
-
-      {/* Bulk Action Dialog */}
-      <Dialog open={showBulkDialog} onOpenChange={setShowBulkDialog}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Confirm Bulk Action</DialogTitle>
-            <DialogDescription>
-              Are you sure you want to {selectedBulkAction?.label.toLowerCase()} for {selectedUsers.size} selected user{selectedUsers.size !== 1 ? 's' : ''}?
-              This action cannot be undone.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setShowBulkDialog(false)}>
-              Cancel
-            </Button>
-            <Button
-              variant={selectedBulkAction?.variant === 'destructive' ? 'destructive' : 'default'}
-              onClick={processBulkAction}
-              disabled={processing}
-            >
-              {processing ? 'Processing...' : 'Confirm'}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-    </div>
+        </div>
+      </CardContent>
+    </Card>
   );
 };
-
-export default AdminUserManagement;

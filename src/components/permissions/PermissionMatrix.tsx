@@ -21,7 +21,7 @@ interface Permission {
 }
 
 interface RolePermission {
-  role: string;
+  role: 'admin' | 'manager' | 'coach' | 'parent';
   permission_id: string;
   permissions?: Permission;
 }
@@ -29,6 +29,8 @@ interface RolePermission {
 interface PermissionMatrixData {
   [role: string]: string[];
 }
+
+type UserRole = 'admin' | 'manager' | 'coach' | 'parent';
 
 export const PermissionMatrix = () => {
   const [permissions, setPermissions] = useState<Permission[]>([]);
@@ -42,7 +44,7 @@ export const PermissionMatrix = () => {
     category: ''
   });
 
-  const roles = ['admin', 'manager', 'coach', 'parent'];
+  const roles: UserRole[] = ['admin', 'manager', 'coach', 'parent'];
   const categories = ['teams', 'events', 'users', 'analytics', 'system', 'groups'];
 
   useEffect(() => {
@@ -95,13 +97,13 @@ export const PermissionMatrix = () => {
     }
   };
 
-  const handlePermissionToggle = async (role: string, permissionId: string, granted: boolean) => {
+  const handlePermissionToggle = async (role: UserRole, permissionId: string, granted: boolean) => {
     try {
       if (granted) {
         // Add permission
         const { error } = await supabase
           .from('role_permissions')
-          .insert({ role, permission_id: permissionId });
+          .insert({ role: role, permission_id: permissionId });
         
         if (error) throw error;
       } else {

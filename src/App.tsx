@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -11,7 +12,7 @@ import EnhancedAnalyticsPage from './pages/EnhancedAnalyticsPage';
 import ModernAnalyticsPage from './pages/ModernAnalyticsPage';
 import AdminDashboard from "@/pages/AdminDashboard";
 import UnauthorizedPage from "@/pages/UnauthorizedPage";
-import AnalyticsDashboard from './components/analytics/AnalyticsDashboard';
+import { AnalyticsDashboard } from './components/analytics/AnalyticsDashboard';
 import PlayerPerformanceDashboard from './components/PlayerPerformanceDashboard';
 
 const queryClient = new QueryClient();
